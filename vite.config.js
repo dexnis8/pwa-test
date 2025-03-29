@@ -7,15 +7,28 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(),
+    tailwindcss({
+      // Tailwind v4 configuration
+      content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+      theme: {
+        extend: {
+          fontFamily: {
+            primary: ['"Proxima Nova"', "sans-serif"],
+            secondary: ["Coolvetica", "sans-serif"],
+          },
+          colors: {
+            primary: "#ffffff",
+          },
+        },
+      },
+    }),
     VitePWA({
       registerType: "autoUpdate", // This ensures the SW checks for updates automatically
       manifest: {
-        name: "My Landing Page",
-        short_name: "LandingPage",
-        description:
-          "A simple landing page built with React, Vite, and Tailwind CSS",
-        theme_color: "#ffffff",
+        name: "The Pace App",
+        short_name: "Pace App",
+        description: "Pace management application",
+        theme_color: "#3DD7A1",
         icons: [
           {
             src: "/pwa-192x192.png",
