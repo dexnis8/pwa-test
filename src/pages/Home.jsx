@@ -18,15 +18,27 @@ export const Home = () => {
         </p>
       </Motion>
 
-      <MotionButton
-        onClick={() => navigate("/get-started")}
-        variant="primary"
-        size="md"
-        shape="rounded"
-        delay={0.6}
-      >
-        Back to Onboarding
-      </MotionButton>
+      <div className="flex flex-col space-y-4 w-full max-w-xs">
+        <MotionButton
+          onClick={() => navigate("/auth/signup")}
+          variant="primary"
+          size="md"
+          shape="rounded"
+          delay={0.6}
+        >
+          Go to Auth Pages
+        </MotionButton>
+
+        <MotionButton
+          onClick={() => navigate("/get-started")}
+          variant="secondary"
+          size="md"
+          shape="rounded"
+          delay={0.8}
+        >
+          Back to Onboarding
+        </MotionButton>
+      </div>
     </div>
   );
 };
