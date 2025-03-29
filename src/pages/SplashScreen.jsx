@@ -1,11 +1,20 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { Motion } from "../components/Motion";
 
 export const SplashScreen = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    // Set loaded after a short delay for initial animation
+    const loadTimer = setTimeout(() => {
+      setLoaded(true);
+    }, 300);
+
     // Progress animation
     const interval = setInterval(() => {
       setProgress((prevProgress) => {
@@ -18,35 +27,55 @@ export const SplashScreen = () => {
     }, 100);
 
     // Auto-navigate to onboarding after 3 seconds
-    const timer = setTimeout(() => {
+    const navigateTimer = setTimeout(() => {
       navigate("/get-started");
     }, 3000);
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(navigateTimer);
+      clearTimeout(loadTimer);
       clearInterval(interval);
     };
   }, [navigate]);
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-b from-[#3DD7A1] to-[#1DA57F] text-white text-center p-5 relative">
-      <div className="mb-4">
-        <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center text-5xl font-bold text-white shadow-md">
-          <span>?</span>
-        </div>
-      </div>
-      <h1 className="text-2xl font-medium mt-0 md:text-3xl">The Pace App</h1>
+    <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-b from-[#3DD7A1] to-[#1DA57F] text-white text-center p-5 relative overflow-hidden">
+      <AnimatePresence>
+        {loaded && (
+          <>
+            <Motion animation="pop" className="mb-4">
+              <img
+                src="/images/logo.png"
+                alt="Pace App Logo"
+                className="w-20 h-20"
+              />
+            </Motion>
+
+            <Motion animation="fadeIn" delay={0.3} className="mb-8">
+              <h1 className="text-2xl font-medium mt-0 md:text-3xl">
+                The Pace App
+              </h1>
+            </Motion>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Loading bar */}
-      <div className="absolute bottom-16 w-4/5 mx-auto">
-        <div className="w-full bg-white/20 rounded-full h-2.5 mb-2">
-          <div
-            className="bg-white h-2.5 rounded-full transition-all duration-100 ease-linear"
-            style={{ width: `${progress}%` }}
-          ></div>
+      <Motion
+        animation="slideUp"
+        delay={0.5}
+        className="absolute bottom-16 w-4/5 mx-auto"
+      >
+        <div className="w-full bg-white/20 rounded-full h-2.5 mb-2 overflow-hidden">
+          <motion.div
+            className="bg-white h-2.5 rounded-full"
+            initial={{ width: "0%" }}
+            animate={{ width: `${progress}%` }}
+            transition={{ ease: "linear", duration: 0.1 }}
+          />
         </div>
         <p className="text-sm text-white/70">Loading...</p>
-      </div>
+      </Motion>
     </div>
   );
 };
