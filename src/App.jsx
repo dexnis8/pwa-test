@@ -5,7 +5,7 @@ import { SplashScreen } from "./pages/SplashScreen";
 import { OnBoarding } from "./pages/OnBoarding";
 import { Home } from "./pages/Home";
 import { MobileLayout } from "./components/MobileLayout";
-import { PageTransition } from "./components/PageTransition";
+// import { PageTransition } from "./components/PageTransition";
 
 function App() {
   const location = useLocation();
@@ -18,25 +18,25 @@ function App() {
             <Route
               path="/"
               element={
-                <PageTransition>
-                  <SplashScreen />
-                </PageTransition>
+                // <PageTransition>
+                <SplashScreen />
+                // </PageTransition>
               }
             />
             <Route
               path="/get-started"
               element={
-                <PageTransition>
-                  <OnBoarding />
-                </PageTransition>
+                // <PageTransition>
+                <OnBoarding />
+                // </PageTransition>
               }
             />
             <Route
               path="/home"
               element={
-                <PageTransition>
-                  <Home />
-                </PageTransition>
+                // <PageTransition>
+                <Home />
+                // </PageTransition>
               }
             />
           </Routes>
