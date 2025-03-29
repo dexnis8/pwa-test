@@ -11,6 +11,9 @@ function App() {
           <p className="text-lg mb-6">
             Built with React, Vite, and Tailwind CSS
           </p>
+          <p className="text-lg mb-6">
+            I just added an update.....Did you see me?
+          </p>
           <button className="px-4 py-2 bg-blue-600 text-white rounded-md">
             Get Started
           </button>
