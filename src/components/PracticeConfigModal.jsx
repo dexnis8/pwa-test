@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -43,9 +44,6 @@ const subjects = {
   physics: { name: "Physics", icon: "🔭" },
   biology: { name: "Biology", icon: "🧬" },
   chemistry: { name: "Chemistry", icon: "🧪" },
-  geography: { name: "Geography", icon: "🌍" },
-  economics: { name: "Economics", icon: "📊" },
-  computerScience: { name: "Computer Science", icon: "💻" },
 };
 
 const PracticeConfigModal = ({ isOpen, onClose }) => {
@@ -56,6 +54,8 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [topic, setTopic] = useState("random");
   const [examType, setExamType] = useState("UTME");
+  const [questionCount, setQuestionCount] = useState(10);
+  const [timeLimit, setTimeLimit] = useState(10);
 
   // Reset form when modal is opened
   useEffect(() => {
@@ -64,6 +64,8 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
       setSelectedSubjects(userInterests.length > 0 ? [userInterests[0]] : []);
       setTopic("random");
       setExamType("UTME");
+      setQuestionCount(10);
+      setTimeLimit(10);
     }
   }, [isOpen, userInterests]);
 
@@ -77,6 +79,24 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
     setSelectedSubjects([subjectId]);
   };
 
+  const handleQuestionCountChange = (e) => {
+    const value = parseInt(e.target.value);
+    if (isNaN(value)) {
+      setQuestionCount(1);
+    } else {
+      setQuestionCount(Math.min(Math.max(value, 1), 50));
+    }
+  };
+
+  const handleTimeLimitChange = (e) => {
+    const value = parseInt(e.target.value);
+    if (isNaN(value)) {
+      setTimeLimit(1);
+    } else {
+      setTimeLimit(Math.min(Math.max(value, 1), 60));
+    }
+  };
+
   const handleStartPractice = () => {
     // Use the selected subject
     const subject = selectedSubjects[0] || "english";
@@ -84,7 +104,7 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
     // In a real app, you'd make an API call or set up Redux state
     // For now, we'll navigate with query params
     navigate(
-      `/practice/session?mode=${mode}&subject=${subject}&topic=${topic}&examType=${examType}`
+      `/practice/session?mode=${mode}&subject=${subject}&topic=${topic}&examType=${examType}&questionCount=${questionCount}&timeLimit=${timeLimit}`
     );
     onClose();
   };
@@ -244,12 +264,13 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
 
                     <button
                       type="button"
-                      disabled
-                      className="p-3 rounded-lg flex flex-col items-center justify-center border border-gray-200 text-gray-400 relative cursor-not-allowed"
+                      onClick={() => setMode("time-based")}
+                      className={`p-3 rounded-lg flex flex-col items-center justify-center border transition-all ${
+                        mode === "time-based"
+                          ? "border-[#16956C] bg-[#E7F7F2] text-[#16956C]"
+                          : "border-gray-200 text-gray-700"
+                      }`}
                     >
-                      <div className="absolute -top-2 -right-2 bg-yellow-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                        Soon
-                      </div>
                       <svg
                         className="w-6 h-6 mb-1"
                         viewBox="0 0 24 24"
@@ -359,6 +380,49 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                     ))}
                   </select>
                 </div>
+
+                {/* Time-based specific options */}
+                {mode === "time-based" && (
+                  <>
+                    <div>
+                      <label className="text-gray-700 font-medium mb-2 block">
+                        Number of Questions
+                      </label>
+                      <div className="flex">
+                        <input
+                          type="number"
+                          min="1"
+                          max="50"
+                          value={questionCount}
+                          onChange={handleQuestionCountChange}
+                          className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#16956C] focus:border-transparent"
+                        />
+                        <div className="ml-2 text-gray-500 self-center">
+                          <span className="text-xs">Max: 50</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-gray-700 font-medium mb-2 block">
+                        Time Limit (minutes)
+                      </label>
+                      <div className="flex">
+                        <input
+                          type="number"
+                          min="1"
+                          max="60"
+                          value={timeLimit}
+                          onChange={handleTimeLimitChange}
+                          className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#16956C] focus:border-transparent"
+                        />
+                        <div className="ml-2 text-gray-500 self-center">
+                          <span className="text-xs">Max: 60</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 {/* Exam Type */}
                 <div>

@@ -6,21 +6,30 @@
         "question": "Read the passage and answer the question below: The sun was setting behind the hills, casting long shadows across the valley. The birds were returning to their nests, and the air was filled with their evening songs. The villagers, too, were heading home after a day in the fields. What time of day is described in the passage?",
         "options": ["Morning", "Afternoon", "Evening", "Night"],
         "correctAnswer": "Evening",
-        "examType": "UTME"
+        "examType": "UTME",
+        "examYear": 2019,
+        "image": null,
+        "explanation": "The passage explicitly mentions the sun setting and villagers heading home after a day's work, which are clear indicators of evening time. The phrase 'long shadows' also suggests that the sun is low in the sky, which happens in the evening."
       },
       {
         "id": "eng-comp-2",
         "question": "In the sentence 'The diligent student completed her assignment early', the word 'diligent' means:",
         "options": ["Lazy", "Intelligent", "Hardworking", "Curious"],
         "correctAnswer": "Hardworking",
-        "examType": "UTME"
+        "examType": "UTME",
+        "examYear": 2020,
+        "image": null,
+        "explanation": "The word 'diligent' describes someone who works hard and is persistent in their efforts. It refers to someone who shows care and conscientiousness in their work or duties, which aligns with the meaning of 'hardworking'."
       },
       {
         "id": "eng-comp-3",
         "question": "Which of the following is NOT a type of figurative language?",
         "options": ["Metaphor", "Simile", "Exposition", "Personification"],
         "correctAnswer": "Exposition",
-        "examType": "WAEC"
+        "examType": "WAEC",
+        "examYear": 2021,
+        "image": null,
+        "explanation": "Exposition is a form of writing that explains or informs, not a type of figurative language. Metaphor, simile, and personification are all forms of figurative language that involve non-literal comparisons or representations."
       }
     ],
     "grammar": [
@@ -29,7 +38,10 @@
         "question": "Choose the correct form of the verb: She _____ to the store yesterday.",
         "options": ["go", "goes", "went", "going"],
         "correctAnswer": "went",
-        "examType": "UTME"
+        "examType": "UTME",
+        "examYear": 2018,
+        "image": null,
+        "explanation": "The sentence requires the past tense form of the verb 'go' because the action happened 'yesterday'. The past tense of 'go' is 'went'."
       },
       {
         "id": "eng-gram-2",
@@ -41,7 +53,10 @@
           "Neither of the boys have completed their homework."
         ],
         "correctAnswer": "Neither of the boys have completed their homework.",
-        "examType": "WAEC"
+        "examType": "WAEC",
+        "examYear": 2022,
+        "image": null,
+        "explanation": "In the sentence 'Neither of the boys have completed their homework', there is a subject-verb agreement error. 'Neither' is singular, so the correct verb form should be 'has' not 'have'. The corrected sentence would be 'Neither of the boys has completed his homework'."
       }
     ]
   },
@@ -52,14 +67,20 @@
         "question": "Solve for x: 2x + 5 = 15",
         "options": ["x = 5", "x = 7.5", "x = 10", "x = 3"],
         "correctAnswer": "x = 5",
-        "examType": "UTME"
+        "examType": "UTME",
+        "examYear": 2019,
+        "image": null,
+        "explanation": "To solve for x, we need to isolate x on one side of the equation. Starting with 2x + 5 = 15, we subtract 5 from both sides to get 2x = 10, then divide both sides by 2 to get x = 5."
       },
       {
         "id": "math-alg-2",
         "question": "Factorize: x² - 9",
         "options": ["(x + 3)(x - 3)", "(x + 9)(x - 1)", "(x - 3)²", "x(x - 9)"],
         "correctAnswer": "(x + 3)(x - 3)",
-        "examType": "WAEC"
+        "examType": "WAEC",
+        "examYear": 2020,
+        "image": null,
+        "explanation": "The expression x² - 9 is a difference of squares because 9 = 3². The formula for the difference of squares is a² - b² = (a + b)(a - b). In this case, a = x and b = 3, so we get (x + 3)(x - 3)."
       }
     ],
     "geometry": [
@@ -68,7 +89,10 @@
         "question": "The area of a circle with radius 7cm is:",
         "options": ["14π cm²", "49π cm²", "7π cm²", "21π cm²"],
         "correctAnswer": "49π cm²",
-        "examType": "UTME"
+        "examType": "UTME",
+        "examYear": 2021,
+        "image": null,
+        "explanation": "The formula for the area of a circle is A = πr², where r is the radius. Given that r = 7cm, we have A = π(7)² = 49π cm²."
       },
       {
         "id": "math-geo-2",
@@ -80,7 +104,20 @@
           "All angles are equal."
         ],
         "correctAnswer": "All angles are equal.",
-        "examType": "WAEC"
+        "examType": "WAEC",
+        "examYear": 2018,
+        "image": null,
+        "explanation": "A rhombus has all sides equal, opposite angles equal, and diagonals that bisect each other. However, it does not necessarily have all angles equal. When all angles in a rhombus are equal (all 90°), it becomes a square."
+      },
+      {
+        "id": "math-geo-3",
+        "question": "Calculate the volume of the cone shown in the image.",
+        "options": ["100π cm³", "113π cm³", "150π cm³", "200π cm³"],
+        "correctAnswer": "113π cm³",
+        "examType": "UTME",
+        "examYear": 2022,
+        "image": "/images/questions/cone_geometry.png",
+        "explanation": "The volume of a cone is V = (1/3)πr²h, where r is the radius of the base and h is the height. From the image, we can see that r = 6cm and h = 9.5cm. Therefore, V = (1/3)π(6)²(9.5) = (1/3)π(36)(9.5) = 113π cm³."
       }
     ]
   },
@@ -91,7 +128,10 @@
         "question": "A 2 kg object accelerates at 4 m/s². What force is acting on it?",
         "options": ["0.5 N", "2 N", "8 N", "6 N"],
         "correctAnswer": "8 N",
-        "examType": "UTME"
+        "examType": "UTME",
+        "examYear": 2019,
+        "image": null,
+        "explanation": "According to Newton's second law of motion, Force = Mass × Acceleration (F = ma). Given m = 2 kg and a = 4 m/s², we calculate F = 2 kg × 4 m/s² = 8 N."
       },
       {
         "id": "phy-mech-2",
@@ -103,7 +143,20 @@
           "Newton-meter"
         ],
         "correctAnswer": "Newton-meter",
-        "examType": "WAEC"
+        "examType": "WAEC",
+        "examYear": 2021,
+        "image": null,
+        "explanation": "Power is the rate of doing work or transferring energy, measured in units like watts, joule/second, or newton-meter/second. Newton-meter is the unit of torque or moment, not power. It's equivalent to joule, which is a unit of energy, not power."
+      },
+      {
+        "id": "phy-mech-3",
+        "question": "Analyze the projectile motion shown in the image. What is the horizontal distance traveled?",
+        "options": ["60m", "75m", "90m", "120m"],
+        "correctAnswer": "90m",
+        "examType": "UTME",
+        "examYear": 2020,
+        "image": "/images/questions/projectile_motion.png",
+        "explanation": "For projectile motion, the horizontal distance (range) depends on the initial velocity and angle of projection. From the diagram, you can see the projectile follows a parabolic path with a horizontal distance of 90m, which is the correct answer based on the given initial conditions in the image."
       }
     ],
     "electricity": [
@@ -112,14 +165,30 @@
         "question": "What is the resistance of a conductor if a current of 2A flows through it when a voltage of 10V is applied?",
         "options": ["5 Ω", "8 Ω", "12 Ω", "20 Ω"],
         "correctAnswer": "5 Ω",
-        "examType": "UTME"
+        "examType": "UTME",
+        "examYear": 2018,
+        "image": null,
+        "explanation": "According to Ohm's law, Resistance = Voltage ÷ Current (R = V/I). Given V = 10V and I = 2A, we calculate R = 10V ÷ 2A = 5 Ω."
       },
       {
         "id": "phy-elec-2",
         "question": "Which of the following materials is a poor conductor of electricity?",
         "options": ["Copper", "Aluminum", "Rubber", "Silver"],
         "correctAnswer": "Rubber",
-        "examType": "WAEC"
+        "examType": "WAEC",
+        "examYear": 2022,
+        "image": null,
+        "explanation": "Rubber is an insulator, which means it has a high resistance to electric current flow. Copper, aluminum, and silver are all excellent conductors of electricity with low resistance."
+      },
+      {
+        "id": "phy-elec-3",
+        "question": "Calculate the total resistance in the circuit shown in the image.",
+        "options": ["5 Ω", "10 Ω", "15 Ω", "20 Ω"],
+        "correctAnswer": "15 Ω",
+        "examType": "WAEC",
+        "examYear": 2019,
+        "image": "/images/questions/circuit_diagram.png",
+        "explanation": "The circuit shows resistors in both series and parallel arrangements. To calculate the total resistance, we first find the equivalent resistance of parallel components, then add the resistances in series. The image shows resistors of 10 Ω in series with a parallel combination equivalent to 5 Ω, giving a total of 15 Ω."
       }
     ]
   },
@@ -130,7 +199,10 @@
         "question": "Which organelle is responsible for protein synthesis in a cell?",
         "options": ["Nucleus", "Mitochondria", "Ribosomes", "Golgi apparatus"],
         "correctAnswer": "Ribosomes",
-        "examType": "UTME"
+        "examType": "UTME",
+        "examYear": 2020,
+        "image": null,
+        "explanation": "Ribosomes are the cell organelles responsible for protein synthesis. They read the genetic code from mRNA and assemble amino acids to form proteins. While the nucleus contains the genetic material (DNA), the actual protein synthesis happens at the ribosomes."
       },
       {
         "id": "bio-cell-2",
@@ -142,7 +214,20 @@
           "Recognizing other cells"
         ],
         "correctAnswer": "Producing energy for the cell",
-        "examType": "WAEC"
+        "examType": "WAEC",
+        "examYear": 2021,
+        "image": null,
+        "explanation": "The cell membrane does not produce energy for the cell; this function is primarily performed by mitochondria through cellular respiration. The cell membrane controls what enters and leaves the cell, provides some structural support, and contains proteins that help in cell recognition."
+      },
+      {
+        "id": "bio-cell-3",
+        "question": "Identify the cell structure labeled 'X' in the image.",
+        "options": ["Nucleus", "Mitochondrion", "Lysosome", "Golgi apparatus"],
+        "correctAnswer": "Mitochondrion",
+        "examType": "UTME",
+        "examYear": 2022,
+        "image": "/images/questions/cell_structure.png",
+        "explanation": "The structure labeled 'X' in the image shows the distinctive double membrane and cristae formations characteristic of mitochondria. Mitochondria are the powerhouses of the cell, responsible for cellular respiration and ATP production."
       }
     ],
     "genetics": [
@@ -151,7 +236,10 @@
         "question": "What is the probability of two heterozygous parents (Tt) having a homozygous recessive (tt) child?",
         "options": ["0%", "25%", "50%", "75%"],
         "correctAnswer": "25%",
-        "examType": "UTME"
+        "examType": "UTME",
+        "examYear": 2019,
+        "image": null,
+        "explanation": "When two heterozygous parents (Tt) mate, the possible genotypes of their offspring are TT, Tt, Tt, and tt. The probability of getting a homozygous recessive (tt) child is 1 out of 4, which is 25%. This can be determined using a Punnett square analysis."
       },
       {
         "id": "bio-gen-2",
@@ -163,7 +251,25 @@
           "DNA replicates during the S phase of the cell cycle."
         ],
         "correctAnswer": "DNA uses the base uracil instead of thymine.",
-        "examType": "WAEC"
+        "examType": "WAEC",
+        "examYear": 2018,
+        "image": null,
+        "explanation": "DNA uses the base thymine, not uracil. Uracil is used in RNA instead of thymine. The other statements are correct: DNA has a double helix structure, contains the sugar deoxyribose, and replicates during the S phase of the cell cycle."
+      },
+      {
+        "id": "bio-gen-3",
+        "question": "Based on the pedigree chart shown in the image, which pattern of inheritance is most likely being displayed?",
+        "options": [
+          "Autosomal dominant",
+          "Autosomal recessive",
+          "X-linked dominant",
+          "X-linked recessive"
+        ],
+        "correctAnswer": "Autosomal recessive",
+        "examType": "WAEC",
+        "examYear": 2020,
+        "image": "/images/questions/pedigree_chart.png",
+        "explanation": "The pedigree chart shows a pattern typical of autosomal recessive inheritance. Key indicators include: affected individuals appear in one generation then skip to another, unaffected parents can have affected children (carriers), and males and females are equally affected. This pattern suggests both parents must contribute a recessive allele for the trait to appear."
       }
     ]
   },
@@ -174,14 +280,30 @@
         "question": "Which of the following is an alkane?",
         "options": ["C₂H₄", "C₃H₈", "C₂H₂", "C₆H₆"],
         "correctAnswer": "C₃H₈",
-        "examType": "UTME"
+        "examType": "UTME",
+        "examYear": 2018,
+        "image": null,
+        "explanation": "Alkanes follow the general formula CₙH₂ₙ₊₂. Of the given options, only C₃H₈ (propane) fits this formula: for n=3, we get 2n+2 = 8 hydrogens. C₂H₄ is ethene (alkene), C₂H₂ is acetylene (alkyne), and C₆H₆ is benzene (aromatic compound)."
       },
       {
         "id": "chem-org-2",
         "question": "What functional group is present in alcohols?",
         "options": ["-COOH", "-OH", "-CHO", "-NH₂"],
         "correctAnswer": "-OH",
-        "examType": "WAEC"
+        "examType": "WAEC",
+        "examYear": 2019,
+        "image": null,
+        "explanation": "The hydroxyl group (-OH) is the functional group that characterizes alcohols. The other options represent different functional groups: -COOH is the carboxyl group found in carboxylic acids, -CHO is the aldehyde group, and -NH₂ is the amino group found in amines."
+      },
+      {
+        "id": "chem-org-3",
+        "question": "Identify the product of the reaction shown in the image.",
+        "options": ["Ketone", "Aldehyde", "Carboxylic acid", "Ester"],
+        "correctAnswer": "Ester",
+        "examType": "UTME",
+        "examYear": 2021,
+        "image": "/images/questions/organic_reaction.png",
+        "explanation": "The reaction shown in the image is an esterification reaction between a carboxylic acid and an alcohol, catalyzed by acid, to form an ester. The structure of the product, with the -COO- linkage, is characteristic of esters, not ketones, aldehydes, or carboxylic acids."
       }
     ],
     "inorganic-chemistry": [
@@ -190,14 +312,30 @@
         "question": "Which of the following elements is a noble gas?",
         "options": ["Chlorine", "Nitrogen", "Argon", "Sodium"],
         "correctAnswer": "Argon",
-        "examType": "UTME"
+        "examType": "UTME",
+        "examYear": 2020,
+        "image": null,
+        "explanation": "Argon (Ar) is a noble gas, belonging to group 18 of the periodic table. Noble gases have a full outer shell of electrons, making them extremely stable and non-reactive. Chlorine is a halogen, nitrogen is a non-metal in group 15, and sodium is an alkali metal."
       },
       {
         "id": "chem-inorg-2",
         "question": "What is the oxidation state of iron in Fe₂O₃?",
         "options": ["+1", "+2", "+3", "+4"],
         "correctAnswer": "+3",
-        "examType": "WAEC"
+        "examType": "WAEC",
+        "examYear": 2022,
+        "image": null,
+        "explanation": "To determine the oxidation state of iron in Fe₂O₃, we know that oxygen typically has an oxidation state of -2. Since there are 3 oxygen atoms, their total contribution is -6. For the compound to be electrically neutral, the two iron atoms must have a combined oxidation state of +6. Therefore, each iron atom has an oxidation state of +3."
+      },
+      {
+        "id": "chem-inorg-3",
+        "question": "Based on the periodic table section shown in the image, which element would you expect to be the most electronegative?",
+        "options": ["A", "B", "C", "D"],
+        "correctAnswer": "C",
+        "examType": "WAEC",
+        "examYear": 2021,
+        "image": "/images/questions/periodic_table_section.png",
+        "explanation": "Electronegativity generally increases as you move from left to right across a period and from bottom to top up a group in the periodic table. Based on the positions shown in the image, element C appears to be in the upper right portion of the displayed section, making it the most electronegative of the options."
       }
     ]
   }

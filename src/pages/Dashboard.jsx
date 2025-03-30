@@ -17,7 +17,7 @@ const Dashboard = () => {
       {/* Quiz card */}
       <div className="bg-[#16956C] rounded-xl p-5 mb-6 text-white relative overflow-hidden">
         {/* Coming soon badge - improved visibility */}
-        <div className="absolute -right-12 top-5 bg-yellow-500 text-white text-[10px] font-bold py-1 px-12 transform rotate-45 shadow-md">
+        <div className="absolute -right-12 z-15 top-5 bg-yellow-500 text-white text-[10px] font-bold py-1 px-12 transform rotate-45 shadow-md">
           COMING SOON
         </div>
         <div className="absolute left-[25%] inset-0 ">

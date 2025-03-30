@@ -1,172 +1,221 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import questionsData from "../data/questions.json";
 
-// Helper to parse query parameters
+// Custom hook to get query parameters
 const useQuery = () => {
-  return new URLSearchParams(useLocation().search);
+  return new URLSearchParams(window.location.search);
 };
 
 const PracticeSession = () => {
   const navigate = useNavigate();
   const query = useQuery();
-
-  // Get query parameters
   const mode = query.get("mode") || "practice";
   const subject = query.get("subject") || "english";
   const topic = query.get("topic") || "random";
   const examType = query.get("examType") || "UTME";
+  const questionCount = parseInt(query.get("questionCount") || "10");
+  const timeLimit = parseInt(query.get("timeLimit") || "10");
 
   const [questions, setQuestions] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [score, setScore] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(timeLimit * 60); // Convert minutes to seconds
+  const [timerActive, setTimerActive] = useState(mode === "time-based");
 
-  // Load questions based on selected subject, topic and exam type
+  // Format time as MM:SS
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  // Load questions based on subject and topic
   useEffect(() => {
     let filteredQuestions = [];
 
-    // Check if subject exists in our data
+    // Check if the subject exists in our data
     if (questionsData[subject]) {
-      // If random topic is selected, get questions from all topics
       if (topic === "random") {
-        // Flatten all topics for the subject
-        Object.values(questionsData[subject]).forEach((topicQuestions) => {
-          const matchingQuestions = topicQuestions.filter(
+        // Get all topics for this subject
+        Object.keys(questionsData[subject]).forEach((topicKey) => {
+          // Filter by exam type if specified
+          const topicQuestions = questionsData[subject][topicKey].filter(
             (q) => q.examType === examType
           );
-          filteredQuestions = [...filteredQuestions, ...matchingQuestions];
+          filteredQuestions = [...filteredQuestions, ...topicQuestions];
         });
       } else {
         // Convert topic slug to key (e.g., "organic-chemistry" to "organic-chemistry")
-        const topicKey = Object.keys(questionsData[subject]).find(
-          (t) => t.toLowerCase().replace(/\s+/g, "-") === topic
+        const topicKey = topic.toLowerCase();
+
+        // Find most closely matching topic
+        const matchingTopic = Object.keys(questionsData[subject]).find(
+          (key) => key.toLowerCase() === topicKey
         );
 
-        if (topicKey && questionsData[subject][topicKey]) {
-          const matchingQuestions = questionsData[subject][topicKey].filter(
+        if (matchingTopic) {
+          // Filter by exam type if specified
+          filteredQuestions = questionsData[subject][matchingTopic].filter(
             (q) => q.examType === examType
           );
-          filteredQuestions = [...filteredQuestions, ...matchingQuestions];
         }
       }
     }
 
-    // If we have no questions, use all available questions
+    // Fallback if no questions match criteria
     if (filteredQuestions.length === 0) {
-      Object.values(questionsData).forEach((subjectData) => {
-        Object.values(subjectData).forEach((topicQuestions) => {
-          const matchingQuestions = topicQuestions.filter(
-            (q) => q.examType === examType
-          );
-          filteredQuestions = [...filteredQuestions, ...matchingQuestions];
+      // Get all questions across all subjects and topics as fallback
+      Object.keys(questionsData).forEach((subj) => {
+        Object.keys(questionsData[subj]).forEach((top) => {
+          filteredQuestions = [
+            ...filteredQuestions,
+            ...questionsData[subj][top],
+          ];
         });
       });
     }
 
-    // Shuffle the questions
-    filteredQuestions.sort(() => 0.5 - Math.random());
+    // Shuffle questions and limit to specified count (or 10 by default)
+    const shuffled = [...filteredQuestions].sort(() => 0.5 - Math.random());
+    setQuestions(shuffled.slice(0, questionCount));
+  }, [subject, topic, examType, questionCount]);
 
-    // Limit to 10 questions for this practice session
-    setQuestions(filteredQuestions.slice(0, 10));
-  }, [subject, topic, examType]);
-
-  const currentQuestion = questions[currentQuestionIndex];
+  // Timer countdown only for time-based mode
+  useEffect(() => {
+    let interval = null;
+    if (timerActive && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (timerActive && timeLeft === 0) {
+      setQuizCompleted(true);
+      setTimerActive(false);
+    }
+    return () => clearInterval(interval);
+  }, [timerActive, timeLeft]);
 
   const handleAnswerSelect = (answer) => {
-    if (showFeedback) return; // Prevent selecting answer during feedback
+    if (showFeedback) return; // Prevent selecting another answer during feedback
 
     setSelectedAnswer(answer);
-    const correct = answer === currentQuestion?.correctAnswer;
+    setShowFeedback(true);
+
+    const currentQuestion = questions[currentIndex];
+    const correct = answer === currentQuestion.correctAnswer;
     setIsCorrect(correct);
 
     if (correct) {
-      setScore(score + 1);
+      setScore((prevScore) => prevScore + 1);
     }
 
-    setShowFeedback(true);
-
-    // Auto-advance after showing feedback for 1.5 seconds
-    setTimeout(() => {
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
-        setSelectedAnswer(null);
-        setShowFeedback(false);
-      } else {
-        setQuizCompleted(true);
-      }
-    }, 1500);
+    // Remove auto-advance - let users control when to go to next question
   };
 
-  const handleReturnToDashboard = () => {
+  const handleEndPractice = () => {
     navigate("/dashboard");
   };
 
-  // Show loading state if questions haven't loaded yet
   if (questions.length === 0) {
     return (
-      <div className="flex flex-col min-h-screen bg-white p-6 justify-center items-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#16956C]"></div>
-        <p className="mt-4 text-gray-600">Loading questions...</p>
-      </div>
-    );
-  }
-
-  // Show quiz completed screen
-  if (quizCompleted) {
-    const percentage = Math.round((score / questions.length) * 100);
-
-    return (
-      <div className="flex flex-col min-h-screen bg-white p-6">
-        <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <div className="w-32 h-32 rounded-full bg-[#E7F7F2] flex items-center justify-center mb-6">
-            <span className="text-[#16956C] text-4xl font-bold">
-              {percentage}%
-            </span>
-          </div>
-
-          <h1 className="text-2xl font-bold mb-2">Practice Completed!</h1>
-          <p className="text-gray-600 mb-4">
-            You scored {score} out of {questions.length} questions
-          </p>
-
-          {percentage >= 70 ? (
-            <p className="text-green-600 font-medium mb-8">
-              Great job! Keep it up!
-            </p>
-          ) : percentage >= 40 ? (
-            <p className="text-yellow-600 font-medium mb-8">
-              Good effort! Try again to improve.
-            </p>
-          ) : (
-            <p className="text-red-600 font-medium mb-8">
-              More practice needed. Don't give up!
-            </p>
-          )}
-
-          <button
-            onClick={handleReturnToDashboard}
-            className="px-6 py-3 bg-[#16956C] text-white rounded-full font-medium hover:bg-[#138055] transition-colors"
-          >
-            Return to Dashboard
-          </button>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#16956C] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading questions...</p>
         </div>
       </div>
     );
   }
 
+  if (quizCompleted) {
+    const percentage = Math.round((score / questions.length) * 100);
+    let feedback = "";
+    let feedbackColor = "";
+
+    if (percentage >= 80) {
+      feedback = "Excellent! You've mastered this topic.";
+      feedbackColor = "text-green-600";
+    } else if (percentage >= 60) {
+      feedback = "Good job! Keep practicing to improve further.";
+      feedbackColor = "text-blue-600";
+    } else {
+      feedback = "Keep practicing! You'll get better with time.";
+      feedbackColor = "text-yellow-600";
+    }
+
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="flex-1 p-6 flex flex-col items-center justify-center">
+          <div className="w-full max-w-md bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="bg-[#16956C] p-5 text-white">
+              <h1 className="text-2xl font-bold text-center">
+                Practice Complete!
+              </h1>
+            </div>
+
+            <div className="p-6 text-center">
+              <div className="mb-6">
+                <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#E7F7F2] mb-4">
+                  <span className="text-2xl font-bold text-[#16956C]">
+                    {percentage}%
+                  </span>
+                </div>
+                <h2 className="text-lg font-semibold mb-2">
+                  You scored {score} out of {questions.length}
+                </h2>
+                <p className={`${feedbackColor} font-medium`}>{feedback}</p>
+              </div>
+
+              <button
+                onClick={handleEndPractice}
+                className="w-full py-3 px-4 bg-[#16956C] text-white rounded-full font-medium hover:bg-[#138055] transition-colors"
+              >
+                Return to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const currentQuestion = questions[currentIndex];
+
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="bg-[#16956C] p-6">
-        <div className="flex justify-between items-center">
-          <button onClick={handleReturnToDashboard} className="text-white">
+      <div className="bg-[#16956C] p-4 flex justify-between items-center">
+        <h1 className="text-xl font-bold text-white capitalize">
+          {subject}
+          {mode === "time-based" && (
+            <span className="ml-2 text-xs bg-white text-[#16956C] px-2 py-0.5 rounded-full">
+              Timed
+            </span>
+          )}
+        </h1>
+        <button
+          onClick={() => {
+            setQuizCompleted(true);
+            setTimerActive(false);
+          }}
+          className="px-4 py-1 bg-white rounded-full text-[#16956C] text-sm font-medium"
+        >
+          End
+        </button>
+      </div>
+
+      {/* Timer - Only show for time-based mode */}
+      {mode === "time-based" && (
+        <div className="flex justify-center items-center py-4 bg-white">
+          <div className="flex items-center text-[#E74C3C]">
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
+              className="w-5 h-5 mr-2"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -175,107 +224,173 @@ const PracticeSession = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-          </button>
-          <div className="text-white text-center">
-            <h1 className="font-bold">
-              {subject.charAt(0).toUpperCase() + subject.slice(1)}
-            </h1>
-            <p className="text-xs opacity-80">
-              {examType} {mode}
-            </p>
+            <span className="text-2xl font-semibold">
+              {formatTime(timeLeft)}
+            </span>
           </div>
-          <div className="w-6"></div> {/* Empty div for flex spacing */}
+        </div>
+      )}
+
+      {/* Progress indicator */}
+      <div className="bg-white px-4 py-2 border-b">
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-sm text-gray-600">
+            Question {currentIndex + 1} of {questions.length}
+          </span>
+          <span className="text-sm text-gray-600">
+            {currentQuestion.examType} {currentQuestion.examYear}
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-1.5">
+          <div
+            className="bg-[#16956C] h-1.5 rounded-full"
+            style={{
+              width: `${((currentIndex + 1) / questions.length) * 100}%`,
+            }}
+          ></div>
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-2 w-full bg-gray-200">
-        <div
-          className="h-2 bg-[#16956C]"
-          style={{
-            width: `${((currentQuestionIndex + 1) / questions.length) * 100}%`,
-          }}
-        ></div>
-      </div>
-
-      {/* Question count */}
-      <div className="p-4 text-center">
-        <span className="text-sm text-gray-600">
-          Question {currentQuestionIndex + 1} of {questions.length}
-        </span>
-      </div>
-
       {/* Question */}
-      <div className="p-6">
-        <p className="text-lg font-medium mb-6">{currentQuestion?.question}</p>
+      <div className="p-5">
+        <div className="bg-[#1D7A8C] text-white p-5 rounded-xl mb-4">
+          <div className="text-center mb-4">
+            {currentQuestion.image && (
+              <div className="mb-4 flex justify-center">
+                <img
+                  src={currentQuestion.image}
+                  alt="Question visual"
+                  className="max-w-full rounded-lg max-h-48 object-contain bg-white p-2"
+                />
+              </div>
+            )}
+            <p className="text-center font-medium">
+              {currentQuestion.question}
+            </p>
+          </div>
+        </div>
 
         {/* Options */}
         <div className="space-y-3">
-          {currentQuestion?.options.map((option, index) => (
+          {currentQuestion.options.map((option, index) => (
             <button
               key={index}
               onClick={() => handleAnswerSelect(option)}
-              className={`w-full p-4 rounded-lg border text-left transition-colors ${
+              className={`w-full text-left p-4 rounded-lg border-2 flex items-center transition-colors ${
                 selectedAnswer === option
                   ? showFeedback
                     ? isCorrect
                       ? "bg-green-100 border-green-500 text-green-800"
+                      : option === currentQuestion.correctAnswer
+                      ? "bg-green-100 border-green-500 text-green-800"
                       : "bg-red-100 border-red-500 text-red-800"
                     : "bg-[#E7F7F2] border-[#16956C] text-[#16956C]"
-                  : "border-gray-200 hover:bg-gray-50"
+                  : "bg-white border-gray-200 hover:border-[#16956C] hover:bg-gray-50"
               }`}
+              disabled={showFeedback}
             >
-              <div className="flex items-start">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-700 mr-3 flex-shrink-0">
-                  {String.fromCharCode(65 + index)}
-                </span>
-                <span>{option}</span>
-              </div>
-
+              <span className="mr-3">{String.fromCharCode(65 + index)}</span>
+              <span>{option}</span>
               {showFeedback && selectedAnswer === option && (
-                <div className="mt-2 flex items-center">
+                <span className="ml-auto">
                   {isCorrect ? (
-                    <>
-                      <svg
-                        className="w-5 h-5 text-green-600 mr-1"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <span className="text-green-600 text-sm">Correct!</span>
-                    </>
+                    <svg
+                      className="w-5 h-5 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
                   ) : (
-                    <>
-                      <svg
-                        className="w-5 h-5 text-red-600 mr-1"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <span className="text-red-600 text-sm">
-                        Incorrect. The correct answer is{" "}
-                        {currentQuestion.correctAnswer}.
-                      </span>
-                    </>
+                    <svg
+                      className="w-5 h-5 text-red-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
                   )}
-                </div>
+                </span>
               )}
+              {showFeedback &&
+                selectedAnswer !== option &&
+                option === currentQuestion.correctAnswer && (
+                  <span className="ml-auto">
+                    <svg
+                      className="w-5 h-5 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </span>
+                )}
             </button>
           ))}
         </div>
+
+        {/* Explanation */}
+        {showFeedback && currentQuestion.explanation && (
+          <div
+            className={`mt-5 p-4 rounded-lg ${
+              isCorrect
+                ? "bg-green-50 border border-green-200"
+                : "bg-yellow-50 border border-yellow-200"
+            }`}
+          >
+            <h3 className="text-sm font-semibold mb-1">
+              {isCorrect ? "Correct! Here's why:" : "Explanation:"}
+            </h3>
+            <p className="text-sm text-gray-700">
+              {currentQuestion.explanation}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Next button */}
+      <div className="mt-auto p-5">
+        <button
+          onClick={() => {
+            if (currentIndex < questions.length - 1) {
+              setCurrentIndex((prevIndex) => prevIndex + 1);
+              setSelectedAnswer(null);
+              setShowFeedback(false);
+            } else {
+              setQuizCompleted(true);
+              setTimerActive(false);
+            }
+          }}
+          disabled={!showFeedback && selectedAnswer === null}
+          className={`w-full py-3 px-4 rounded-full font-medium transition-colors ${
+            !showFeedback && selectedAnswer === null
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "bg-[#16956C] text-white hover:bg-[#138055]"
+          }`}
+        >
+          Next
+        </button>
       </div>
     </div>
   );
