@@ -10,7 +10,7 @@ export const PasswordResetLayout = () => {
       {/* Header without tabs */}
       <div className="p-6 pb-4">
         <Motion animation="fadeIn" delay={0.1}>
-          <h1 className="text-[#4B4D52] font-medium text-center text-2xl font-coolvetica">
+          <h1 className="text-[#4B4D52] font-bold text-center text-2xl font-coolvetica">
             Account Recovery
           </h1>
         </Motion>

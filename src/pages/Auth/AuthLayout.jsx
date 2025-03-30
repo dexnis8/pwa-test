@@ -10,7 +10,7 @@ export const AuthLayout = () => {
       {/* Header with tabs */}
       <div className="p-6 pb-4">
         <Motion animation="fadeIn" delay={0.1}>
-          <h1 className="text-[#4B4D52] font-medium mb-5 text-lg font-coolvetica">
+          <h1 className="text-[#4B4D52] font-bold mb-5 text-lg font-coolvetica">
             Welcome to The Pace App
           </h1>
         </Motion>
