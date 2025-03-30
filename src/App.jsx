@@ -17,6 +17,7 @@ import {
   CompleteProfile,
   ChooseDepartment,
   ChooseInterests,
+  EditProfile,
 } from "./pages/Profile/index.js";
 import Dashboard from "./pages/Dashboard";
 import Leaderboard from "./pages/Leaderboard";
@@ -58,6 +59,7 @@ function App() {
               path="/profile/complete/step3"
               element={<ChooseInterests />}
             />
+            <Route path="/profile/edit" element={<EditProfile />} />
 
             {/* Dashboard Routes with common layout and bottom navigation */}
             <Route element={<DashboardLayout />}>

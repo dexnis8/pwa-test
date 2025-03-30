@@ -77,9 +77,12 @@ const Profile = () => {
           </p>
 
           {/* Edit Profile Button */}
-          <button className="bg-[#E7F7F2] text-[#16956C] rounded-full px-6 py-2 font-medium text-sm hover:bg-[#D6F0E6] transition-colors">
+          <Link
+            to="/profile/edit"
+            className="bg-[#E7F7F2] text-[#16956C] rounded-full px-6 py-2 font-medium text-sm hover:bg-[#D6F0E6] transition-colors inline-block"
+          >
             Edit profile
-          </button>
+          </Link>
         </div>
       </div>
 
