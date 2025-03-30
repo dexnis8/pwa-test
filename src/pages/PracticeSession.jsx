@@ -350,15 +350,25 @@ const PracticeSession = () => {
           {/* Coins Earned */}
           <div className="bg-white/10 border border-white/20 rounded-2xl p-5 mb-8 flex justify-between items-center">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-[#FFD700] bg-opacity-20 rounded-full flex items-center justify-center mr-3">
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="#FFD700">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-                  <circle cx="12" cy="12" r="5" />
+              <div className="w-10 h-10 bg-yellow-400 bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                <svg
+                  className="w-6 h-6"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
               <div>
                 <span className="text-xs text-white/70">REWARDS</span>
-                <p className="font-medium">Coins Earned</p>
+                <p className="font-medium">Points Earned</p>
               </div>
             </div>
             <span className="text-2xl font-bold">{coinsEarned}</span>
@@ -669,34 +679,41 @@ const PracticeSession = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-[#16956C] rounded-xl p-6 w-full max-w-md text-white"
+                className="bg-white rounded-lg shadow-lg overflow-hidden w-full max-w-xs"
               >
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold">
+                {/* Modal Header */}
+                <div className="bg-[#16956C] p-4 text-white text-center">
+                  <h2 className="font-bold text-xl">
                     Are you sure you want to quit?
-                  </h3>
-                  <p className="mt-2">
-                    You'll lose points for this practice. Remember, practicing
-                    questions helps you earn more points in live games.
+                  </h2>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-4 text-center text-gray-600">
+                  <p className="mb-1">You will lose all point.</p>
+                  <p className="text-sm">
+                    Also pratice questions increase your chance of partipating
+                    in LIVE GAMES.
                   </p>
                 </div>
 
-                <div className="flex gap-3">
+                {/* Modal Footer */}
+                <div className="p-4 flex space-x-3">
                   <button
                     onClick={() => navigate("/dashboard")}
-                    className="flex-1 py-3 rounded-lg border border-white font-medium hover:bg-white/10"
+                    className="flex-1 py-2 px-4 rounded border border-[#16956C] text-[#16956C] font-medium hover:bg-gray-50 transition-colors"
                   >
-                    End Practice
+                    End Pratice
                   </button>
                   <button
                     onClick={() => setShowQuitModal(false)}
-                    className="flex-1 py-3 rounded-lg bg-white text-[#16956C] font-medium hover:bg-gray-100"
+                    className="flex-1 py-2 px-4 rounded bg-[#16956C] text-white font-medium hover:bg-[#138055] transition-colors"
                   >
                     Cancel
                   </button>
@@ -915,6 +932,57 @@ const PracticeSession = () => {
           Next
         </button>
       </div>
+
+      {/* Quit Confirmation Modal */}
+      <AnimatePresence>
+        {showQuitModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-white rounded-lg shadow-lg overflow-hidden w-full max-w-xs"
+            >
+              {/* Modal Header */}
+              <div className="bg-[#16956C] p-4 text-white text-center">
+                <h2 className="font-bold text-xl">
+                  Are you sure you want to quit?
+                </h2>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-4 text-center text-gray-600">
+                <p className="mb-1">You will lose all point.</p>
+                <p className="text-sm">
+                  Practicing questions increases your chance of partipating in
+                  LIVE GAMES.
+                </p>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 flex space-x-3">
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="flex-1 py-2 px-4 rounded border border-[#16956C] text-[#16956C] font-medium hover:bg-gray-50 transition-colors"
+                >
+                  End Practice
+                </button>
+                <button
+                  onClick={() => setShowQuitModal(false)}
+                  className="flex-1 py-2 px-4 rounded bg-[#16956C] text-white font-medium hover:bg-[#138055] transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
