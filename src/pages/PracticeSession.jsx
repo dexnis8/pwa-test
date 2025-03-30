@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import questionsData from "../data/questions.json";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Custom hook to get query parameters
 const useQuery = () => {
@@ -26,6 +28,7 @@ const PracticeSession = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(timeLimit * 60); // Convert minutes to seconds
   const [timerActive, setTimerActive] = useState(mode === "time-based");
+  const [showQuitModal, setShowQuitModal] = useState(false);
 
   // Format time as MM:SS
   const formatTime = (seconds) => {
@@ -122,6 +125,20 @@ const PracticeSession = () => {
     navigate("/dashboard");
   };
 
+  const handleEndClick = () => {
+    setShowQuitModal(true);
+  };
+
+  const handleConfirmQuit = () => {
+    setShowQuitModal(false);
+    setQuizCompleted(true);
+    setTimerActive(false);
+  };
+
+  const handleCancelQuit = () => {
+    setShowQuitModal(false);
+  };
+
   if (questions.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -200,10 +217,7 @@ const PracticeSession = () => {
           )}
         </h1>
         <button
-          onClick={() => {
-            setQuizCompleted(true);
-            setTimerActive(false);
-          }}
+          onClick={handleEndClick}
           className="px-4 py-1 bg-white rounded-full text-[#16956C] text-sm font-medium"
         >
           End
@@ -292,7 +306,9 @@ const PracticeSession = () => {
               }`}
               disabled={showFeedback}
             >
-              <span className="mr-3">{String.fromCharCode(65 + index)}</span>
+              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center mr-3 font-medium">
+                {String.fromCharCode(65 + index)}
+              </span>
               <span>{option}</span>
               {showFeedback && selectedAnswer === option && (
                 <span className="ml-auto">
@@ -392,6 +408,52 @@ const PracticeSession = () => {
           Next
         </button>
       </div>
+
+      {/* Quit Confirmation Modal */}
+      <AnimatePresence>
+        {showQuitModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-white rounded-lg shadow-lg overflow-hidden w-full max-w-xs"
+            >
+              {/* Modal Header */}
+              <div className="bg-[#16956C] p-4 text-white text-center">
+                <h2 className="font-bold text-xl">
+                  Are you sure you want to quit?
+                </h2>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-4 text-center text-gray-600">
+                <p className="mb-1">You will lose all point.</p>
+                <p className="text-sm">
+                  Also pratice questions increase your chance of partipating in
+                  LIVE GAMES.
+                </p>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 flex space-x-3">
+                <button
+                  onClick={handleConfirmQuit}
+                  className="flex-1 py-2 px-4 rounded border border-[#16956C] text-[#16956C] font-medium hover:bg-gray-50 transition-colors"
+                >
+                  End Pratice
+                </button>
+                <button
+                  onClick={handleCancelQuit}
+                  className="flex-1 py-2 px-4 rounded bg-[#16956C] text-white font-medium hover:bg-[#138055] transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
