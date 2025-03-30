@@ -83,6 +83,24 @@ const ShareableResultCard = ({
               ctx.fillStyle = "#1A4B8C";
               ctx.fill();
 
+              // // Draw logo (simplified version for canvas)
+              // ctx.fillStyle = "#16956C";
+              // ctx.beginPath();
+              // ctx.arc(50, 50, 20, 0, Math.PI * 2);
+              // ctx.fill();
+
+              // // Draw Q in the logo
+              // ctx.fillStyle = "white";
+              // ctx.font = "bold 22px Arial";
+              // ctx.textAlign = "center";
+              // ctx.fillText("Q", 50, 57);
+
+              // Draw app name
+              ctx.fillStyle = "#16956C";
+              ctx.font = "bold 18px Arial";
+              ctx.textAlign = "left";
+              ctx.fillText("The Pace App", 20, 55);
+
               // Draw text
               ctx.fillStyle = "#1A4B8C"; // Blue text
               ctx.font = "bold 24px Arial";
@@ -228,6 +246,16 @@ const ShareableResultCard = ({
 
         {/* Content container */}
         <div className="relative z-10 text-center p-8 h-full flex flex-col items-center">
+          {/* Logo and App Name */}
+          <div className="absolute top-6 left-6 flex items-center">
+            <div className="w-10 h-10 bg-[#16956C] rounded-full flex items-center justify-center">
+              <span className="text-white text-xl font-bold">Q</span>
+            </div>
+            <h1 className="text-[#1A4B8C] text-lg font-bold ml-2">
+              The Pace App
+            </h1>
+          </div>
+
           {/* Header text */}
           <h2 className="text-[#1A4B8C] text-2xl font-semibold mt-6">
             You scored
