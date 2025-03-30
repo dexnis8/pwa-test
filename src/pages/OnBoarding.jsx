@@ -9,7 +9,7 @@ export const OnBoarding = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="h-full w-full flex flex-col bg-gradient-to-b from-[#3DD7A1] to-[#1DA57F] text-white p-0 relative">
+    <div className="h-full w-full flex overflow-hidden flex-col bg-gradient-to-b from-[#2ACB8F] to-[#16956C] text-white p-0 relative">
       {/* Main content container */}
       <div className="flex flex-col justify-between h-full w-full">
         {/* Illustration and text section */}
@@ -18,7 +18,7 @@ export const OnBoarding = () => {
           <Motion
             animation="slideInRight"
             delay={0.2}
-            className="flex justify-center items-center mb-8 mt-6"
+            className="flex justify-center items-center mb-5 mt-3"
           >
             <img
               src="/images/get-started.png"
@@ -35,12 +35,13 @@ export const OnBoarding = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7, duration: 0.5 }}
               >
-                The Pace App makes studying <br />
+                The Pace App <br /> makes studying <br />
               </motion.span>
               <motion.span
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.9, duration: 0.5 }}
+                className="font-coolvetica"
               >
                 FUN & also <br />
               </motion.span>
@@ -48,6 +49,7 @@ export const OnBoarding = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.1, duration: 0.5 }}
+                className="font-coolvetica"
               >
                 REWARD you
               </motion.span>
@@ -56,9 +58,9 @@ export const OnBoarding = () => {
         </div>
 
         {/* Bottom button section */}
-        <Motion animation="slideUp" delay={1.3} className="p-6 pb-10">
+        <Motion animation="slideUp" delay={1.3} className="p-6 pt-4 ">
           <MotionButton
-            onClick={() => navigate("/home")}
+            onClick={() => navigate("/auth/signin")}
             variant="white"
             size="full"
             shape="pill"

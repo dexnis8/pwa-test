@@ -10,7 +10,9 @@ export const AuthLayout = () => {
       {/* Header with tabs */}
       <div className="p-6 pb-4">
         <Motion animation="fadeIn" delay={0.1}>
-          <h1 className="text-gray-700 mb-5 text-lg">Welcome</h1>
+          <h1 className="text-[#4B4D52] font-medium mb-5 text-lg font-coolvetica">
+            Welcome to The Pace App
+          </h1>
         </Motion>
 
         <div className="flex space-x-12">
@@ -19,7 +21,7 @@ export const AuthLayout = () => {
             className={({ isActive }) =>
               `text-xl font-medium transition-colors ${
                 isActive
-                  ? "text-[#18B684] border-b-2 border-[#18B684] pb-1"
+                  ? "text-[#16956C] border-b-2 border-[#16956C] pb-1"
                   : "text-gray-400"
               }`
             }
@@ -32,7 +34,7 @@ export const AuthLayout = () => {
             className={({ isActive }) =>
               `text-xl font-medium transition-colors ${
                 isActive
-                  ? "text-[#18B684] border-b-2 border-[#18B684] pb-1"
+                  ? "text-[#16956C] border-b-2 border-[#16956C] pb-1"
                   : "text-gray-400"
               }`
             }
@@ -43,7 +45,7 @@ export const AuthLayout = () => {
       </div>
 
       {/* Main content - nested routes will render here */}
-      <div className="flex-1 bg-[#18B684] rounded-t-3xl p-6">
+      <div className="flex-1 bg-[#16956C] rounded-t-3xl p-6">
         <Motion
           key={location.pathname}
           animation="fadeIn"

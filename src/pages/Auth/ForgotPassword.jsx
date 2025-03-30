@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,10 +10,24 @@ const forgotPasswordSchema = z.object({
   phoneNumber: z
     .string()
     .min(1, "Phone number is required")
-    .regex(/^\d+$/, "Phone number must contain only digits"),
+    .refine(
+      (value) => {
+        // Nigerian number format validation
+        // Format 1: +2349XXXXXXXXX (14 digits with country code)
+        // Format 2: 09XXXXXXXXX (11 digits)
+        const pattern1 = /^\+234[7-9][0-1][0-9]{8}$/; // +234 followed by 9 digits
+        const pattern2 = /^0[7-9][0-1][0-9]{8}$/; // 0 followed by 10 digits
+        return pattern1.test(value) || pattern2.test(value);
+      },
+      {
+        message:
+          "Please enter a valid Nigerian phone number (e.g., +2348012345678 or 08012345678)",
+      }
+    ),
 });
 
 export const ForgotPassword = () => {
+  const navigate = useNavigate();
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const {
@@ -32,18 +46,24 @@ export const ForgotPassword = () => {
     // Handle password reset logic here
     console.log("Requesting password reset for:", data.phoneNumber);
     setIsSubmitted(true);
+
+    // For demo purposes, navigate to reset password page after successful submission
+    setTimeout(() => {
+      navigate("/auth/password/reset");
+    }, 2000);
   };
 
   return (
     <div className="flex flex-col h-full text-white">
-      <div className="mb-4">
+      {/* Page Header with Back Button */}
+      <div className="flex items-center mb-6">
         <Link
           to="/auth/signin"
-          className="flex items-center text-white hover:text-white/80 transition-colors"
+          className="bg-white/20 rounded-full p-2 mr-3 hover:bg-white/30 transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-2"
+            className="h-5 w-5"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
@@ -53,11 +73,14 @@ export const ForgotPassword = () => {
               clipRule="evenodd"
             />
           </svg>
-          Back to Sign In
         </Link>
+        <h2 className="text-2xl font-medium">Forgot Password</h2>
       </div>
 
-      <h2 className="text-xl font-medium mb-6">Forgot Password</h2>
+      <p className="text-white/80 mb-8">
+        Enter your registered phone number and we'll send you a 4-digit
+        verification code to reset your password.
+      </p>
 
       {!isSubmitted ? (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
@@ -69,7 +92,7 @@ export const ForgotPassword = () => {
               type="tel"
               id="phoneNumber"
               {...register("phoneNumber")}
-              placeholder="Your registered phone number"
+              placeholder="e.g., +2348012345678 or 08012345678"
               className="w-full bg-transparent border-b border-white/50 focus:border-white py-2 text-white placeholder-white/50 outline-none"
             />
             {errors.phoneNumber && (
@@ -81,9 +104,9 @@ export const ForgotPassword = () => {
 
           <button
             type="submit"
-            className="bg-white text-[#18B684] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer mt-6"
+            className="bg-white text-[#16956C] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer mt-6"
           >
-            Send Reset Instructions
+            Send Verification Code
           </button>
         </form>
       ) : (
@@ -109,13 +132,14 @@ export const ForgotPassword = () => {
           </div>
           <h3 className="text-xl font-medium mb-4">Check your phone</h3>
           <p className="mb-6">
-            We've sent instructions to reset your password to your phone number.
+            We've sent a 4-digit verification code to your phone. Enter this
+            code on the next screen to reset your password.
           </p>
           <button
-            onClick={() => setIsSubmitted(false)}
-            className="bg-white text-[#18B684] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer"
+            onClick={() => navigate("/auth/password/reset")}
+            className="bg-white text-[#16956C] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer"
           >
-            Back to reset form
+            Enter verification code
           </button>
         </motion.div>
       )}

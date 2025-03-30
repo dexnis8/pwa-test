@@ -3,7 +3,6 @@ import { AnimatePresence } from "framer-motion";
 import "./App.css";
 import { SplashScreen } from "./pages/SplashScreen";
 import { OnBoarding } from "./pages/OnBoarding";
-import { Home } from "./pages/Home";
 import { MobileLayout } from "./components/MobileLayout";
 import {
   AuthLayout,
@@ -11,6 +10,7 @@ import {
   SignIn,
   ForgotPassword,
   ResetPassword,
+  PasswordResetLayout,
 } from "./pages/Auth";
 
 function App() {
@@ -23,15 +23,18 @@ function App() {
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<SplashScreen />} />
             <Route path="/get-started" element={<OnBoarding />} />
-            <Route path="/home" element={<Home />} />
 
-            {/* Auth Routes */}
+            {/* Main Auth Routes with Tabs */}
             <Route path="/auth" element={<AuthLayout />}>
               <Route index element={<SignUp />} />
               <Route path="signup" element={<SignUp />} />
               <Route path="signin" element={<SignIn />} />
-              <Route path="forgot-password" element={<ForgotPassword />} />
-              <Route path="reset-password" element={<ResetPassword />} />
+            </Route>
+
+            {/* Password Recovery Routes - No Tabs */}
+            <Route path="/auth/password" element={<PasswordResetLayout />}>
+              <Route path="forgot" element={<ForgotPassword />} />
+              <Route path="reset" element={<ResetPassword />} />
             </Route>
           </Routes>
         </AnimatePresence>

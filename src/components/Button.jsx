@@ -2,10 +2,10 @@ import React from "react";
 
 // Button variants
 const VARIANTS = {
-  primary: "bg-[#3DD7A1] hover:bg-[#2bc28c] text-white",
+  primary: "bg-[#16956C] hover:bg-[#14855F] text-white",
   secondary:
-    "bg-white text-[#3DD7A1] hover:bg-gray-100 border border-[#3DD7A1]",
-  white: "bg-white text-[#3DD7A1] hover:bg-gray-100",
+    "bg-white text-[#16956C] hover:bg-gray-100 border border-[#16956C]",
+  white: "bg-white text-[#16956C] hover:bg-gray-100",
 };
 
 // Button sizes

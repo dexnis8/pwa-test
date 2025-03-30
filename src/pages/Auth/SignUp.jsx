@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
 import { MotionButton } from "../../components/MotionButton";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { FaFacebookF } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 
 // Define validation schema with zod
 const signUpSchema = z
@@ -15,7 +16,20 @@ const signUpSchema = z
     phoneNumber: z
       .string()
       .min(1, "Phone number is required")
-      .regex(/^\d+$/, "Phone number must contain only digits"),
+      .refine(
+        (value) => {
+          // Nigerian number format validation
+          // Format 1: +2349XXXXXXXXX (14 digits with country code)
+          // Format 2: 09XXXXXXXXX (11 digits)
+          const pattern1 = /^\+234[7-9][0-1][0-9]{8}$/; // +234 followed by 9 digits
+          const pattern2 = /^0[7-9][0-1][0-9]{8}$/; // 0 followed by 10 digits
+          return pattern1.test(value) || pattern2.test(value);
+        },
+        {
+          message:
+            "Please enter a valid Nigerian phone number (e.g., +2348012345678 or 08012345678)",
+        }
+      ),
     password: z
       .string()
       .min(1, "Password is required")
@@ -89,7 +103,7 @@ export const SignUp = () => {
             type="tel"
             id="phoneNumber"
             {...register("phoneNumber")}
-            placeholder="Enter your phone number"
+            placeholder="e.g., +2348012345678 or 08012345678"
             className="w-full bg-transparent border-b border-white/50 focus:border-white py-2 text-white placeholder-white/50 outline-none"
           />
           {errors.phoneNumber && (
@@ -214,7 +228,7 @@ export const SignUp = () => {
         {/* Sign Up Button */}
         <button
           type="submit"
-          className="bg-white text-[#18B684] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer my-4"
+          className="bg-white text-[#16956C] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer my-4"
         >
           Sign up
         </button>
@@ -230,26 +244,22 @@ export const SignUp = () => {
         <div className="flex gap-4">
           <button
             type="button"
-            className="flex-1 bg-white text-[#18B684] py-2 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer flex items-center justify-center"
+            className="flex-1 gap-2 bg-white text-[#16956C] py-2 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer flex items-center justify-center"
           >
-            <img
-              src="/images/google-icon.png"
-              alt="Google"
-              className="w-5 h-5 mr-2"
-            />
-            <span className="text-sm">sign up with</span>
+            <span className="text-sm italic">sign up with</span>
+            <div className="p-1 border rounded-full flex items-center border-[#E1E4EB] justify-center">
+              <FcGoogle className="w-5 h-5" />
+            </div>
           </button>
 
           <button
             type="button"
-            className="flex-1 bg-white text-[#18B684] py-2 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer flex items-center justify-center"
+            className="flex-1 bg-white gap-2 text-[#16956C] py-2 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer flex items-center justify-center"
           >
-            <img
-              src="/images/facebook-icon.png"
-              alt="Facebook"
-              className="w-5 h-5 mr-2"
-            />
-            <span className="text-sm">sign up with</span>
+            <span className="text-sm italic">sign up with</span>
+            <div className="p-1 border rounded-full flex items-center justify-center border-[#E1E4EB] text-blue-600">
+              <FaFacebookF className="w-4 h-4" />
+            </div>
           </button>
         </div>
       </form>

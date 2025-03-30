@@ -39,7 +39,7 @@ export const SplashScreen = () => {
   }, [navigate]);
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-b from-[#3DD7A1] to-[#1DA57F] text-white text-center p-5 relative overflow-hidden">
+    <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-b from-[#2ACB8F] to-[#16956C] text-white text-center p-5 relative overflow-hidden">
       <AnimatePresence>
         {loaded && (
           <>
