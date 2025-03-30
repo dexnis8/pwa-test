@@ -14,8 +14,21 @@ const ShareableResultCard = ({
 }) => {
   const cardRef = useRef(null);
   const personalInfo = useSelector(selectPersonalInfo);
-  const username = personalInfo?.name || "Student";
+  const username = personalInfo?.name || "Me";
   const [attempts, setAttempts] = useState(0);
+
+  // Calculate performance metrics
+  const percentage = Math.round((score / totalQuestions) * 100);
+  const performanceLevel =
+    percentage >= 90
+      ? "OUTSTANDING"
+      : percentage >= 75
+      ? "EXCELLENT"
+      : percentage >= 60
+      ? "GOOD"
+      : percentage >= 40
+      ? "FAIR"
+      : "NEEDS PRACTICE";
 
   // Generate shareable image when component becomes visible
   useEffect(() => {
@@ -24,7 +37,7 @@ const ShareableResultCard = ({
       const timer = setTimeout(() => {
         console.log("Attempting to generate image...");
         html2canvas(cardRef.current, {
-          scale: 2, // Higher quality
+          scale: 3, // Higher quality
           backgroundColor: null,
           logging: true, // Enable logging for debugging
           useCORS: true, // Try with CORS enabled
@@ -48,30 +61,87 @@ const ShareableResultCard = ({
               fallbackCanvas.height = 380;
               const ctx = fallbackCanvas.getContext("2d");
 
-              // Draw background
-              ctx.fillStyle = "#16956C";
+              // Create background
+              ctx.fillStyle = "#F5F5DC"; // Light beige background
               ctx.fillRect(0, 0, 600, 380);
 
+              // Add diagonal green section
+              ctx.beginPath();
+              ctx.moveTo(0, 150);
+              ctx.lineTo(0, 380);
+              ctx.lineTo(200, 380);
+              ctx.closePath();
+              ctx.fillStyle = "#16956C";
+              ctx.fill();
+
+              // Add diagonal blue section
+              ctx.beginPath();
+              ctx.moveTo(600, 0);
+              ctx.lineTo(600, 230);
+              ctx.lineTo(430, 0);
+              ctx.closePath();
+              ctx.fillStyle = "#1A4B8C";
+              ctx.fill();
+
               // Draw text
-              ctx.fillStyle = "white";
+              ctx.fillStyle = "#1A4B8C"; // Blue text
               ctx.font = "bold 24px Arial";
               ctx.textAlign = "center";
-              ctx.fillText(`${subject.toUpperCase()} Practice Result`, 300, 80);
+              ctx.fillText("You scored", 300, 70);
 
-              ctx.font = "bold 48px Arial";
-              ctx.fillText(`${score}/${totalQuestions}`, 300, 180);
+              // Draw percentage
+              ctx.font = "bold 80px Arial";
+              ctx.fillText(`${percentage}%`, 300, 150);
 
+              // Draw performance level
+              ctx.fillStyle = "#FFD700"; // Gold color
+              ctx.font = "bold 36px Arial";
+              ctx.fillText(performanceLevel, 300, 200);
+
+              // Draw subject and score
+              ctx.fillStyle = "#333";
               ctx.font = "16px Arial";
-              ctx.fillText(`by ${username}`, 300, 220);
+              ctx.fillText(
+                `${subject} ${examType} · ${
+                  mode === "time-based" ? "Timed" : "Practice"
+                } · ${score}/${totalQuestions} correct answers`,
+                300,
+                240
+              );
 
-              ctx.font = "18px Arial";
-              ctx.fillText("eduprep.app/register", 300, 320);
+              ctx.font = "bold 14px Arial";
+              ctx.fillText(
+                `by ${username} - ${new Date().toLocaleDateString()}`,
+                300,
+                270
+              );
+
+              // Draw CTA text
+              ctx.fillStyle = "#333";
+              ctx.font = "12px Arial";
+              ctx.fillText(
+                "Keep practicing to improve your scores and master your subjects.",
+                300,
+                320
+              );
+
+              // Draw CTA button
+              ctx.fillStyle = "#1A4B8C";
+              ctx.fillRect(150, 330, 295, 35);
+              ctx.fillStyle = "white";
+              ctx.font = "bold 14px Arial";
+              ctx.fillText("Practice Now @ https://thepaceapp.ng", 300, 353);
+
+              // App name
+              ctx.fillStyle = "#16956C";
+              ctx.font = "bold 12px Arial";
+              ctx.fillText("#icandobetter", 500, 365);
 
               const fallbackImageData = fallbackCanvas.toDataURL("image/png");
               onImageGenerated(fallbackImageData);
             }
           });
-      }, 500); // Increased from 100ms to 500ms
+      }, 500);
 
       return () => clearTimeout(timer);
     }
@@ -83,11 +153,12 @@ const ShareableResultCard = ({
     totalQuestions,
     subject,
     username,
+    percentage,
+    performanceLevel,
+    examType,
+    mode,
   ]);
 
-  const percentage = Math.round((score / totalQuestions) * 100);
-
-  // This component should be clearly visible to ensure proper rendering
   return (
     <div
       ref={cardRef}
@@ -96,54 +167,111 @@ const ShareableResultCard = ({
     >
       {/* Card container with fixed dimensions */}
       <div
-        className="bg-gradient-to-br from-[#16956C] to-[#0D7353] p-8 rounded-lg text-white shadow-lg"
-        style={{ width: "600px", height: "380px" }}
+        className="overflow-hidden"
+        style={{
+          width: "600px",
+          height: "380px",
+          position: "relative",
+          backgroundColor: "#F5F5DC",
+        }}
       >
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center">
-            <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center">
-              <span className="text-[#16956C] text-2xl font-bold">E</span>
-            </div>
-            <h1 className="text-2xl font-bold ml-3">EduPrep</h1>
-          </div>
-          <div className="bg-white/20 rounded-full px-4 py-1 text-sm">
-            {examType} · {mode === "time-based" ? "Timed" : "Practice"}
+        {/* Diagonal shapes for visual interest */}
+        <div
+          className="absolute left-0 bottom-0"
+          style={{
+            width: "200px",
+            height: "230px",
+            backgroundColor: "#16956C",
+            clipPath: "polygon(0 40%, 0% 100%, 100% 100%)",
+          }}
+        ></div>
+
+        <div
+          className="absolute top-0 right-0"
+          style={{
+            width: "200px",
+            height: "230px",
+            backgroundColor: "#1A4B8C",
+            clipPath: "polygon(30% 0, 100% 0, 100% 100%)",
+          }}
+        ></div>
+
+        {/* Calculator icon (simulated) */}
+        <div
+          className="absolute left-16 bottom-24 w-20 h-20 rounded-lg bg-[#1A4B8C] flex items-center justify-center"
+          style={{ transform: "rotate(-10deg)" }}
+        >
+          <div className="text-white text-xs font-bold">100%</div>
+          <div className="absolute inset-0 flex flex-wrap content-end p-1">
+            <div className="w-3 h-2 bg-white/50 m-0.5 rounded-sm"></div>
+            <div className="w-3 h-2 bg-white/50 m-0.5 rounded-sm"></div>
+            <div className="w-3 h-2 bg-white/50 m-0.5 rounded-sm"></div>
+            <div className="w-3 h-2 bg-white/50 m-0.5 rounded-sm"></div>
           </div>
         </div>
 
-        {/* Title */}
-        <h2 className="text-xl font-semibold capitalize mb-2">
-          {subject} Practice Result
-        </h2>
-        <p className="text-white/80 mb-6">by {username}</p>
+        {/* Book icon (simulated) */}
+        <div
+          className="absolute left-40 bottom-20 w-16 h-20 bg-[#FFD700]"
+          style={{ transform: "rotate(15deg)" }}
+        ></div>
+        <div
+          className="absolute left-38 bottom-19 w-14 h-22 bg-[#2ECDA0]"
+          style={{ transform: "rotate(5deg)" }}
+        ></div>
 
-        {/* Score */}
-        <div className="flex mb-8">
-          <div className="mr-8">
-            <div className="bg-white text-[#16956C] text-4xl font-bold rounded-xl w-24 h-24 flex items-center justify-center">
-              {percentage}%
-            </div>
-          </div>
-          <div>
-            <div className="mb-2">
-              <p className="text-sm text-white/70">Score</p>
-              <p className="text-2xl font-bold">
-                {score}/{totalQuestions} correct
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-white/70">Completed on</p>
-              <p className="text-lg">{new Date().toLocaleDateString()}</p>
-            </div>
-          </div>
+        {/* Computer mouse */}
+        <div className="absolute right-12 top-24 w-16 h-24 bg-[#1A4B8C] rounded-t-2xl">
+          <div className="absolute inset-0 top-5 bg-white/30 rounded-t-2xl"></div>
+          <div className="absolute top-0 left-1/2 w-0.5 h-4 bg-white/50"></div>
         </div>
 
-        {/* Call to action */}
-        <div className="bg-white/10 rounded-lg p-4 flex justify-between items-center">
-          <p className="text-lg font-medium">Try your own practice session!</p>
-          <div className="bg-white text-[#16956C] font-bold px-4 py-2 rounded-lg">
-            eduprep.app/register
+        {/* Content container */}
+        <div className="relative z-10 text-center p-8 h-full flex flex-col items-center">
+          {/* Header text */}
+          <h2 className="text-[#1A4B8C] text-2xl font-semibold mt-6">
+            You scored
+          </h2>
+
+          {/* Large percentage */}
+          <div className="text-[#1A4B8C] text-8xl font-bold mb-2">
+            {percentage}%
+          </div>
+
+          {/* Performance level */}
+          <div className="text-[#FFD700] text-4xl font-bold mb-4 tracking-wide">
+            {performanceLevel}
+          </div>
+
+          {/* Subject and score details */}
+          <p className="text-gray-700 mb-1 max-w-md">
+            {subject} {examType} ·{" "}
+            {mode === "time-based" ? "Timed" : "Practice"} · {score}/
+            {totalQuestions} correct answers
+          </p>
+          <p className="text-gray-600 text-sm font-medium mb-6">
+            by {username} · {new Date().toLocaleDateString()}
+          </p>
+
+          {/* Hashtag */}
+          <div className="absolute right-8 bottom-4 text-[#16956C] text-xs font-bold">
+            #icandobetter
+          </div>
+
+          {/* Message */}
+          <p className="text-gray-600 text-sm max-w-md mt-auto mb-4">
+            Keep practicing to improve your scores and master your subjects.
+            Consistency is key to success!
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="flex gap-4 w-full max-w-md justify-center">
+            <div className="border border-[#1A4B8C] text-[#1A4B8C] rounded px-6 py-2 text-sm font-bold">
+              Share on Facebook
+            </div>
+            <div className="bg-[#1A4B8C] text-white rounded px-6 py-2 text-sm font-bold whitespace-nowrap">
+              Practice Now @ thepaceapp.ng
+            </div>
           </div>
         </div>
       </div>
