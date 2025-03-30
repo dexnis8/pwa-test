@@ -56,8 +56,8 @@ export const SignUp = () => {
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       username: "",
-      phoneNumber: "",
-      password: "",
+    phoneNumber: "",
+    password: "",
       confirmPassword: "",
     },
   });
@@ -132,12 +132,12 @@ export const SignUp = () => {
             Password
           </label>
           <div className="relative">
-            <input
+          <input
               type={showPassword ? "text" : "password"}
-              id="password"
+            id="password"
               {...register("password")}
-              placeholder="Enter your password"
-              className="w-full bg-transparent border-b border-white/50 focus:border-white py-2 text-white placeholder-white/50 outline-none"
+            placeholder="Enter your password"
+            className="w-full bg-transparent border-b border-white/50 focus:border-white py-2 text-white placeholder-white/50 outline-none"
             />
             <button
               type="button"

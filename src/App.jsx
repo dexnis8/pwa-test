@@ -4,6 +4,7 @@ import "./App.css";
 import { SplashScreen } from "./pages/SplashScreen";
 import { OnBoarding } from "./pages/OnBoarding";
 import { MobileLayout } from "./components/MobileLayout";
+import DashboardLayout from "./components/DashboardLayout";
 import {
   AuthLayout,
   SignUp,
@@ -16,37 +17,12 @@ import {
   CompleteProfile,
   ChooseDepartment,
   ChooseInterests,
-} from "./pages/Profile";
+} from "./pages/Profile/index.js";
 import Dashboard from "./pages/Dashboard";
-
-// Placeholder components for new routes
-const Practice = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold text-[#16956C] mb-4">Practice Page</h1>
-    <p>This is where users will practice for quizzes.</p>
-  </div>
-);
-
-const Leaderboard = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold text-[#16956C] mb-4">Leaderboard</h1>
-    <p>This is where users will see top performers.</p>
-  </div>
-);
-
-const Notifications = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold text-[#16956C] mb-4">Notifications</h1>
-    <p>This is where users will see their notifications.</p>
-  </div>
-);
-
-const Profile = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold text-[#16956C] mb-4">Profile</h1>
-    <p>This is where users will manage their profile.</p>
-  </div>
-);
+import Leaderboard from "./pages/Leaderboard";
+import Practice from "./pages/Practice";
+import Notifications from "./pages/Notifications";
+import Profile from "./pages/Profile";
 
 function App() {
   const location = useLocation();
@@ -83,12 +59,14 @@ function App() {
               element={<ChooseInterests />}
             />
 
-            {/* Dashboard Routes */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/practice" element={<Practice />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/profile" element={<Profile />} />
+            {/* Dashboard Routes with common layout and bottom navigation */}
+            <Route element={<DashboardLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/practice" element={<Practice />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
           </Routes>
         </AnimatePresence>
       </MobileLayout>
