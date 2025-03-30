@@ -280,7 +280,7 @@ const Dashboard = () => {
           </p>
         </div>
         <a
-          href="https://deluxcoding.com"
+          href="https://deluxcodingschool.ng"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap transition-colors"
