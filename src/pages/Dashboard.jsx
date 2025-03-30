@@ -15,7 +15,12 @@ const Dashboard = () => {
         <p className="text-gray-700 text-base mb-6">Next Live Quiz</p>
 
         {/* Quiz card */}
-        <div className="bg-[#16956C] rounded-xl p-5 mb-6 text-white">
+        <div className="bg-[#16956C] rounded-xl p-5 mb-6 text-white relative overflow-hidden">
+          {/* Coming soon badge */}
+          <div className="absolute -right-8 top-4 bg-yellow-500 text-white text-xs font-bold py-1 px-10 transform rotate-45 shadow-md">
+            COMING SOON
+          </div>
+
           <h2 className="text-xl font-bold mb-2">SATURDAY LIVE QUIZ</h2>
           <p className="text-sm mb-3">Entry: 10 hours on-screen practice</p>
 
@@ -151,13 +156,23 @@ const Dashboard = () => {
 
         {/* Ad banner */}
         <div className="mt-6 bg-[#14213D] text-white p-4 rounded-lg flex justify-between items-center">
-          <div>
-            <p className="uppercase text-sm">Discover flat</p>
-            <p className="uppercase text-lg font-bold">Bed luxury</p>
+          <div className="flex-1 pr-3">
+            <p className="uppercase text-xs font-medium">Limited Time Offer</p>
+            <p className="uppercase text-base font-bold mb-1">
+              Delux Coding School
+            </p>
+            <p className="text-xs text-white/80">
+              Learn to code with industry experts. Get 30% off your first month!
+            </p>
           </div>
-          <div className="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold">
-            GET YOUR SEAT
-          </div>
+          <a
+            href="https://deluxcodingschool.ng"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap transition-colors"
+          >
+            ENROLL NOW
+          </a>
         </div>
       </div>
 

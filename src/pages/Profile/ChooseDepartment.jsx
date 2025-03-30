@@ -177,7 +177,7 @@ const ChooseDepartment = () => {
               selectedDepartment === dept.id
                 ? "ring-2 ring-[#16956C] ring-offset-1"
                 : ""
-            } w-full py-5 px-6 rounded-xl text-white flex justify-between items-center transition-all ${
+            } w-full py-5 text-left px-6 rounded-xl text-white flex justify-between items-center transition-all ${
               dept.disabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
             onClick={() => !dept.disabled && setSelectedDepartment(dept.id)}

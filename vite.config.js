@@ -13,8 +13,8 @@ export default defineConfig({
       theme: {
         extend: {
           fontFamily: {
-            primary: ['"Proxima Nova"', "sans-serif"],
-            secondary: ["Coolvetica", "sans-serif"],
+            primary: ["Montserrat", "sans-serif"],
+            secondary: ["Montserrat", "sans-serif"],
           },
           colors: {
             primary: "#ffffff",
