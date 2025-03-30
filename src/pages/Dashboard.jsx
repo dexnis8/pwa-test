@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { selectPersonalInfo } from "../redux/slices/profileSlice";
+import PracticeConfigModal from "../components/PracticeConfigModal";
 
 const Dashboard = () => {
   const personalInfo = useSelector(selectPersonalInfo);
   const name = personalInfo.fullName?.split(" ")[0] || "User";
+  const [isPracticeModalOpen, setIsPracticeModalOpen] = useState(false);
 
   return (
     <div className="p-6">
@@ -221,9 +223,9 @@ const Dashboard = () => {
       </div>
 
       {/* Practice button */}
-      <Link
-        to="/practice"
-        className="block relative bg-[#1B7A93] hover:bg-[#166A80] text-white font-bold py-4 px-6 rounded-lg mb-6 transition-colors"
+      <button
+        onClick={() => setIsPracticeModalOpen(true)}
+        className="block w-full relative bg-[#1B7A93] hover:bg-[#166A80] text-white font-bold py-4 px-6 rounded-lg mb-6 transition-colors"
       >
         <div className="absolute right-0 top-0">
           <svg
@@ -258,7 +260,13 @@ const Dashboard = () => {
           </svg>
           <span className="uppercase text-lg">PRACTICE NOW</span>
         </div>
-      </Link>
+      </button>
+
+      {/* Practice Configuration Modal */}
+      <PracticeConfigModal
+        isOpen={isPracticeModalOpen}
+        onClose={() => setIsPracticeModalOpen(false)}
+      />
 
       {/* Referral link */}
       <div className="flex items-center bg-gray-100 p-4 rounded-lg">
@@ -280,7 +288,7 @@ const Dashboard = () => {
           </p>
         </div>
         <a
-          href="https://deluxcodingschool.ng"
+          href="https://deluxcoding.com"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap transition-colors"

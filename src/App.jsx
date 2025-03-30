@@ -24,6 +24,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Practice from "./pages/Practice";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
+import PracticeSession from "./pages/PracticeSession";
 
 function App() {
   const location = useLocation();
@@ -69,6 +70,9 @@ function App() {
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/profile" element={<Profile />} />
             </Route>
+
+            {/* Practice Session Route - Full screen without bottom navigation */}
+            <Route path="/practice/session" element={<PracticeSession />} />
           </Routes>
         </AnimatePresence>
       </MobileLayout>

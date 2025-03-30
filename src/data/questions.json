@@ -1,0 +1,204 @@
+{
+  "english": {
+    "comprehension": [
+      {
+        "id": "eng-comp-1",
+        "question": "Read the passage and answer the question below: The sun was setting behind the hills, casting long shadows across the valley. The birds were returning to their nests, and the air was filled with their evening songs. The villagers, too, were heading home after a day in the fields. What time of day is described in the passage?",
+        "options": ["Morning", "Afternoon", "Evening", "Night"],
+        "correctAnswer": "Evening",
+        "examType": "UTME"
+      },
+      {
+        "id": "eng-comp-2",
+        "question": "In the sentence 'The diligent student completed her assignment early', the word 'diligent' means:",
+        "options": ["Lazy", "Intelligent", "Hardworking", "Curious"],
+        "correctAnswer": "Hardworking",
+        "examType": "UTME"
+      },
+      {
+        "id": "eng-comp-3",
+        "question": "Which of the following is NOT a type of figurative language?",
+        "options": ["Metaphor", "Simile", "Exposition", "Personification"],
+        "correctAnswer": "Exposition",
+        "examType": "WAEC"
+      }
+    ],
+    "grammar": [
+      {
+        "id": "eng-gram-1",
+        "question": "Choose the correct form of the verb: She _____ to the store yesterday.",
+        "options": ["go", "goes", "went", "going"],
+        "correctAnswer": "went",
+        "examType": "UTME"
+      },
+      {
+        "id": "eng-gram-2",
+        "question": "Which of the following sentences contains a subject-verb agreement error?",
+        "options": [
+          "The team is playing well this season.",
+          "A group of students are waiting outside.",
+          "The committee has made its decision.",
+          "Neither of the boys have completed their homework."
+        ],
+        "correctAnswer": "Neither of the boys have completed their homework.",
+        "examType": "WAEC"
+      }
+    ]
+  },
+  "mathematics": {
+    "algebra": [
+      {
+        "id": "math-alg-1",
+        "question": "Solve for x: 2x + 5 = 15",
+        "options": ["x = 5", "x = 7.5", "x = 10", "x = 3"],
+        "correctAnswer": "x = 5",
+        "examType": "UTME"
+      },
+      {
+        "id": "math-alg-2",
+        "question": "Factorize: x² - 9",
+        "options": ["(x + 3)(x - 3)", "(x + 9)(x - 1)", "(x - 3)²", "x(x - 9)"],
+        "correctAnswer": "(x + 3)(x - 3)",
+        "examType": "WAEC"
+      }
+    ],
+    "geometry": [
+      {
+        "id": "math-geo-1",
+        "question": "The area of a circle with radius 7cm is:",
+        "options": ["14π cm²", "49π cm²", "7π cm²", "21π cm²"],
+        "correctAnswer": "49π cm²",
+        "examType": "UTME"
+      },
+      {
+        "id": "math-geo-2",
+        "question": "Which of the following is NOT a property of a rhombus?",
+        "options": [
+          "All sides are equal.",
+          "Opposite angles are equal.",
+          "Diagonals bisect each other.",
+          "All angles are equal."
+        ],
+        "correctAnswer": "All angles are equal.",
+        "examType": "WAEC"
+      }
+    ]
+  },
+  "physics": {
+    "mechanics": [
+      {
+        "id": "phy-mech-1",
+        "question": "A 2 kg object accelerates at 4 m/s². What force is acting on it?",
+        "options": ["0.5 N", "2 N", "8 N", "6 N"],
+        "correctAnswer": "8 N",
+        "examType": "UTME"
+      },
+      {
+        "id": "phy-mech-2",
+        "question": "Which of the following is NOT a unit of power?",
+        "options": [
+          "Watt",
+          "Joule/second",
+          "Newton-meter/second",
+          "Newton-meter"
+        ],
+        "correctAnswer": "Newton-meter",
+        "examType": "WAEC"
+      }
+    ],
+    "electricity": [
+      {
+        "id": "phy-elec-1",
+        "question": "What is the resistance of a conductor if a current of 2A flows through it when a voltage of 10V is applied?",
+        "options": ["5 Ω", "8 Ω", "12 Ω", "20 Ω"],
+        "correctAnswer": "5 Ω",
+        "examType": "UTME"
+      },
+      {
+        "id": "phy-elec-2",
+        "question": "Which of the following materials is a poor conductor of electricity?",
+        "options": ["Copper", "Aluminum", "Rubber", "Silver"],
+        "correctAnswer": "Rubber",
+        "examType": "WAEC"
+      }
+    ]
+  },
+  "biology": {
+    "cell-biology": [
+      {
+        "id": "bio-cell-1",
+        "question": "Which organelle is responsible for protein synthesis in a cell?",
+        "options": ["Nucleus", "Mitochondria", "Ribosomes", "Golgi apparatus"],
+        "correctAnswer": "Ribosomes",
+        "examType": "UTME"
+      },
+      {
+        "id": "bio-cell-2",
+        "question": "Which of the following is NOT a function of the cell membrane?",
+        "options": [
+          "Controlling what enters and leaves the cell",
+          "Providing shape and support to the cell",
+          "Producing energy for the cell",
+          "Recognizing other cells"
+        ],
+        "correctAnswer": "Producing energy for the cell",
+        "examType": "WAEC"
+      }
+    ],
+    "genetics": [
+      {
+        "id": "bio-gen-1",
+        "question": "What is the probability of two heterozygous parents (Tt) having a homozygous recessive (tt) child?",
+        "options": ["0%", "25%", "50%", "75%"],
+        "correctAnswer": "25%",
+        "examType": "UTME"
+      },
+      {
+        "id": "bio-gen-2",
+        "question": "Which of the following statements about DNA is INCORRECT?",
+        "options": [
+          "DNA is a double helix structure.",
+          "DNA contains the sugar deoxyribose.",
+          "DNA uses the base uracil instead of thymine.",
+          "DNA replicates during the S phase of the cell cycle."
+        ],
+        "correctAnswer": "DNA uses the base uracil instead of thymine.",
+        "examType": "WAEC"
+      }
+    ]
+  },
+  "chemistry": {
+    "organic-chemistry": [
+      {
+        "id": "chem-org-1",
+        "question": "Which of the following is an alkane?",
+        "options": ["C₂H₄", "C₃H₈", "C₂H₂", "C₆H₆"],
+        "correctAnswer": "C₃H₈",
+        "examType": "UTME"
+      },
+      {
+        "id": "chem-org-2",
+        "question": "What functional group is present in alcohols?",
+        "options": ["-COOH", "-OH", "-CHO", "-NH₂"],
+        "correctAnswer": "-OH",
+        "examType": "WAEC"
+      }
+    ],
+    "inorganic-chemistry": [
+      {
+        "id": "chem-inorg-1",
+        "question": "Which of the following elements is a noble gas?",
+        "options": ["Chlorine", "Nitrogen", "Argon", "Sodium"],
+        "correctAnswer": "Argon",
+        "examType": "UTME"
+      },
+      {
+        "id": "chem-inorg-2",
+        "question": "What is the oxidation state of iron in Fe₂O₃?",
+        "options": ["+1", "+2", "+3", "+4"],
+        "correctAnswer": "+3",
+        "examType": "WAEC"
+      }
+    ]
+  }
+}
