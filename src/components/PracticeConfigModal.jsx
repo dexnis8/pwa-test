@@ -200,6 +200,51 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
 
                     <button
                       type="button"
+                      onClick={() => setMode("time-based")}
+                      className={`p-3 rounded-lg flex flex-col items-center justify-center border transition-all ${
+                        mode === "time-based"
+                          ? "border-[#16956C] bg-[#E7F7F2] text-[#16956C]"
+                          : "border-gray-200 text-gray-700"
+                      }`}
+                    >
+                      <svg
+                        className="w-6 h-6 mb-1"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect
+                          x="3"
+                          y="6"
+                          width="18"
+                          height="15"
+                          rx="2"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d="M3 10H21"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d="M8 3V7"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M16 3V7"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <span className="text-sm font-medium">Time-based</span>
+                    </button>
+
+                    <button
+                      type="button"
                       disabled
                       className="p-3 rounded-lg flex flex-col items-center justify-center border border-gray-200 text-gray-400 relative cursor-not-allowed"
                     >
@@ -260,51 +305,6 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                       <span className="text-sm font-medium">
                         Exam Simulation
                       </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setMode("time-based")}
-                      className={`p-3 rounded-lg flex flex-col items-center justify-center border transition-all ${
-                        mode === "time-based"
-                          ? "border-[#16956C] bg-[#E7F7F2] text-[#16956C]"
-                          : "border-gray-200 text-gray-700"
-                      }`}
-                    >
-                      <svg
-                        className="w-6 h-6 mb-1"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <rect
-                          x="3"
-                          y="6"
-                          width="18"
-                          height="15"
-                          rx="2"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        />
-                        <path
-                          d="M3 10H21"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        />
-                        <path
-                          d="M8 3V7"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                        <path
-                          d="M16 3V7"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <span className="text-sm font-medium">Time-based</span>
                     </button>
                   </div>
                 </div>
