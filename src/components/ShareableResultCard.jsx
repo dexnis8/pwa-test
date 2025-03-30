@@ -99,7 +99,7 @@ const ShareableResultCard = ({
               ctx.fillStyle = "#16956C";
               ctx.font = "bold 18px Arial";
               ctx.textAlign = "left";
-              ctx.fillText("The Pace App", 20, 55);
+              ctx.fillText("The Pace App", 30, 55);
 
               // Draw text
               ctx.fillStyle = "#1A4B8C"; // Blue text
@@ -120,7 +120,7 @@ const ShareableResultCard = ({
               ctx.fillStyle = "#333";
               ctx.font = "16px Arial";
               ctx.fillText(
-                `${subject} ${examType} · ${
+                `${subject.toUpperCase()} ${examType} · ${
                   mode === "time-based" ? "Timed" : "Practice"
                 } · ${score}/${totalQuestions} correct answers`,
                 300,
@@ -273,7 +273,7 @@ const ShareableResultCard = ({
 
           {/* Subject and score details */}
           <p className="text-gray-700 mb-1 max-w-md">
-            {subject} {examType} ·{" "}
+            {subject.toUpperCase()} {examType} ·{" "}
             {mode === "time-based" ? "Timed" : "Practice"} · {score}/
             {totalQuestions} correct answers
           </p>
