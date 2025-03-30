@@ -55,7 +55,7 @@ const Profile = () => {
           <div className="w-28 h-28 z-20 relative rounded-2xl bg-gray-200 flex items-center justify-center overflow-hidden mx-auto mb-3 border-4 border-white shadow-sm">
             {personalInfo.avatarUrl ? (
               <img
-                src="/images/user.png"
+                src={personalInfo.avatarUrl}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />

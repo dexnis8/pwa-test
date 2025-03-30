@@ -139,6 +139,12 @@ const EditProfile = () => {
     });
   };
 
+  // Add minimum selections constant
+  const minimumSelections = 4;
+
+  // Check if minimum subjects are selected
+  const hasMinimumSelections = selectedInterests.length >= minimumSelections;
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Green Header Section */}
@@ -381,7 +387,7 @@ const EditProfile = () => {
         <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
           <h3 className="text-lg font-bold mb-4">Subjects of Interest</h3>
           <p className="text-gray-500 text-sm mb-4">
-            Select subjects that interest you
+            Select minimum of {minimumSelections} subjects that interest you
           </p>
 
           <div className="grid grid-cols-2 gap-3 mb-2">
@@ -393,7 +399,7 @@ const EditProfile = () => {
                   type="button"
                   onClick={() => toggleInterest(subject.id)}
                   className={`
-                    flex items-center px-4 py-3 rounded-full transition-colors
+                    flex items-center px-3 py-3 rounded-full transition-colors w-full
                     ${
                       isSelected
                         ? "bg-[#16956C] text-white"
@@ -404,7 +410,7 @@ const EditProfile = () => {
                   {isSelected && (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 mr-2"
+                      className="h-4 w-4 min-w-4 mr-1"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -415,19 +421,43 @@ const EditProfile = () => {
                       />
                     </svg>
                   )}
-                  <span className="mr-2">{subject.icon}</span>
-                  <span className="font-medium text-sm whitespace-nowrap">
+                  <span className="mr-1 flex-shrink-0">{subject.icon}</span>
+                  <span className="font-medium text-xs truncate">
                     {subject.name}
                   </span>
                 </button>
               );
             })}
           </div>
-          {selectedInterests.length === 0 && (
-            <p className="text-yellow-600 text-xs mt-2">
-              Please select at least one subject
-            </p>
-          )}
+
+          <div className="mt-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">
+                Selected: {selectedInterests.length - 1}/{minimumSelections}{" "}
+                required
+              </span>
+              {!hasMinimumSelections && (
+                <span className="text-yellow-600 text-xs font-medium">
+                  Please select {minimumSelections - selectedInterests.length}{" "}
+                  more
+                </span>
+              )}
+            </div>
+
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div
+                className={`h-2 rounded-full ${
+                  hasMinimumSelections ? "bg-green-500" : "bg-yellow-500"
+                }`}
+                style={{
+                  width: `${Math.min(
+                    (selectedInterests.length / minimumSelections) * 100,
+                    100
+                  )}%`,
+                }}
+              ></div>
+            </div>
+          </div>
         </div>
 
         {/* Action Buttons */}
@@ -441,9 +471,9 @@ const EditProfile = () => {
           </button>
           <button
             type="submit"
-            disabled={selectedInterests.length === 0}
+            disabled={!hasMinimumSelections}
             className={`flex-1 py-4 px-4 rounded-full font-medium transition-colors ${
-              selectedInterests.length > 0
+              hasMinimumSelections
                 ? "bg-[#16956C] text-white hover:bg-[#0F7355]"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
