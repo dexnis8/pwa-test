@@ -13,7 +13,7 @@ const leaderboardData = [
   { id: 9, rank: 9, name: "Profkay01", amount: "PT 55,012" },
   { id: 10, rank: 10, name: "SAckool", amount: "PT 55,658" },
   { id: 11, rank: 11, name: "Bamidele_Sam", amount: "PT 70,900" },
-  { id: 26, rank: 26, name: "Jide08221", amount: "PT 12,907" },
+  { id: 12, rank: 12, name: "Jide08221", amount: "PT 12,907" },
 ];
 
 const Leaderboard = () => {
@@ -117,6 +117,17 @@ const Leaderboard = () => {
 
       {/* Leaderboard List */}
       <div className="flex-1 bg-white rounded-t-3xl px-4 pt-6 pb-20">
+        {/* Total users count */}
+        <div className="flex justify-between items-center mb-4 px-2">
+          <div className="text-sm text-gray-500">
+            <span className="font-medium text-[#16956C]">
+              {leaderboardData.length}
+            </span>{" "}
+            total users
+          </div>
+          <div className="text-xs text-gray-400">Last updated: Today</div>
+        </div>
+
         <div className="space-y-2">
           {leaderboardData.slice(3, 11).map((user, index) => (
             <div
@@ -150,7 +161,7 @@ const Leaderboard = () => {
           {/* Last position (26th) */}
           <div className="flex items-center rounded-lg p-2 hover:bg-gray-50">
             <div className="w-5 text-gray-500 font-medium text-right mr-2">
-              26
+              12
             </div>
             <div className="flex items-center flex-1 ml-2">
               <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden mr-3">
