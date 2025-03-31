@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Motion } from "../components/Motion";
+import tokenManager from "../lib/tokenManager";
 
 export const SplashScreen = () => {
   const navigate = useNavigate();
@@ -26,9 +27,18 @@ export const SplashScreen = () => {
       });
     }, 100);
 
-    // Auto-navigate to onboarding after 3 seconds
+    // Auto-navigate based on authentication status after 3 seconds
     const navigateTimer = setTimeout(() => {
-      navigate("/get-started");
+      const accessToken = tokenManager.getAccessToken();
+      const isExpired = tokenManager.isTokenExpired();
+
+      if (accessToken && !isExpired) {
+        // User is logged in and token is valid - go to dashboard
+        navigate("/dashboard");
+      } else {
+        // User is not logged in or token is expired - go to get-started
+        navigate("/get-started");
+      }
     }, 3000);
 
     return () => {
