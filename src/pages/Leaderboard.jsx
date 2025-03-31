@@ -174,34 +174,60 @@ const Leaderboard = () => {
 
             <div className="space-y-2">
               {/* Other Users List */}
-              {data?.data?.listUsers?.map((user, index) => (
-                <div
-                  key={user._id}
-                  className={`flex items-center rounded-lg p-2 hover:bg-gray-50 ${
-                    index > 0 ? "border-b border-gray-100 pb-3" : ""
-                  }`}
-                >
-                  <div className="w-5 text-gray-500 font-medium text-right mr-2">
-                    {user.rank}
-                  </div>
-                  <div className="flex items-center flex-1 ml-2">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden mr-3">
-                      <img
-                        src={user.image || defaultAvatar}
-                        alt={user.username}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.src = defaultAvatar;
-                        }}
-                      />
+              {data?.data?.listUsers?.map((user, index) => {
+                // Check if this is the current user
+                const isCurrentUser =
+                  data.data.userPosition &&
+                  user._id === data.data.userPosition._id;
+
+                return (
+                  <div
+                    key={user._id}
+                    className={`flex items-center rounded-lg p-2 hover:bg-gray-50 ${
+                      index > 0 ? "border-b border-gray-100 pb-3" : ""
+                    } ${isCurrentUser ? "bg-gray-50" : ""}`}
+                  >
+                    <div className="w-5 text-gray-500 font-medium text-right mr-2">
+                      {user.rank}
+                      {isCurrentUser &&
+                        data.data.userPosition.tiedWithCount > 0 && (
+                          <span className="text-xs ml-0.5">*</span>
+                        )}
                     </div>
-                    <span className="text-sm font-medium">{user.username}</span>
+                    <div className="flex items-center flex-1 ml-2">
+                      <div
+                        className={`w-8 h-8 bg-gray-200 rounded-full overflow-hidden mr-3 ${
+                          isCurrentUser ? "border-2 border-[#16956C]" : ""
+                        }`}
+                      >
+                        <img
+                          src={user.image || defaultAvatar}
+                          alt={user.username}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src = defaultAvatar;
+                          }}
+                        />
+                      </div>
+                      <span
+                        className={`text-sm font-medium ${
+                          isCurrentUser ? "text-[#16956C]" : ""
+                        }`}
+                      >
+                        {user.username}
+                        {isCurrentUser && " (You)"}
+                      </span>
+                    </div>
+                    <div
+                      className={`text-sm font-bold ${
+                        isCurrentUser ? "text-[#16956C]" : "text-gray-700"
+                      }`}
+                    >
+                      {user.formattedScore}
+                    </div>
                   </div>
-                  <div className="text-sm font-bold text-gray-700">
-                    {user.formattedScore}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
 
               {/* Current User Position (if not in top lists) */}
               {data?.data?.userPosition &&
