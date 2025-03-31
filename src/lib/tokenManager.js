@@ -53,7 +53,7 @@ export const tokenManager = {
 
       // Call the refresh token API
       const response = await axiosInstance.post(
-        "/refresh-token",
+        "auth/refresh-token",
         {
           refreshToken,
         },

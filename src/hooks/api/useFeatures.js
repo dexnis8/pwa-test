@@ -1,6 +1,25 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../lib/axios";
 import { showToast } from "../../lib/toast.jsx";
+
+/**
+ * Hook for fetching leaderboard data
+ */
+export const useLeaderboard = () => {
+  return useQuery({
+    queryKey: ["leaderboard"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get("/leaderboard");
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
+    onError: (error) => {
+      console.error("Leaderboard fetch error:", error);
+      showToast.error("Failed to load leaderboard. Please try again.");
+    },
+  });
+};
 
 /**
  * Hook for uploading images to cloudinary
