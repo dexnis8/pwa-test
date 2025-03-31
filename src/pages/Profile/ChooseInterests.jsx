@@ -4,16 +4,24 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   setInterests,
   selectInterests,
-  completeProfile,
+  completeProfile as markProfileCompleted,
   selectCompletionStep,
   setCompletionStep,
+  selectPersonalInfo,
+  selectDepartment,
 } from "../../redux/slices/profileSlice";
+import { useCompleteProfile } from "../../hooks/api/useFeatures";
+import BeatLoader from "react-spinners/BeatLoader";
 
 const ChooseInterests = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const savedInterests = useSelector(selectInterests);
   const currentStep = useSelector(selectCompletionStep);
+  const personalInfo = useSelector(selectPersonalInfo);
+  const department = useSelector(selectDepartment);
+  const completeProfileMutation = useCompleteProfile();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Use saved interests if available, otherwise use defaults
   const [selectedInterests, setSelectedInterests] = useState(
@@ -74,15 +82,48 @@ const ChooseInterests = () => {
     navigate("/profile/complete/step2");
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     // Save selected interests to Redux
     dispatch(setInterests(selectedInterests));
 
-    // Mark profile as completed
-    dispatch(completeProfile());
+    try {
+      setIsSubmitting(true);
 
-    // Navigate to dashboard
-    navigate("/dashboard");
+      // Map the selected IDs to their display names for the API
+      const subjectsMap = subjects.reduce((acc, subject) => {
+        acc[subject.id] = subject.name;
+        return acc;
+      }, {});
+
+      const selectedSubjectNames = selectedInterests.map(
+        (id) => subjectsMap[id] || id
+      );
+
+      // Prepare the complete profile data according to API requirements
+      const profileData = {
+        fullName: personalInfo.fullName,
+        email: personalInfo.email || "", // Email is optional
+        gender: personalInfo.gender.toLowerCase(), // Ensure lowercase for API
+        dateOfBirth: personalInfo.dateOfBirth, // Date format will be handled by the hook
+        levelOfStudy: personalInfo.levelOfStudy,
+        subjectsOfInterest: selectedSubjectNames,
+        department: department || "sciences",
+        image: personalInfo.profileImage, // The Cloudinary URL
+      };
+
+      // Submit all profile data to the API
+      await completeProfileMutation.mutateAsync(profileData);
+
+      // Mark profile as completed in Redux
+      dispatch(markProfileCompleted());
+
+      // Navigate to dashboard
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error completing profile:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const isMinimumSelected = selectedInterests.length >= minimumSelections;
@@ -172,14 +213,20 @@ const ChooseInterests = () => {
         <button
           type="button"
           onClick={handleComplete}
-          disabled={!isMinimumSelected}
-          className={`w-full py-4 px-4 rounded-full font-medium transition-colors ${
-            isMinimumSelected
+          disabled={!isMinimumSelected || isSubmitting}
+          className={`w-full py-4 px-4 rounded-full font-medium transition-colors relative ${
+            isMinimumSelected && !isSubmitting
               ? "bg-[#16956C] text-white hover:bg-[#0F7355]"
               : "bg-gray-200 text-gray-400 cursor-not-allowed"
           }`}
         >
-          {isMinimumSelected ? "Done" : "Continue"}
+          {isSubmitting ? (
+            <BeatLoader color="#FFFFFF" size={8} />
+          ) : isMinimumSelected ? (
+            "Done"
+          ) : (
+            "Continue"
+          )}
         </button>
       </div>
     </div>

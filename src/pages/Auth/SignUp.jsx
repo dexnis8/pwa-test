@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { MotionButton } from "../../components/MotionButton";
 import { useForm } from "react-hook-form";
@@ -6,6 +7,9 @@ import { z } from "zod";
 import { FaFacebookF } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
+import { useSignup } from "../../hooks/api/useAuth";
+import { showToast } from "../../lib/toast.jsx";
+import BeatLoader from "react-spinners/BeatLoader";
 
 // Define validation schema with zod
 const signUpSchema = z
@@ -34,7 +38,7 @@ const signUpSchema = z
     password: z
       .string()
       .min(1, "Password is required")
-      .min(6, "Password must be at least 6 characters"),
+      .min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(1, "Confirm password is required"),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -46,7 +50,7 @@ export const SignUp = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const signupMutation = useSignup();
 
   const {
     register,
@@ -56,25 +60,29 @@ export const SignUp = () => {
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       username: "",
-    phoneNumber: "",
-    password: "",
+      phoneNumber: "",
+      password: "",
       confirmPassword: "",
     },
   });
 
-  const onSubmit = (data) => {
-    // Set loading state
-    setIsLoading(true);
+  const onSubmit = async (data) => {
+    console.log("Form submitted with data:", data); // Debug log
+    try {
+      // Remove confirmPassword before sending to API
+      const { confirmPassword, ...signupData } = data;
+      console.log("Sending signup data to API:", signupData); // Debug log
 
-    // Handle signup logic here
-    console.log("Signing up with:", data);
+      // Call the mutation directly
+      const result = await signupMutation.mutateAsync(signupData);
+      console.log("Mutation result:", result); // Debug log
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Redirect to profile completion page
+      // If successful, navigate to profile completion
       navigate("/profile/complete");
-    }, 1500);
+    } catch (error) {
+      console.error("Signup form submission error:", error); // Debug log
+      // Error handling is done in the mutation
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -132,12 +140,12 @@ export const SignUp = () => {
             Password
           </label>
           <div className="relative">
-          <input
+            <input
               type={showPassword ? "text" : "password"}
-            id="password"
+              id="password"
               {...register("password")}
-            placeholder="Enter your password"
-            className="w-full bg-transparent border-b border-white/50 focus:border-white py-2 text-white placeholder-white/50 outline-none"
+              placeholder="Enter your password"
+              className="w-full bg-transparent border-b border-white/50 focus:border-white py-2 text-white placeholder-white/50 outline-none"
             />
             <button
               type="button"
@@ -241,12 +249,13 @@ export const SignUp = () => {
         {/* Sign Up Button */}
         <button
           type="submit"
-          disabled={isLoading}
-          className="bg-white text-[#16956C] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer my-4 relative"
+          disabled={signupMutation.isPending}
+          className="bg-white text-[#16956C] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer my-4 relative disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          {isLoading ? (
+          {signupMutation.isPending ? (
             <>
-              <span className="opacity-0">Sign up</span>
+              <BeatLoader color="#16956C" />
+              {/* <span className="opacity-0">Sign up</span>
               <div className="absolute inset-0 flex items-center justify-center">
                 <svg
                   className="animate-spin h-5 w-5 text-[#16956C]"
@@ -268,7 +277,7 @@ export const SignUp = () => {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-              </div>
+              </div> */}
             </>
           ) : (
             "Sign up"
@@ -286,7 +295,8 @@ export const SignUp = () => {
         <div className="flex gap-4">
           <button
             type="button"
-            className="flex-1 gap-2 bg-white text-[#16956C] py-2 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer flex items-center justify-center"
+            disabled={true}
+            className="flex-1 gap-2 bg-white text-[#16956C] py-2 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-not-allowed flex items-center justify-center"
           >
             <span className="text-sm italic">sign up with</span>
             <div className="p-1 border rounded-full flex items-center border-[#E1E4EB] justify-center">
@@ -296,7 +306,8 @@ export const SignUp = () => {
 
           <button
             type="button"
-            className="flex-1 bg-white gap-2 text-[#16956C] py-2 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer flex items-center justify-center"
+            disabled={true}
+            className="flex-1 bg-white gap-2 text-[#16956C] py-2 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-not-allowed flex items-center justify-center"
           >
             <span className="text-sm italic">sign up with</span>
             <div className="p-1 border rounded-full flex items-center justify-center border-[#E1E4EB] text-blue-600">

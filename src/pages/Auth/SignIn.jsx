@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FaFacebookF } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import BeatLoader from "react-spinners/BeatLoader";
+import { useLogin } from "../../hooks/api/useAuth";
 
 // Define validation schema with zod
 const signInSchema = z.object({
-  identifier: z
+  username: z
     .string()
     .min(1, "Username or phone number is required")
     .refine(
@@ -48,6 +50,9 @@ const signInSchema = z.object({
 
 export const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const loginMutation = useLogin();
 
   const {
     register,
@@ -56,14 +61,26 @@ export const SignIn = () => {
   } = useForm({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      identifier: "",
+      username: "",
       password: "",
     },
   });
 
-  const onSubmit = (data) => {
-    // Handle signin logic here
-    console.log("Signing in with:", data);
+  const onSubmit = async (data) => {
+    try {
+      const result = await loginMutation.mutateAsync(data);
+      // Redirect to the attempted URL or dashboard
+      console.log("LOGIN RESULT", result);
+      if (result?.data.isProfileComplete) {
+        const from = location.state?.from?.pathname || "/dashboard";
+        navigate(from, { replace: true });
+      } else {
+        navigate("/profile/complete", { replace: true });
+      }
+    } catch (error) {
+      // Error handling is done in the mutation
+      console.error("Sign in error:", error);
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -75,19 +92,19 @@ export const SignIn = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1">
         {/* Username/Phone Number Input */}
         <div className="mb-6">
-          <label htmlFor="identifier" className="block mb-2 text-white">
+          <label htmlFor="username" className="block mb-2 text-white">
             Username or Phone number
           </label>
           <input
             type="text"
-            id="identifier"
-            {...register("identifier")}
+            id="username"
+            {...register("username")}
             placeholder="Enter your username or phone number"
             className="w-full bg-transparent border-b border-white/50 focus:border-white py-2 text-white placeholder-white/50 outline-none"
           />
-          {errors.identifier && (
+          {errors.username && (
             <p className="text-red-200 text-sm mt-1">
-              {errors.identifier.message}
+              {errors.username.message}
             </p>
           )}
           <p className="text-white/50 text-xs mt-1">
@@ -164,9 +181,10 @@ export const SignIn = () => {
         {/* Sign In Button */}
         <button
           type="submit"
-          className="bg-white text-[#16956C] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer my-4"
+          disabled={loginMutation.isPending}
+          className="bg-white text-[#16956C] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer my-4 relative disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          Sign in
+          {loginMutation.isPending ? <BeatLoader color="#16956C" /> : "Sign in"}
         </button>
 
         {/* OR Divider */}

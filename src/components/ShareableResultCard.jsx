@@ -249,7 +249,7 @@ const ShareableResultCard = ({
           {/* Logo and App Name */}
           <div className="absolute top-6 left-6 flex items-center">
             <div className="w-10 h-10 bg-[#16956C] rounded-full flex items-center justify-center">
-              <span className="text-white text-xl font-bold">Q</span>
+              <span className="text-white text-xl font-bold">?</span>
             </div>
             <h1 className="text-[#1A4B8C] text-lg font-bold ml-2">
               The Pace App

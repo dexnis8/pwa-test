@@ -25,6 +25,7 @@ import Practice from "./pages/Practice";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import PracticeSession from "./pages/PracticeSession";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
   const location = useLocation();
@@ -62,8 +63,14 @@ function App() {
             />
             <Route path="/profile/edit" element={<EditProfile />} />
 
-            {/* Dashboard Routes with common layout and bottom navigation */}
-            <Route element={<DashboardLayout />}>
+            {/* Protected Dashboard Routes with common layout and bottom navigation */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/practice" element={<Practice />} />
@@ -71,8 +78,15 @@ function App() {
               <Route path="/profile" element={<Profile />} />
             </Route>
 
-            {/* Practice Session Route - Full screen without bottom navigation */}
-            <Route path="/practice/session" element={<PracticeSession />} />
+            {/* Protected Practice Session Route - Full screen without bottom navigation */}
+            <Route
+              path="/practice/session"
+              element={
+                <ProtectedRoute>
+                  <PracticeSession />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </AnimatePresence>
       </MobileLayout>
