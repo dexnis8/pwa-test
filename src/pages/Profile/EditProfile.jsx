@@ -368,7 +368,7 @@ const EditProfile = () => {
               />
             </label>
           </div>
-          <p className="text-sm text-gray-500">(required, max 3MB)</p>
+          <p className="text-sm text-gray-500">(max size: 3MB)</p>
           {uploadError && (
             <p className="text-red-500 text-sm mt-1">{uploadError}</p>
           )}
