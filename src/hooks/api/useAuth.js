@@ -64,20 +64,18 @@ export const useLogout = () => {
       }
 
       // Include the refreshToken in the payload
-      await axiosInstance.post("/sign-out", { refreshToken });
+      await axiosInstance.post("/auth/sign-out", { refreshToken });
     },
     onSuccess: () => {
       // Clear all tokens
       tokenManager.clearTokens();
-
-      showToast.success("Successfully logged out!");
       window.location.href = "/auth/signin";
     },
     onError: (error) => {
       console.error("Logout error:", error);
       // Even if the API call fails, clear tokens locally
       tokenManager.clearTokens();
-      // showToast.success("Logged out");
+
       window.location.href = "/auth/signin";
     },
   });

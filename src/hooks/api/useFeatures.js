@@ -1,6 +1,25 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../../lib/axios";
 import { showToast } from "../../lib/toast.jsx";
+
+/**
+ * Hook for fetching user profile data
+ */
+export const useProfile = () => {
+  return useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get("/student/get-profile");
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
+    onError: (error) => {
+      console.error("Profile fetch error:", error);
+      showToast.error("Failed to load profile. Please try again.");
+    },
+  });
+};
 
 /**
  * Hook for fetching leaderboard data
@@ -25,6 +44,8 @@ export const useLeaderboard = () => {
  * Hook for uploading images to cloudinary
  */
 export const useImageUpload = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (file) => {
       // Validate file size (max 3MB)
@@ -46,6 +67,12 @@ export const useImageUpload = () => {
         },
       });
       return data;
+    },
+    onSuccess: (data) => {
+      // Invalidate profile query if the upload was successful
+      if (data.success) {
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+      }
     },
     onError: (error) => {
       // Custom error handling
@@ -87,6 +114,44 @@ export const useCompleteProfile = () => {
     onError: (error) => {
       console.error("Profile completion error:", error);
       // Error handling is done in axios interceptor
+    },
+  });
+};
+
+/**
+ * Hook for updating the user profile
+ * This will be called when editing an existing profile
+ */
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (profileData) => {
+      // Format date of birth from YYYY-MM-DD to DD-MM-YYYY format
+      if (profileData.dateOfBirth) {
+        const [year, month, day] = profileData.dateOfBirth.split("-");
+        if (year && month && day) {
+          profileData.dateOfBirth = `${day}-${month}-${year}`;
+        }
+      }
+
+      const { data } = await axiosInstance.post(
+        "/student/complete-profile",
+        profileData
+      );
+      return data;
+    },
+    onSuccess: (data) => {
+      // Invalidate profile query to trigger a refetch with updated data
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      showToast.success("Profile updated successfully!");
+      return data;
+    },
+    onError: (error) => {
+      console.error("Profile update error:", error);
+      showToast.error(
+        error.response?.data?.message || "Failed to update profile"
+      );
     },
   });
 };

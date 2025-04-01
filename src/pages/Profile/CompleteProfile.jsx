@@ -359,12 +359,12 @@ const CompleteProfile = () => {
               <option value="" disabled selected>
                 Select your level of study
               </option>
+              <option value="SS1">SS1</option>
+              <option value="SS2">SS2</option>
+              <option value="SS3">SS3</option>
+              <option value="WAEC/NECO">WAEC/NECO</option>
               <option value="UTME">UTME</option>
-              <option value="high-school">High School</option>
-              <option value="undergraduate">Undergraduate</option>
-              <option value="postgraduate">Postgraduate</option>
-              <option value="doctorate">Doctorate</option>
-              <option value="other">Other</option>
+              <option value="POST-UTME">POST-UTME</option>
             </select>
             {errors.levelOfStudy && (
               <p className="text-red-500 text-sm mt-1">

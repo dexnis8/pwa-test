@@ -1,27 +1,45 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import {
-  selectPersonalInfo,
-  selectDepartment,
-  selectInterests,
-} from "../redux/slices/profileSlice";
 import { useLogout } from "../hooks/api/useAuth";
+import { useProfile } from "../hooks/api/useFeatures";
+import { BeatLoader } from "react-spinners";
 
 const Profile = () => {
-  const personalInfo = useSelector(selectPersonalInfo);
-  const department = useSelector(selectDepartment);
-  const interests = useSelector(selectInterests);
+  const { data, isLoading, error, refetch } = useProfile();
   const logoutMutation = useLogout();
 
-  // For the sample data to match the inspiration
-  const earnings = "₦12,489.00";
+  // Preserve the sample data for features marked as "COMING SOON"
   const coins = "C9,652";
   const practiceTime = "6hours, 52minutes";
 
   const handleLogout = () => {
     logoutMutation.mutate();
   };
+
+  // Format date from "dd-mm-yyyy" to a more readable format if needed
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+
+    // Check if the date is in DD-MM-YYYY format
+    const parts = dateString.split("-");
+    if (parts.length === 3) {
+      const [day, month, year] = parts;
+      // Return formatted date
+      return `${day}/${month}/${year}`;
+    }
+
+    return dateString;
+  };
+
+  const profileData = data?.data || {};
+
+  // Create skeleton loaders for different components
+  const Skeleton = ({ className, ...props }) => (
+    <div
+      className={`animate-pulse bg-gray-200 rounded ${className}`}
+      {...props}
+    />
+  );
 
   return (
     <div className="flex flex-col min-h-screen pb-16">
@@ -59,28 +77,42 @@ const Profile = () => {
         <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
           {/* Profile Image */}
           <div className="w-28 h-28 z-20 relative rounded-2xl bg-gray-200 flex items-center justify-center overflow-hidden mx-auto mb-3 border-4 border-white shadow-sm">
-            {personalInfo.avatarUrl ? (
+            {isLoading ? (
+              <Skeleton className="w-full h-full" />
+            ) : profileData.image ? (
               <img
-                src={personalInfo.avatarUrl}
+                src={profileData.image}
                 alt="Profile"
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = "/images/default-avatar.png";
+                }}
               />
             ) : (
               <div className="w-full h-full bg-[#16956C] flex items-center justify-center text-white text-3xl font-bold">
-                {personalInfo.fullName ? personalInfo.fullName.charAt(0) : "S"}
+                {profileData.fullName
+                  ? profileData.fullName.charAt(0)
+                  : profileData.username?.charAt(0) || "U"}
               </div>
             )}
           </div>
 
           {/* Name and Username */}
-          <h2 className="text-xl font-bold uppercase tracking-wide mb-1">
-            {personalInfo.fullName || "SALAWU HABEEBLAI"}
-          </h2>
-          <p className="text-gray-500 mb-4">
-            @
-            {personalInfo.fullName?.toLowerCase().replace(/\s+/g, "") ||
-              "habeeblai"}
-          </p>
+          {isLoading ? (
+            <>
+              <Skeleton className="h-6 w-40 mx-auto mb-1" />
+              <Skeleton className="h-4 w-24 mx-auto mb-4" />
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-bold uppercase tracking-wide mb-1">
+                {profileData.fullName || ""}
+              </h2>
+              <p className="text-gray-500 mb-4">
+                @{profileData.username || ""}
+              </p>
+            </>
+          )}
 
           {/* Edit Profile Button */}
           <Link
@@ -94,7 +126,7 @@ const Profile = () => {
 
       {/* Stats Section */}
       <div className="px-6 space-y-4 mb-6">
-        {/* Points (formerly Earnings) */}
+        {/* Points (Questions Answered Correctly) */}
         <div className="bg-white rounded-xl p-4 shadow-sm flex items-center">
           <div className="w-10 h-10 bg-[#E7F7F2] rounded-lg flex items-center justify-center mr-3">
             <svg
@@ -114,7 +146,13 @@ const Profile = () => {
           </div>
           <div className="flex-1">
             <span className="text-sm text-gray-500">Points</span>
-            <p className="text-lg font-bold">{earnings}</p>
+            {isLoading ? (
+              <Skeleton className="h-6 w-16 mt-1" />
+            ) : (
+              <p className="text-lg font-bold">
+                PT {profileData.questionsAnsweredCorrectly || 0}
+              </p>
+            )}
           </div>
         </div>
 
@@ -194,30 +232,62 @@ const Profile = () => {
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <h3 className="text-lg font-bold mb-4">Personal Information</h3>
           <div className="space-y-4">
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-600">Department</span>
-              <span className="font-medium">
-                {department || "Computer Science"}
-              </span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-600">Gender</span>
-              <span className="font-medium">
-                {personalInfo.gender || "Female"}
-              </span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-600">Date of Birth</span>
-              <span className="font-medium">
-                {personalInfo.dateOfBirth || "05/12/1998"}
-              </span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-600">Level of Study</span>
-              <span className="font-medium">
-                {personalInfo.levelOfStudy || "300 Level"}
-              </span>
-            </div>
+            {isLoading ? (
+              // Skeleton loader for personal info
+              <>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className="flex justify-between py-2 border-b border-gray-100"
+                  >
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-5 w-32" />
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-600">Department</span>
+                  <span className="font-medium text-right">
+                    {profileData.department
+                      ? profileData.department.charAt(0).toUpperCase() +
+                        profileData.department.slice(1)
+                      : "Not specified"}
+                  </span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-600">Phone Number</span>
+                  <span className="font-medium">
+                    {profileData.phoneNumber || "Not specified"}
+                  </span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-600">Date of Birth</span>
+                  <span className="font-medium">
+                    {formatDate(profileData.dateOfBirth) || "Not specified"}
+                  </span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-600">Level of Study</span>
+                  <span className="font-medium">
+                    {profileData.levelOfStudy || "Not specified"}
+                  </span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-600">Verification Status</span>
+                  <span
+                    className={`font-medium ${
+                      profileData.isVerified
+                        ? "text-green-600"
+                        : "text-orange-500"
+                    }`}
+                  >
+                    {profileData.isVerified ? "Verified" : "Not Verified"}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -226,35 +296,51 @@ const Profile = () => {
       <div className="px-6 mb-6">
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <h3 className="text-lg font-bold mb-4">Your Interests</h3>
-          <div className="flex flex-wrap gap-2">
-            {interests && interests.length > 0 ? (
-              interests.map((interest, index) => (
-                <span
-                  key={index}
-                  className="bg-[#E7F7F2] text-[#16956C] rounded-full px-3 py-1 text-sm"
-                >
-                  {interest}
-                </span>
-              ))
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                <span className="bg-[#E7F7F2] text-[#16956C] rounded-full px-3 py-1 text-sm">
-                  Chemistry
-                </span>
-                <span className="bg-[#E7F7F2] text-[#16956C] rounded-full px-3 py-1 text-sm">
-                  Physics
-                </span>
-                <span className="bg-[#E7F7F2] text-[#16956C] rounded-full px-3 py-1 text-sm">
-                  Biology
-                </span>
-              </div>
-            )}
-          </div>
+          {isLoading ? (
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-8 w-20 rounded-full" />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {profileData.subjectsOfInterest &&
+              profileData.subjectsOfInterest.length > 0 ? (
+                profileData.subjectsOfInterest.map((subject, index) => (
+                  <span
+                    key={index}
+                    className="bg-[#E7F7F2] text-[#16956C] rounded-full px-3 py-1 text-sm"
+                  >
+                    {subject}
+                  </span>
+                ))
+              ) : (
+                <p className="text-gray-500">
+                  No subjects of interest specified
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Logout Button Section */}
-      <div className="px-6 mb-10">
+      {/* Error state indicator */}
+      {error && (
+        <div className="px-6 mb-4">
+          <div className="bg-red-50 p-4 rounded-lg border border-red-100 text-center">
+            <p className="text-red-600 mb-2">Failed to load profile</p>
+            <button
+              onClick={() => refetch()}
+              className="bg-white text-red-600 border border-red-300 px-4 py-2 rounded-full text-sm font-medium"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Button */}
+      <div className="px-6 mb-6">
         <button
           onClick={handleLogout}
           disabled={logoutMutation.isPending}
@@ -262,27 +348,8 @@ const Profile = () => {
         >
           {logoutMutation.isPending ? (
             <div className="flex items-center justify-center">
-              <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4 text-red-500"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Logging out...
+              <BeatLoader color="#EF4444" size={8} />
+              <span className="ml-2">Logging out...</span>
             </div>
           ) : (
             <div className="flex items-center justify-center">

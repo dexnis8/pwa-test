@@ -12,14 +12,26 @@ import {
   selectInterests,
   setInterests,
 } from "../../redux/slices/profileSlice";
+import {
+  useProfile,
+  useImageUpload,
+  useUpdateProfile,
+} from "../../hooks/api/useFeatures";
+import { BeatLoader } from "react-spinners";
+import { showToast } from "../../lib/toast.jsx";
 
 // Form validation schema
 const editProfileSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
-  email: z.string().email("Please enter a valid email address").optional(),
+  email: z
+    .string()
+    .email("Please enter a valid email address")
+    .optional()
+    .or(z.literal("")),
   gender: z.string().min(1, "Gender is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
   levelOfStudy: z.string().min(1, "Level of study is required"),
+  profileImage: z.string().min(1, "Profile image is required"),
 });
 
 const EditProfile = () => {
@@ -28,8 +40,18 @@ const EditProfile = () => {
   const personalInfo = useSelector(selectPersonalInfo);
   const currentDepartment = useSelector(selectDepartment);
   const savedInterests = useSelector(selectInterests);
+  const { data: profileData } = useProfile();
+  const imageUploadMutation = useImageUpload();
+  const updateProfileMutation = useUpdateProfile();
 
-  const [avatarUrl, setAvatarUrl] = useState(personalInfo.avatarUrl || null);
+  // Get profile image from API if available
+  const profileImageFromApi = profileData?.data?.image;
+
+  // Use API image if available, otherwise fall back to Redux state
+  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
   const [department, setLocalDepartment] = useState(
     currentDepartment || "sciences"
   );
@@ -37,11 +59,30 @@ const EditProfile = () => {
     savedInterests.length > 0 ? savedInterests : []
   );
 
+  // Map of subjects for getting display names
+  const subjectsMap = {
+    english: "English",
+    mathematics: "Mathematics",
+    physics: "Physics",
+    biology: "Biology",
+    chemistry: "Chemistry",
+  };
+
+  // Update avatar URL once profile data is loaded
+  useEffect(() => {
+    if (profileImageFromApi) {
+      setAvatarUrl(profileImageFromApi);
+    } else if (personalInfo.avatarUrl || personalInfo.profileImage) {
+      setAvatarUrl(personalInfo.avatarUrl || personalInfo.profileImage);
+    }
+  }, [profileImageFromApi, personalInfo]);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
   } = useForm({
     resolver: zodResolver(editProfileSchema),
     defaultValues: {
@@ -50,8 +91,12 @@ const EditProfile = () => {
       gender: personalInfo.gender || "",
       dateOfBirth: personalInfo.dateOfBirth || "",
       levelOfStudy: personalInfo.levelOfStudy || "",
+      profileImage: personalInfo.profileImage || profileImageFromApi || "",
     },
   });
+
+  // Watch the profileImage field
+  const profileImage = watch("profileImage");
 
   // Prefill form with any existing data
   useEffect(() => {
@@ -62,33 +107,127 @@ const EditProfile = () => {
         }
       });
     }
-  }, [personalInfo, setValue]);
 
-  const handleAvatarChange = (e) => {
+    // If API data is available, use it to populate fields
+    if (profileData?.data) {
+      const apiData = profileData.data;
+
+      if (apiData.fullName) setValue("fullName", apiData.fullName);
+      if (apiData.gender) setValue("gender", apiData.gender.toLowerCase());
+      if (apiData.dateOfBirth) setValue("dateOfBirth", apiData.dateOfBirth);
+      if (apiData.levelOfStudy) setValue("levelOfStudy", apiData.levelOfStudy);
+      if (apiData.image) setValue("profileImage", apiData.image);
+
+      // Set department from API if available
+      if (apiData.department) {
+        setLocalDepartment(apiData.department);
+      }
+
+      // Set interests from API if available
+      if (apiData.subjectsOfInterest && apiData.subjectsOfInterest.length > 0) {
+        // Convert subject names to IDs (assuming lowercase conversion works for matching)
+        const subjectIds = apiData.subjectsOfInterest.map((name) =>
+          name.toLowerCase().replace(/\s+/g, "")
+        );
+        setSelectedInterests(subjectIds);
+      }
+    }
+  }, [personalInfo, profileData, setValue]);
+
+  const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
-    if (file) {
+
+    if (!file) return;
+
+    // Clear previous errors
+    setUploadError(null);
+
+    try {
+      // Validate file type (images only)
+      if (!file.type.startsWith("image/")) {
+        setUploadError("Only image files are allowed");
+        showToast.error("Only image files are allowed");
+        return;
+      }
+
+      // Validate file size (max 3MB)
+      if (file.size > 3 * 1024 * 1024) {
+        setUploadError("Image size must be less than 3MB");
+        showToast.error("Image size must be less than 3MB");
+        return;
+      }
+
+      // Set local image preview
       const imageUrl = URL.createObjectURL(file);
       setAvatarUrl(imageUrl);
+      setIsUploading(true);
+
+      // Upload to server
+      const result = await imageUploadMutation.mutateAsync(file);
+
+      if (result.success && result.data?.urls?.length > 0) {
+        const uploadedUrl = result.data.urls[0];
+        // Update form with the cloudinary URL
+        setValue("profileImage", uploadedUrl);
+        showToast.success("Image uploaded successfully");
+      } else {
+        throw new Error("Failed to upload image");
+      }
+    } catch (error) {
+      setUploadError(error.message || "Failed to upload image");
+      // Keep the local preview but set error state
+    } finally {
+      setIsUploading(false);
     }
   };
 
-  const onSubmit = (data) => {
-    // Save the data to Redux
-    dispatch(
-      updatePersonalInfo({
-        ...data,
-        avatarUrl,
-      })
-    );
+  const onSubmit = async (data) => {
+    try {
+      setIsSubmitting(true);
 
-    // Save department
-    dispatch(setDepartment(department));
+      // Save the data to Redux
+      dispatch(
+        updatePersonalInfo({
+          ...data,
+          avatarUrl, // local preview
+          profileImage: data.profileImage, // cloud URL for API
+        })
+      );
 
-    // Save interests
-    dispatch(setInterests(selectedInterests));
+      // Save department
+      dispatch(setDepartment(department));
 
-    // Navigate back to profile
-    navigate("/profile");
+      // Save interests
+      dispatch(setInterests(selectedInterests));
+
+      // Get display names for subjects/interests
+      const selectedSubjectNames = selectedInterests.map(
+        (id) => subjectsMap[id] || id
+      );
+
+      // Prepare profile data for API
+      const profileData = {
+        fullName: data.fullName,
+        email: data.email || "", // Email is optional
+        gender: data.gender.toLowerCase(), // Ensure lowercase for API
+        dateOfBirth: data.dateOfBirth, // Date format will be handled by the hook
+        levelOfStudy: data.levelOfStudy,
+        subjectsOfInterest: selectedSubjectNames,
+        department: department || "sciences",
+        image: data.profileImage, // The Cloudinary URL
+      };
+
+      // Submit all profile data to the API
+      await updateProfileMutation.mutateAsync(profileData);
+
+      // Navigate back to profile
+      navigate("/profile");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      showToast.error("Failed to update profile. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -178,11 +317,22 @@ const EditProfile = () => {
           {/* Profile Image */}
           <div className="w-28 h-28 rounded-2xl bg-gray-200 flex items-center justify-center overflow-hidden mx-auto mb-3 border-4 border-white shadow-sm relative">
             {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
+              <div className="relative w-full h-full">
+                <img
+                  src={avatarUrl}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = "/images/default-avatar.png";
+                    console.log("Failed to load profile image");
+                  }}
+                />
+                {isUploading && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <BeatLoader color="#FFFFFF" size={8} />
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="w-full h-full bg-[#16956C] flex items-center justify-center text-white text-3xl font-bold">
                 {personalInfo.fullName ? personalInfo.fullName.charAt(0) : "U"}
@@ -190,30 +340,46 @@ const EditProfile = () => {
             )}
             <label
               htmlFor="avatar-upload"
-              className="absolute bottom-2 right-2 bg-[#16956C] rounded-full w-8 h-8 flex items-center justify-center cursor-pointer text-white shadow-md"
+              className="absolute bottom-2 right-2 bg-[#16956C] rounded-full w-8 h-8 flex items-center justify-center cursor-pointer text-white shadow-md disabled:bg-gray-400"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              {isUploading ? (
+                <BeatLoader color="#FFFFFF" size={5} />
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              )}
               <input
                 type="file"
                 id="avatar-upload"
                 accept="image/*"
                 className="hidden"
                 onChange={handleAvatarChange}
+                disabled={isUploading}
               />
             </label>
           </div>
-          <p className="text-gray-500 text-sm">Tap to change profile picture</p>
+          <p className="text-sm text-gray-500">(required, max 3MB)</p>
+          {uploadError && (
+            <p className="text-red-500 text-sm mt-1">{uploadError}</p>
+          )}
+          {errors.profileImage && !profileImage && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.profileImage.message}
+            </p>
+          )}
+
+          {/* Hidden input for the uploaded image URL */}
+          <input type="hidden" {...register("profileImage")} />
         </div>
       </div>
 
@@ -280,10 +446,8 @@ const EditProfile = () => {
                 <option value="" disabled>
                   Select your gender
                 </option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-                <option value="Prefer not to say">Prefer not to say</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
               </select>
               {errors.gender && (
                 <p className="text-red-500 text-xs mt-1">
@@ -327,12 +491,12 @@ const EditProfile = () => {
                 <option value="" disabled>
                   Select your level of study
                 </option>
-                <option value="100 Level">100 Level</option>
-                <option value="200 Level">200 Level</option>
-                <option value="300 Level">300 Level</option>
-                <option value="400 Level">400 Level</option>
-                <option value="500 Level">500 Level</option>
-                <option value="Postgraduate">Postgraduate</option>
+                <option value="SS1">SS1</option>
+                <option value="SS2">SS2</option>
+                <option value="SS3">SS3</option>
+                <option value="WAEC/NECO">WAEC/NECO</option>
+                <option value="UTME">UTME</option>
+                <option value="POST-UTME">POST-UTME</option>
               </select>
               {errors.levelOfStudy && (
                 <p className="text-red-500 text-xs mt-1">
@@ -433,7 +597,7 @@ const EditProfile = () => {
           <div className="mt-3">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-500">
-                Selected: {selectedInterests.length - 1}/{minimumSelections}{" "}
+                Selected: {selectedInterests.length}/{minimumSelections}{" "}
                 required
               </span>
               {!hasMinimumSelections && (
@@ -471,14 +635,18 @@ const EditProfile = () => {
           </button>
           <button
             type="submit"
-            disabled={!hasMinimumSelections}
+            disabled={!hasMinimumSelections || isSubmitting || isUploading}
             className={`flex-1 py-4 px-4 rounded-full font-medium transition-colors ${
-              hasMinimumSelections
+              hasMinimumSelections && !isSubmitting && !isUploading
                 ? "bg-[#16956C] text-white hover:bg-[#0F7355]"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
           >
-            Save Changes
+            {isSubmitting ? (
+              <BeatLoader color="#FFFFFF" size={8} />
+            ) : (
+              "Save Changes"
+            )}
           </button>
         </div>
       </form>
