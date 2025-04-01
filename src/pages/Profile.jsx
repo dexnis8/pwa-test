@@ -47,7 +47,10 @@ const Profile = () => {
       <div className="bg-[#16956C] p-6 pb-36 relative">
         <div className="flex justify-between items-center">
           <h1 className="text-white text-2xl font-bold">Profile</h1>
-          <button className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+          <Link
+            to="/change-password"
+            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+          >
             <svg
               className="w-5 h-5 text-white"
               fill="none"
@@ -68,7 +71,7 @@ const Profile = () => {
                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
               ></path>
             </svg>
-          </button>
+          </Link>
         </div>
       </div>
 

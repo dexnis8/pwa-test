@@ -80,3 +80,24 @@ export const useLogout = () => {
     },
   });
 };
+
+/**
+ * Hook for changing user password
+ */
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: async (data) => {
+      const response = await axiosInstance.post("/auth/change-password", data);
+      return response.data;
+    },
+    onSuccess: () => {
+      showToast.success("Password changed successfully!");
+    },
+    onError: (error) => {
+      console.error("Password change error:", error);
+      showToast.error(
+        error.response?.data?.message || "Failed to change password"
+      );
+    },
+  });
+};

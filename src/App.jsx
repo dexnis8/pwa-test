@@ -24,6 +24,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Practice from "./pages/Practice";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
+import ChangePassword from "./pages/ChangePassword";
 import PracticeSession from "./pages/PracticeSession";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -84,6 +85,16 @@ function App() {
               element={
                 <ProtectedRoute>
                   <PracticeSession />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Change Password Route - Full screen without bottom navigation */}
+            <Route
+              path="/change-password"
+              element={
+                <ProtectedRoute>
+                  <ChangePassword />
                 </ProtectedRoute>
               }
             />
