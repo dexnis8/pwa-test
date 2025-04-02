@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import toast from "react-hot-toast";
 import { MdErrorOutline } from "react-icons/md";
+import { ImCheckboxChecked } from "react-icons/im";
 
 // Custom toast styles
 const toastStyles = {
@@ -15,7 +16,7 @@ const toastStyles = {
     margin: "0 auto",
   },
   success: {
-    icon: "✅",
+    icon: <ImCheckboxChecked color="#fff" size={25} />,
     style: {
       background: "#10B981",
       color: "#fff",

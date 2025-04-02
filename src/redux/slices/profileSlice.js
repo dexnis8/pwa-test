@@ -25,6 +25,12 @@ export const profileSlice = createSlice({
         ...action.payload,
       };
     },
+    setFullName: (state, action) => {
+      state.personalInfo = {
+        ...state.personalInfo,
+        fullName: action.payload,
+      };
+    },
     setDepartment: (state, action) => {
       state.department = action.payload;
     },
@@ -65,6 +71,7 @@ export const {
   incrementCompletionStep,
   completeProfile,
   resetProfile,
+  setFullName,
 } = profileSlice.actions;
 
 // Export selectors

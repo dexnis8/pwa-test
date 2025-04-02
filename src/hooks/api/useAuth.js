@@ -2,6 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import axiosInstance from "../../lib/axios";
 import { showToast } from "../../lib/toast.jsx";
 import tokenManager from "../../lib/tokenManager";
+import { useDispatch } from "react-redux";
+import { resetProfile } from "../../redux/slices/profileSlice.js";
 
 export const useLogin = () => {
   return useMutation({
@@ -53,6 +55,7 @@ export const useSignup = () => {
 };
 
 export const useLogout = () => {
+  const dispatch = useDispatch();
   return useMutation({
     mutationFn: async () => {
       // Get the refresh token to include in the sign-out request
@@ -70,11 +73,13 @@ export const useLogout = () => {
       // Clear all tokens
       tokenManager.clearTokens();
       window.location.href = "/auth/signin";
+      dispatch(resetProfile);
     },
     onError: (error) => {
       console.error("Logout error:", error);
       // Even if the API call fails, clear tokens locally
       tokenManager.clearTokens();
+      dispatch(resetProfile);
 
       window.location.href = "/auth/signin";
     },

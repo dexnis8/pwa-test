@@ -55,7 +55,7 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
   const [topic, setTopic] = useState("random");
   const [examType, setExamType] = useState("UTME");
   const [questionCount, setQuestionCount] = useState(10);
-  const [timeLimit, setTimeLimit] = useState(10);
+  const [timeLimit, setTimeLimit] = useState(5);
 
   // Reset form when modal is opened
   useEffect(() => {
@@ -65,7 +65,7 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
       setTopic("random");
       setExamType("UTME");
       setQuestionCount(10);
-      setTimeLimit(10);
+      setTimeLimit(5);
     }
   }, [isOpen, userInterests]);
 
@@ -80,20 +80,48 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
   };
 
   const handleQuestionCountChange = (e) => {
-    const value = parseInt(e.target.value);
-    if (isNaN(value)) {
-      setQuestionCount(1);
-    } else {
-      setQuestionCount(Math.min(Math.max(value, 1), 50));
+    const value = e.target.value;
+    // Allow empty input for typing
+    if (value === "") {
+      setQuestionCount("");
+      return;
+    }
+
+    const numValue = parseInt(value);
+    if (!isNaN(numValue)) {
+      setQuestionCount(numValue);
+    }
+  };
+
+  const handleQuestionCountBlur = () => {
+    const numValue = parseInt(questionCount);
+    if (isNaN(numValue) || numValue < 10) {
+      setQuestionCount(10);
+    } else if (numValue > 50) {
+      setQuestionCount(50);
     }
   };
 
   const handleTimeLimitChange = (e) => {
-    const value = parseInt(e.target.value);
-    if (isNaN(value)) {
-      setTimeLimit(1);
-    } else {
-      setTimeLimit(Math.min(Math.max(value, 1), 60));
+    const value = e.target.value;
+    // Allow empty input for typing
+    if (value === "") {
+      setTimeLimit("");
+      return;
+    }
+
+    const numValue = parseInt(value);
+    if (!isNaN(numValue)) {
+      setTimeLimit(numValue);
+    }
+  };
+
+  const handleTimeLimitBlur = () => {
+    const numValue = parseInt(timeLimit);
+    if (isNaN(numValue) || numValue < 5) {
+      setTimeLimit(5);
+    } else if (numValue > 60) {
+      setTimeLimit(60);
     }
   };
 
@@ -388,17 +416,21 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                       <label className="text-gray-700 font-medium mb-2 block">
                         Number of Questions
                       </label>
-                      <div className="flex">
+                      <div className="flex flex-col">
                         <input
                           type="number"
-                          min="1"
+                          min="10"
                           max="50"
                           value={questionCount}
                           onChange={handleQuestionCountChange}
+                          onBlur={handleQuestionCountBlur}
+                          placeholder="Enter number of questions"
                           className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#16956C] focus:border-transparent"
                         />
-                        <div className="ml-2 text-gray-500 self-center">
-                          <span className="text-xs">Max: 50</span>
+                        <div className="text-gray-500 self-start">
+                          <span className="text-xs">
+                            Min: 10, Max: 50 questions
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -407,17 +439,21 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                       <label className="text-gray-700 font-medium mb-2 block">
                         Time Limit (minutes)
                       </label>
-                      <div className="flex">
+                      <div className="flex flex-col">
                         <input
                           type="number"
-                          min="1"
+                          min="5"
                           max="60"
                           value={timeLimit}
                           onChange={handleTimeLimitChange}
+                          onBlur={handleTimeLimitBlur}
+                          placeholder="Enter time limit"
                           className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#16956C] focus:border-transparent"
                         />
-                        <div className="ml-2 text-gray-500 self-center">
-                          <span className="text-xs">Max: 60</span>
+                        <div className="text-gray-500 self-start">
+                          <span className="text-xs">
+                            Min: 5, Max: 60 minutes
+                          </span>
                         </div>
                       </div>
                     </div>

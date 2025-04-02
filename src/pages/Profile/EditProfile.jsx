@@ -28,7 +28,6 @@ const editProfileSchema = z.object({
     .email("Please enter a valid email address")
     .optional()
     .or(z.literal("")),
-  gender: z.string().min(1, "Gender is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
   levelOfStudy: z.string().min(1, "Level of study is required"),
   profileImage: z.string().min(1, "Profile image is required"),
@@ -88,7 +87,6 @@ const EditProfile = () => {
     defaultValues: {
       fullName: personalInfo.fullName || "",
       email: personalInfo.email || "",
-      gender: personalInfo.gender || "",
       dateOfBirth: personalInfo.dateOfBirth || "",
       levelOfStudy: personalInfo.levelOfStudy || "",
       profileImage: personalInfo.profileImage || profileImageFromApi || "",
@@ -98,23 +96,44 @@ const EditProfile = () => {
   // Watch the profileImage field
   const profileImage = watch("profileImage");
 
-  // Prefill form with any existing data
+  // Update useEffect for debugging
   useEffect(() => {
+    console.log("Personal Info from Redux:", personalInfo);
+
     if (personalInfo) {
+      console.log("Setting values from personalInfo");
       Object.keys(personalInfo).forEach((key) => {
         if (personalInfo[key] && key !== "avatarUrl") {
+          console.log(`Setting ${key}:`, personalInfo[key]);
           setValue(key, personalInfo[key]);
         }
       });
     }
 
-    // If API data is available, use it to populate fields
     if (profileData?.data) {
       const apiData = profileData.data;
+      console.log("API Data received:", apiData);
 
       if (apiData.fullName) setValue("fullName", apiData.fullName);
-      if (apiData.gender) setValue("gender", apiData.gender.toLowerCase());
-      if (apiData.dateOfBirth) setValue("dateOfBirth", apiData.dateOfBirth);
+      if (apiData.dateOfBirth) {
+        console.log("Setting DOB from API:", apiData.dateOfBirth);
+        try {
+          // Try to parse and format the date
+          const date = new Date(apiData.dateOfBirth);
+          if (!isNaN(date.getTime())) {
+            const formattedDate = date.toISOString().split("T")[0];
+            console.log("Formatted DOB:", formattedDate);
+            setValue("dateOfBirth", formattedDate);
+          } else {
+            console.error(
+              "Invalid date received from API:",
+              apiData.dateOfBirth
+            );
+          }
+        } catch (error) {
+          console.error("Error formatting date:", error);
+        }
+      }
       if (apiData.levelOfStudy) setValue("levelOfStudy", apiData.levelOfStudy);
       if (apiData.image) setValue("profileImage", apiData.image);
 
@@ -125,7 +144,6 @@ const EditProfile = () => {
 
       // Set interests from API if available
       if (apiData.subjectsOfInterest && apiData.subjectsOfInterest.length > 0) {
-        // Convert subject names to IDs (assuming lowercase conversion works for matching)
         const subjectIds = apiData.subjectsOfInterest.map((name) =>
           name.toLowerCase().replace(/\s+/g, "")
         );
@@ -209,7 +227,6 @@ const EditProfile = () => {
       const profileData = {
         fullName: data.fullName,
         email: data.email || "", // Email is optional
-        gender: data.gender.toLowerCase(), // Ensure lowercase for API
         dateOfBirth: data.dateOfBirth, // Date format will be handled by the hook
         levelOfStudy: data.levelOfStudy,
         subjectsOfInterest: selectedSubjectNames,
@@ -427,31 +444,6 @@ const EditProfile = () => {
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="gender"
-                className="block mb-2 text-gray-700 text-sm"
-              >
-                Gender
-              </label>
-              <select
-                id="gender"
-                {...register("gender")}
-                className="w-full border-b border-gray-300 py-2 focus:border-[#16956C] outline-none bg-transparent font-medium"
-              >
-                <option value="" disabled>
-                  Select your gender
-                </option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-              {errors.gender && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.gender.message}
                 </p>
               )}
             </div>

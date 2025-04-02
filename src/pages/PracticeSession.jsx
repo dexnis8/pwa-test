@@ -1,9 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import questionsData from "../data/questions.json";
 import { motion, AnimatePresence } from "framer-motion";
 import ShareableResultCard from "../components/ShareableResultCard";
+import QuitConfirmationModal from "../components/QuitConfirmationModal";
 
 // Custom hook to get query parameters
 const useQuery = () => {
@@ -33,6 +35,44 @@ const PracticeSession = () => {
   const [shareCardVisible, setShareCardVisible] = useState(false);
   const [shareableImage, setShareableImage] = useState(null);
   const [showShareOptions, setShowShareOptions] = useState(false);
+
+  // Handle page refresh/leave
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (!quizCompleted) {
+        e.preventDefault();
+        e.returnValue = "";
+        // Show our custom modal
+        setShowQuitModal(true);
+        // Prevent the default browser prompt
+        return "";
+      }
+    };
+
+    const handleUnload = () => {
+      if (!quizCompleted) {
+        // Store a flag in sessionStorage to indicate we're showing the modal
+        sessionStorage.setItem("showingQuitModal", "true");
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
+    };
+  }, [quizCompleted]);
+
+  // Check if we need to show the modal on component mount
+  useEffect(() => {
+    const showingModal = sessionStorage.getItem("showingQuitModal");
+    if (showingModal === "true") {
+      setShowQuitModal(true);
+      sessionStorage.removeItem("showingQuitModal");
+    }
+  }, []);
 
   // Format time as MM:SS
   const formatTime = (seconds) => {
@@ -104,6 +144,7 @@ const PracticeSession = () => {
     } else if (timerActive && timeLeft === 0) {
       setQuizCompleted(true);
       setTimerActive(false);
+      navigateToResult();
     }
     return () => clearInterval(interval);
   }, [timerActive, timeLeft]);
@@ -125,13 +166,33 @@ const PracticeSession = () => {
     // Remove auto-advance - let users control when to go to next question
   };
 
+  const navigateToResult = () => {
+    navigate("/practice/result", {
+      state: {
+        score,
+        totalQuestions: questions.length,
+        subject,
+        examType,
+        mode,
+        timeLeft,
+        timeLimit,
+      },
+    });
+  };
+
   // Handler for the end practice button
   const handleEndPractice = () => {
     if (quizCompleted) {
-      navigate("/dashboard");
+      navigateToResult();
     } else {
       setShowQuitModal(true);
     }
+  };
+
+  // Handler for quit confirmation
+  const handleQuitConfirm = () => {
+    setShowQuitModal(false);
+    navigate("/dashboard");
   };
 
   // Handler for the share button click
@@ -673,55 +734,11 @@ const PracticeSession = () => {
         />
 
         {/* Quit Confirmation Modal */}
-        <AnimatePresence>
-          {showQuitModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-white rounded-lg shadow-lg overflow-hidden w-full max-w-xs"
-              >
-                {/* Modal Header */}
-                <div className="bg-[#16956C] p-4 text-white text-center">
-                  <h2 className="font-bold text-xl">
-                    Are you sure you want to quit?
-                  </h2>
-                </div>
-
-                {/* Modal Body */}
-                <div className="p-4 text-center text-gray-600">
-                  <p className="mb-1">You will lose all point.</p>
-                  <p className="text-sm">
-                    Also pratice questions increase your chance of partipating
-                    in LIVE GAMES.
-                  </p>
-                </div>
-
-                {/* Modal Footer */}
-                <div className="p-4 flex space-x-3">
-                  <button
-                    onClick={() => navigate("/dashboard")}
-                    className="flex-1 py-2 px-4 rounded border border-[#16956C] text-[#16956C] font-medium hover:bg-gray-50 transition-colors"
-                  >
-                    End Pratice
-                  </button>
-                  <button
-                    onClick={() => setShowQuitModal(false)}
-                    className="flex-1 py-2 px-4 rounded bg-[#16956C] text-white font-medium hover:bg-[#138055] transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <QuitConfirmationModal
+          isOpen={showQuitModal}
+          onClose={() => setShowQuitModal(false)}
+          onConfirm={handleQuitConfirm}
+        />
       </div>
     );
   }
@@ -920,6 +937,7 @@ const PracticeSession = () => {
             } else {
               setQuizCompleted(true);
               setTimerActive(false);
+              navigateToResult();
             }
           }}
           disabled={!showFeedback && selectedAnswer === null}
@@ -934,55 +952,11 @@ const PracticeSession = () => {
       </div>
 
       {/* Quit Confirmation Modal */}
-      <AnimatePresence>
-        {showQuitModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white rounded-lg shadow-lg overflow-hidden w-full max-w-xs"
-            >
-              {/* Modal Header */}
-              <div className="bg-[#16956C] p-4 text-white text-center">
-                <h2 className="font-bold text-xl">
-                  Are you sure you want to quit?
-                </h2>
-              </div>
-
-              {/* Modal Body */}
-              <div className="p-4 text-center text-gray-600">
-                <p className="mb-1">You will lose all point.</p>
-                <p className="text-sm">
-                  Practicing questions increases your chance of partipating in
-                  LIVE GAMES.
-                </p>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="p-4 flex space-x-3">
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className="flex-1 py-2 px-4 rounded border border-[#16956C] text-[#16956C] font-medium hover:bg-gray-50 transition-colors"
-                >
-                  End Practice
-                </button>
-                <button
-                  onClick={() => setShowQuitModal(false)}
-                  className="flex-1 py-2 px-4 rounded bg-[#16956C] text-white font-medium hover:bg-[#138055] transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <QuitConfirmationModal
+        isOpen={showQuitModal}
+        onClose={() => setShowQuitModal(false)}
+        onConfirm={handleQuitConfirm}
+      />
     </div>
   );
 };

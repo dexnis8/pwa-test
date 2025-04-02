@@ -1,11 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../../lib/axios";
 import { showToast } from "../../lib/toast.jsx";
+import { useDispatch } from "react-redux";
+import { updatePersonalInfo } from "../../redux/slices/profileSlice.js";
 
 /**
  * Hook for fetching user profile data
  */
 export const useProfile = () => {
+  const dispatch = useDispatch();
   return useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
@@ -14,6 +17,20 @@ export const useProfile = () => {
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      const result = data.data;
+      console.log("Profile result", result);
+      dispatch(
+        updatePersonalInfo({
+          fullName: result.fullName,
+          email: result.email,
+          avatarUrl: result.image,
+          gender: result.gender,
+          dateOfBirth: result.dateOfBirth,
+          levelOfStudy: result.levelOfStudy,
+        })
+      );
+    },
     onError: (error) => {
       console.error("Profile fetch error:", error);
       showToast.error("Failed to load profile. Please try again.");
@@ -136,7 +153,7 @@ export const useUpdateProfile = () => {
       }
 
       const { data } = await axiosInstance.post(
-        "/student/complete-profile",
+        "/student/update-profile",
         profileData
       );
       return data;

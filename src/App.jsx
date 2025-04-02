@@ -26,6 +26,7 @@ import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
 import PracticeSession from "./pages/PracticeSession";
+import PracticeResult from "./pages/PracticeResult";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
@@ -85,6 +86,16 @@ function App() {
               element={
                 <ProtectedRoute>
                   <PracticeSession />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Practice Result Route - Full screen without bottom navigation */}
+            <Route
+              path="/practice/result"
+              element={
+                <ProtectedRoute>
+                  <PracticeResult />
                 </ProtectedRoute>
               }
             />

@@ -7,6 +7,8 @@ import { FaFacebookF } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import BeatLoader from "react-spinners/BeatLoader";
 import { useLogin } from "../../hooks/api/useAuth";
+import { useDispatch } from "react-redux";
+import { setFullName, setInterests } from "../../redux/slices/profileSlice";
 
 // Define validation schema with zod
 const signInSchema = z.object({
@@ -51,6 +53,7 @@ const signInSchema = z.object({
 export const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
   const loginMutation = useLogin();
 
@@ -74,6 +77,8 @@ export const SignIn = () => {
       if (result?.data.isProfileComplete) {
         const from = location.state?.from?.pathname || "/dashboard";
         navigate(from, { replace: true });
+        dispatch(setInterests(result.data.subjectsOfInterest));
+        dispatch(setFullName(result.data.fullName));
       } else {
         navigate("/profile/complete", { replace: true });
       }
