@@ -175,7 +175,6 @@ const CompleteProfile = () => {
       setIsUploading(false);
     }
   };
-  
 
   return (
     <div className="flex flex-col min-h-screen bg-white p-6">
