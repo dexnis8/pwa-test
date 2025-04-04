@@ -13,8 +13,9 @@ const PracticeResult = () => {
     subject,
     examType,
     mode,
-    // timeLeft,
+    timeLeft,
     timeLimit,
+    queryParams,
   } = location.state || {};
 
   const [shareCardVisible, setShareCardVisible] = React.useState(false);
@@ -244,17 +245,18 @@ const PracticeResult = () => {
           {/* Play Again Button */}
           <button
             onClick={() => {
-              // Reset the session and navigate back to practice session
-              navigate("/practice/session", {
-                state: {
-                  mode,
-                  subject,
-                  topic: "random",
-                  examType,
-                  questionCount: totalQuestions,
-                  timeLimit,
-                },
-              });
+              // Use the saved query parameters to navigate back to practice session
+              const searchParams = new URLSearchParams({
+                mode: queryParams.mode,
+                subject: queryParams.subject,
+                topic: queryParams.topic,
+                examType: queryParams.examType,
+                questionCount: queryParams.questionCount,
+                timeLimit: queryParams.timeLimit,
+              }).toString();
+
+              // Navigate back to practice session with the same parameters
+              navigate(`/practice/session?${searchParams}`);
             }}
             className="w-full py-4 bg-white text-[#16956C] rounded-xl font-semibold transition-all hover:bg-gray-100 active:scale-[0.98] flex items-center justify-center"
           >

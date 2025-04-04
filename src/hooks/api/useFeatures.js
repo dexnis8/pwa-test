@@ -172,3 +172,39 @@ export const useUpdateProfile = () => {
     },
   });
 };
+
+/**
+ * Hook for fetching practice questions
+ */
+export const useQuestions = () => {
+  const fetchQuestions = async (params) => {
+    try {
+      const { data } = await axiosInstance.get("/questions/practice", {
+        params: {
+          mode: params.mode || "practice",
+          subject: params.subject || "english",
+          examtype: params.examType || "UTME",
+          topic: params.topic || "random",
+          limit: params.questionCount || 10,
+        },
+      });
+
+      if (data.success) {
+        return data.data;
+      } else {
+        throw new Error(data.message || "Failed to fetch questions");
+      }
+    } catch (error) {
+      console.error("Questions fetch error:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to load questions"
+      );
+    }
+  };
+
+  return {
+    fetchQuestions,
+    isLoading: false,
+    error: null,
+  };
+};

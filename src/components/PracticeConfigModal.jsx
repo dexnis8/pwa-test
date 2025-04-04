@@ -5,36 +5,138 @@ import { useSelector } from "react-redux";
 import { selectInterests } from "../redux/slices/profileSlice";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Mock topics data - in a real app, this would be fetched from an API
+// Updated topics data with comprehensive list
 const TOPICS_BY_SUBJECT = {
   english: [
+    "Random (All Topics)",
     "Comprehension",
-    "Grammar",
-    "Vocabulary",
-    "Literature",
-    "Oral English",
-  ],
-  mathematics: [
-    "Algebra",
-    "Geometry",
-    "Calculus",
-    "Statistics",
-    "Trigonometry",
-  ],
-  physics: ["Mechanics", "Electricity", "Optics", "Waves", "Thermodynamics"],
-  biology: [
-    "Cell Biology",
-    "Genetics",
-    "Ecology",
-    "Human Anatomy",
-    "Evolution",
+    "Cloze Test, Language Register",
+    "Lexis II: Antonyms",
+    "Interpretation of Words and Expressions",
+    "Idioms, Sayings",
+    "Phrasal Verbs",
+    "Nouns, Pronouns",
+    "Verbs, Tenses",
+    "Prepositions",
+    "Adjectives, Articles, Determiners",
+    "Adverbs, Conjunctions, Punctuation",
+    "Rules of Concord, Collocation",
+    "Question Tags, Interrogatives, Direct and Reported Speech",
+    "Spelling Mistakes",
+    "Common Mistakes in English, Fixed Expressions",
+    "Test of Oral Forms",
   ],
   chemistry: [
+    "Random (All Topics)",
+    "Nature of Matter, Separation of Mixtures",
+    "Particulate Nature of Matter, Chemical Formula and Equations, Laws of Chemical Reaction",
+    "The Atomic Structure, Electronic Configuration, Periodicity of Elements",
+    "Chemical Bonding, Shapes of Molecules",
+    "The Kinetic Theory of Matter, Gas Laws",
+    "Air, Composition of Air, Environmental Pollution",
+    "Water, Solutions, Solubility",
+    "Acids, Bases, Salts: Hydrolysis of Salts",
+    "Stoichiometry, Quantitative and Qualitative Analysis",
+    "Types of Reaction, Oxidation and Reduction",
+    "Electrolytes, Electrolysis, Electrochemical Cells",
+    "Energy Changes in Chemical and Physical Changes, Entropy, Spontaneity of Reaction",
+    "Rate of Chemical Reactions",
+    "Chemical Equilibrium, Equilibrium Constant",
+    "Nuclear Chemistry, Radioactivity, Nuclear Reactions",
+    "Non-Metals I: Hydrogen, Oxygen, Carbon, Phosphorus",
+    "Non-Metals II: Chlorine, Nitrogen, Sulfur, Silicon",
+    "Metals and Their Compounds",
     "Organic Chemistry",
-    "Inorganic Chemistry",
-    "Physical Chemistry",
-    "Analytical Chemistry",
-    "Biochemistry",
+  ],
+  physics: [
+    "Random (All Topics)",
+    "Measurement, Dimensions, Scalar and Vector Quantities",
+    "Linear Motion, Projectiles",
+    "Gravitational Field, Mass and Weight",
+    "Vectors, Equilibrium of Forces",
+    "Work, Energy and Power",
+    "Friction, Viscosity, Surface Tension",
+    "Simple Machines",
+    "Elasticity, Hooke's Law, Young's Modulus",
+    "Density and Upthrust, Archimedes' Principle, Floatation",
+    "Pressure, Pascal's Principle",
+    "Temperature and Heat, Thermal Expansion",
+    "Structure of Matter, Kinetic Theory, Gas Laws",
+    "Quantity of Heat, Heat Capacity and Latent Heat",
+    "Change of State, Vapours",
+    "Heat Transfer",
+    "Waves: Types, Production, Propagation, Properties",
+    "Sound Waves: Propagation and Characteristics",
+    "Light Energy, Reflection from Plane Surfaces",
+    "Reflection of Light from Spherical Surfaces",
+    "Refraction of Light from Plane and Spherical Surfaces",
+    "Optical Instruments, Vision",
+    "Dispersion of Light, Electromagnetic Spectrum",
+    "Electrostatics, Electric Field, Capacitors",
+    "Current Electricity",
+    "Electrical Energy and Power",
+    "Magnetic Field and Electromagnetic Induction",
+    "Conduction of Electricity through Liquids and Gases",
+    "Atomic Physics and Radioactivity",
+    "Introductory Electronics",
+    "Simple A.C. Circuits",
+  ],
+  mathematics: [
+    "Random (All Topics)",
+    "Number Bases",
+    "Fractions, Decimals, Percentages, Approximation, Errors",
+    "Indices, Standard Form",
+    "Logarithms",
+    "Surds",
+    "Polynomial I: Factorization",
+    "Variation, Change of Subject of the Formula",
+    "Factor and Remainder Theorems, Function, Polynomial II: Algebraic Inequalities",
+    "Mensuration I: Plane Figures",
+    "Mensuration II: Solid Figures",
+    "Matrices",
+    "Geometry I: Lines, Angles, Triangles",
+    "Geometry II: Polygons",
+    "Binary Operation",
+    "Progression: Arithmetic and Geometric",
+    "Geometry III: Circle Construction",
+    "Geometry IV: Cyclic Quadrilaterals",
+    "Geometry V: Coordinate Geometry, Loci",
+    "Trigonometry: Special Angles, Solving Triangles, Pythagoras Theorem",
+    "Calculus I: Differentiation",
+    "Calculus II: Integration",
+    "Statistics I: Data Presentation, Measures of Location, Cumulative Frequency",
+    "Statistics II: Measures of Dispersion",
+    "Permutations and Combinations",
+    "Probability",
+    "Inequalities",
+  ],
+  biology: [
+    "Random (All Topics)",
+    "The Cell - Organization of Life",
+    "Classification I: Viruses, Monera, Protista, Fungi",
+    "Classification II: Plantae, Thallophyta, Bryophyta, Pteridophyta",
+    "Classification III: Higher Plants - Spermatophyta",
+    "Classification IV: Lower Invertebrates",
+    "Classification V: Higher Invertebrates",
+    "Classification VI: Vertebrates I - Pisces, Amphibians, Reptiles",
+    "Nutrition - Food Substances",
+    "Excretion - Excretory Products",
+    "Reproduction in Flowering Plants - Germination",
+    "Fruit and Seed Dispersal",
+    "Homeostasis - Endocrine System, Plant Hormones",
+    "The Nervous System",
+    "The Cell and its Environment",
+    "Classification VII: Vertebrates - Birds, Mammals",
+    "Supporting Tissues - Musculoskeletal System",
+    "Digestive System - Digestive Enzymes, Dentition, Movement",
+    "Transport - Circulatory System",
+    "Respiration",
+    "Reproduction in Animals - Growth and Development",
+    "Agriculture - Soil Science",
+    "Common Diseases - Insect Vectors",
+    "Ecology I: Basic Concept, Ecological Management",
+    "Ecology II: Ecological Succession, Adaptation, Feeding Relationship",
+    "Heredity, Variation, Evolution",
   ],
 };
 
@@ -57,27 +159,33 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
   const [questionCount, setQuestionCount] = useState(10);
   const [timeLimit, setTimeLimit] = useState(5);
 
+  // Modified to handle subject selection
+  const handleSubjectToggle = (subjectId) => {
+    console.log("Toggling subject:", subjectId);
+    // Don't allow deselecting the currently selected subject
+    if (selectedSubjects.includes(subjectId) && selectedSubjects.length === 1) {
+      return;
+    }
+    // Set only the clicked subject (ensure lowercase)
+    setSelectedSubjects([subjectId.toLowerCase()]);
+    // Reset topic when subject changes
+    setTopic("random");
+  };
+
   // Reset form when modal is opened
   useEffect(() => {
     if (isOpen) {
       setMode("practice");
-      setSelectedSubjects(userInterests.length > 0 ? [userInterests[0]] : []);
+      // Ensure lowercase subject ID
+      setSelectedSubjects(
+        userInterests.length > 0 ? [userInterests[0].toLowerCase()] : []
+      );
       setTopic("random");
       setExamType("UTME");
       setQuestionCount(10);
       setTimeLimit(5);
     }
   }, [isOpen, userInterests]);
-
-  // Modified to only allow one subject at a time (radio button behavior)
-  const handleSubjectToggle = (subjectId) => {
-    // Don't allow deselecting the currently selected subject
-    if (selectedSubjects.includes(subjectId) && selectedSubjects.length === 1) {
-      return;
-    }
-    // Set only the clicked subject
-    setSelectedSubjects([subjectId]);
-  };
 
   const handleQuestionCountChange = (e) => {
     const value = e.target.value;
@@ -138,6 +246,13 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
   };
 
   const availableTopics = TOPICS_BY_SUBJECT[selectedSubjects[0]] || [];
+
+  // Add this console log to debug
+  console.log("Selected subject:", selectedSubjects[0]);
+  console.log(
+    "Available topics:",
+    selectedSubjects[0] ? TOPICS_BY_SUBJECT[selectedSubjects[0]] : []
+  );
 
   if (!isOpen) return null;
 
@@ -346,7 +461,9 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                     {userInterests.length > 0 ? (
                       <div className="grid grid-cols-2 gap-2">
                         {userInterests.map((interestId) => {
-                          const subjectInfo = subjects[interestId] || {
+                          const subjectInfo = subjects[
+                            interestId.toLowerCase()
+                          ] || {
                             name: interestId,
                             icon: "📚",
                           };
@@ -354,7 +471,9 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                             <label
                               key={interestId}
                               className={`flex items-center p-2 cursor-pointer rounded-lg ${
-                                selectedSubjects.includes(interestId)
+                                selectedSubjects.includes(
+                                  interestId.toLowerCase()
+                                )
                                   ? "bg-[#E7F7F2]"
                                   : "hover:bg-gray-50"
                               }`}
@@ -362,7 +481,9 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                               <input
                                 type="radio"
                                 name="subject"
-                                checked={selectedSubjects.includes(interestId)}
+                                checked={selectedSubjects.includes(
+                                  interestId.toLowerCase()
+                                )}
                                 onChange={() => handleSubjectToggle(interestId)}
                                 className="h-4 w-4 border-gray-300 text-[#16956C] focus:ring-[#16956C]"
                               />
@@ -397,15 +518,22 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                     onChange={(e) => setTopic(e.target.value)}
                     className="w-full p-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#16956C] focus:border-transparent"
                   >
-                    <option value="random">Random (All Topics)</option>
-                    {availableTopics.map((t) => (
-                      <option
-                        key={t}
-                        value={t.toLowerCase().replace(/\s+/g, "-")}
-                      >
-                        {t}
+                    {selectedSubjects[0] ? (
+                      TOPICS_BY_SUBJECT[selectedSubjects[0].toLowerCase()]?.map(
+                        (topicName, index) => (
+                          <option
+                            key={index}
+                            value={index === 0 ? "random" : topicName}
+                          >
+                            {topicName}
+                          </option>
+                        )
+                      )
+                    ) : (
+                      <option value="random">
+                        Please select a subject first
                       </option>
-                    ))}
+                    )}
                   </select>
                 </div>
 
