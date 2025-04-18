@@ -28,91 +28,145 @@ import ChangePassword from "./pages/ChangePassword";
 import PracticeSession from "./pages/PracticeSession";
 import PracticeResult from "./pages/PracticeResult";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import LandingPage from "./pages/LandingPage.jsx";
 
 function App() {
   const location = useLocation();
 
   return (
-    <>
-      <MobileLayout>
-        <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<SplashScreen />} />
-            <Route path="/get-started" element={<OnBoarding />} />
+    <AnimatePresence mode="wait">
+      {/* Use location and key on Routes for AnimatePresence */}
+      <Routes location={location} key={location.pathname}>
+        {/* Landing Page Route (Full Width) */}
+        <Route path="/" element={<LandingPage />} />
 
-            {/* Main Auth Routes with Tabs */}
-            <Route path="/auth" element={<AuthLayout />}>
-              <Route index element={<SignUp />} />
-              <Route path="signup" element={<SignUp />} />
-              <Route path="signin" element={<SignIn />} />
-            </Route>
+        {/* App Routes (Constrained by MobileLayout) */}
+        <Route
+          path="/app"
+          element={
+            <MobileLayout>
+              <SplashScreen />
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/get-started"
+          element={
+            <MobileLayout>
+              <OnBoarding />
+            </MobileLayout>
+          }
+        />
 
-            {/* Password Recovery Routes - No Tabs */}
-            <Route path="/auth/password" element={<PasswordResetLayout />}>
-              <Route path="forgot" element={<ForgotPassword />} />
-              <Route path="reset" element={<ResetPassword />} />
-            </Route>
+        {/* Auth Routes wrapped in MobileLayout */}
+        <Route
+          element={
+            <MobileLayout>
+              <AuthLayout />
+            </MobileLayout>
+          }
+        >
+          <Route path="/auth" element={<SignUp />} /> {/* Default auth route */}
+          <Route path="/auth/signup" element={<SignUp />} />
+          <Route path="/auth/signin" element={<SignIn />} />
+        </Route>
 
-            {/* Profile Completion Routes */}
-            <Route path="/profile/complete" element={<CompleteProfile />} />
-            <Route
-              path="/profile/complete/step2"
-              element={<ChooseDepartment />}
-            />
-            <Route
-              path="/profile/complete/step3"
-              element={<ChooseInterests />}
-            />
-            <Route path="/profile/edit" element={<EditProfile />} />
+        {/* Password Recovery Routes wrapped in MobileLayout */}
+        <Route
+          element={
+            <MobileLayout>
+              <PasswordResetLayout />
+            </MobileLayout>
+          }
+        >
+          <Route path="/auth/password/forgot" element={<ForgotPassword />} />
+          <Route path="/auth/password/reset" element={<ResetPassword />} />
+        </Route>
 
-            {/* Protected Dashboard Routes with common layout and bottom navigation */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/leaderboard" element={<Leaderboard />} />
-              <Route path="/practice" element={<Practice />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/profile" element={<Profile />} />
-            </Route>
+        {/* Profile Completion Routes wrapped in MobileLayout */}
+        <Route
+          path="/profile/complete"
+          element={
+            <MobileLayout>
+              <CompleteProfile />
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/profile/complete/step2"
+          element={
+            <MobileLayout>
+              <ChooseDepartment />
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/profile/complete/step3"
+          element={
+            <MobileLayout>
+              <ChooseInterests />
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/profile/edit"
+          element={
+            <MobileLayout>
+              <EditProfile />
+            </MobileLayout>
+          }
+        />
 
-            {/* Protected Practice Session Route - Full screen without bottom navigation */}
-            <Route
-              path="/practice/session"
-              element={
-                <ProtectedRoute>
-                  <PracticeSession />
-                </ProtectedRoute>
-              }
-            />
+        {/* Protected Routes with Dashboard Layout (already wrapped) */}
+        <Route
+          element={
+            <MobileLayout>
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            </MobileLayout>
+          }
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/practice" element={<Practice />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
 
-            {/* Protected Practice Result Route - Full screen without bottom navigation */}
-            <Route
-              path="/practice/result"
-              element={
-                <ProtectedRoute>
-                  <PracticeResult />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Protected Change Password Route - Full screen without bottom navigation */}
-            <Route
-              path="/change-password"
-              element={
-                <ProtectedRoute>
-                  <ChangePassword />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </AnimatePresence>
-      </MobileLayout>
-    </>
+        {/* Standalone Protected Routes wrapped in MobileLayout */}
+        <Route
+          path="/practice/session"
+          element={
+            <MobileLayout>
+              <ProtectedRoute>
+                <PracticeSession />
+              </ProtectedRoute>
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/practice/result"
+          element={
+            <MobileLayout>
+              <ProtectedRoute>
+                <PracticeResult />
+              </ProtectedRoute>
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/change-password"
+          element={
+            <MobileLayout>
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            </MobileLayout>
+          }
+        />
+      </Routes>
+    </AnimatePresence>
   );
 }
 

@@ -62,6 +62,8 @@ const PracticeSession = () => {
 
       if (data) {
         setQuestions(data.questions);
+      } else {
+        navigate("/dashboard");
       }
     };
 
@@ -563,6 +565,27 @@ const PracticeSession = () => {
             </button>
           ))}
         </div>
+
+        {/* Explanation Section - Appears after feedback */}
+        <AnimatePresence>
+          {showFeedback && currentQuestion.explanation && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-800"
+            >
+              <h4 className="font-bold mb-2 text-blue-900">Explanation:</h4>
+              <div
+                className="text-sm leading-relaxed prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(currentQuestion.explanation),
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Next button */}

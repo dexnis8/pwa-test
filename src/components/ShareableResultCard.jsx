@@ -14,7 +14,7 @@ const ShareableResultCard = ({
 }) => {
   const cardRef = useRef(null);
   const personalInfo = useSelector(selectPersonalInfo);
-  const username = personalInfo?.name || "Me";
+  const username = personalInfo?.fullName?.split(" ")[0] || "Me";
   const [attempts, setAttempts] = useState(0);
 
   // Calculate performance metrics

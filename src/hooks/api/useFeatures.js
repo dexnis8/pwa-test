@@ -3,6 +3,7 @@ import axiosInstance from "../../lib/axios";
 import { showToast } from "../../lib/toast.jsx";
 import { useDispatch } from "react-redux";
 import { updatePersonalInfo } from "../../redux/slices/profileSlice.js";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Hook for fetching user profile data
@@ -177,6 +178,7 @@ export const useUpdateProfile = () => {
  * Hook for fetching practice questions
  */
 export const useQuestions = () => {
+  const navigate = useNavigate();
   const fetchQuestions = async (params) => {
     try {
       const { data } = await axiosInstance.get("/questions/practice", {
@@ -195,6 +197,7 @@ export const useQuestions = () => {
         throw new Error(data.message || "Failed to fetch questions");
       }
     } catch (error) {
+      navigate("/dashboard");
       console.error("Questions fetch error:", error);
       throw new Error(
         error.response?.data?.message || "Failed to load questions"
