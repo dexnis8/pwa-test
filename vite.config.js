@@ -28,15 +28,18 @@ export default defineConfig({
         name: "The Pace App",
         short_name: "Pace App",
         description: "Pace management application",
-        theme_color: "#3DD7A1",
+        theme_color: "#ffffff", //"#3DD7A1"
+        background_color: "#ffffff",
+        start_url: ".",
+        display: "standalone",
         icons: [
           {
-            src: "/pwa-192x192.png",
+            src: "/images/logo.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "/pwa-512x512.png",
+            src: "/images/logo.png",
             sizes: "512x512",
             type: "image/png",
           },
