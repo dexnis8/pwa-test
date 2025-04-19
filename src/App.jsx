@@ -38,11 +38,11 @@ function App() {
       {/* Use location and key on Routes for AnimatePresence */}
       <Routes location={location} key={location.pathname}>
         {/* Landing Page Route (Full Width) */}
-        <Route path="/" element={<LandingPage />} />
+        {/* <Route path="/" element={<LandingPage />} /> */}
 
         {/* App Routes (Constrained by MobileLayout) */}
         <Route
-          path="/app"
+          path="/"
           element={
             <MobileLayout>
               <SplashScreen />
