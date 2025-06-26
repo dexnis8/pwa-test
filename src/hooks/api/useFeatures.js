@@ -211,3 +211,32 @@ export const useQuestions = () => {
     error: null,
   };
 };
+
+/**
+ * Hook for reporting question issues
+ */
+export const useReportIssue = () => {
+  return useMutation({
+    mutationFn: async (reportData) => {
+      const { data } = await axiosInstance.post("/reports", reportData);
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        showToast.success(
+          data.message ||
+            "Issue reported successfully! Thank you for helping us improve."
+        );
+      } else {
+        showToast.error(data.message || "Failed to submit report");
+      }
+    },
+    onError: (error) => {
+      console.error("Report issue error:", error);
+      showToast.error(
+        error.response?.data?.message ||
+          "Failed to report issue. Please try again."
+      );
+    },
+  });
+};

@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import ShareableResultCard from "../components/ShareableResultCard";
 import QuitConfirmationModal from "../components/QuitConfirmationModal";
-import { useQuestions } from "../hooks/api/useFeatures";
+import ReportIssueModal from "../components/ReportIssueModal";
+import { useQuestions, useReportIssue } from "../hooks/api/useFeatures";
 import { BeatLoader } from "react-spinners";
 import { showToast } from "../lib/toast";
 import DOMPurify from "dompurify";
@@ -46,8 +47,10 @@ const PracticeSession = () => {
   const [shareCardVisible, setShareCardVisible] = useState(false);
   const [shareableImage, setShareableImage] = useState(null);
   const [showShareOptions, setShowShareOptions] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const { fetchQuestions, isLoading, error } = useQuestions();
+  const reportIssueMutation = useReportIssue();
 
   // Load questions from API
   useEffect(() => {
@@ -157,6 +160,14 @@ const PracticeSession = () => {
   const handleQuitConfirm = () => {
     setShowQuitModal(false);
     navigate("/dashboard");
+  };
+
+  const handleReportIssue = (reportData) => {
+    reportIssueMutation.mutate(reportData, {
+      onSuccess: () => {
+        setShowReportModal(false);
+      },
+    });
   };
 
   // Handler for the share button click
@@ -463,6 +474,34 @@ const PracticeSession = () => {
         </div>
       </div>
 
+      {/* Floating Report Issue Button */}
+      <div className="fixed bottom-20 right-4 z-40">
+        <button
+          onClick={() => setShowReportModal(true)}
+          className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 group"
+          title="Report Issue"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+            />
+          </svg>
+          {/* Tooltip */}
+          <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+            Report Issue
+            <div className="absolute top-full right-3 w-0 h-0 border-l-2 border-r-2 border-t-4 border-l-transparent border-r-transparent border-t-gray-800"></div>
+          </div>
+        </button>
+      </div>
+
       {/* Question */}
       <div className="p-5">
         <div className="bg-[#1D7A8C] text-white p-5 rounded-xl mb-4">
@@ -620,6 +659,15 @@ const PracticeSession = () => {
         isOpen={showQuitModal}
         onClose={() => setShowQuitModal(false)}
         onConfirm={handleQuitConfirm}
+      />
+
+      {/* Report Issue Modal */}
+      <ReportIssueModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        questionId={currentQuestion?._id}
+        onSubmit={handleReportIssue}
+        isLoading={reportIssueMutation.isPending}
       />
 
       {/* Share Modal */}
