@@ -48,9 +48,158 @@ const PracticeSession = () => {
   const [shareableImage, setShareableImage] = useState(null);
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [expandedExplanations, setExpandedExplanations] = useState(new Set());
 
   const { fetchQuestions, isLoading, error } = useQuestions();
   const reportIssueMutation = useReportIssue();
+
+  // Character limit for explanations
+  const EXPLANATION_CHAR_LIMIT = 300;
+
+  // Utility function to format explanations
+  const formatExplanation = (explanation) => {
+    if (!explanation) return "";
+
+    let formatted = explanation;
+
+    // Fix common encoding issues
+    formatted = formatted.replace(/\bimes\b/g, "×");
+    formatted = formatted.replace(/\bext\{([^}]*)\}/g, "$1");
+
+    // Handle Markdown-style formatting
+    // Bold text: **text** or *text:** (for headers)
+    formatted = formatted.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    // Handle cases like *Tools:** -> **Tools:**
+    formatted = formatted.replace(/\*([^*:]+):\*\*/g, "<strong>$1:</strong>");
+    // Italic text: *text* (but not if it's part of bullet points or bold)
+    formatted = formatted.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, "<em>$1</em>");
+
+    // Convert LaTeX-style math expressions to better HTML
+    formatted = formatted.replace(/\$([^$]+)\$/g, (match, math) => {
+      // Basic math formatting
+      let mathHtml = math
+        .replace(/_(\w+|\{[^}]*\})/g, "<sub>$1</sub>") // subscripts
+        .replace(/\^(\w+|\{[^}]*\})/g, "<sup>$1</sup>") // superscripts
+        .replace(/\{([^}]*)\}/g, "$1") // remove braces
+        .replace(/\\times/g, "×")
+        .replace(/\\cdot/g, "·")
+        .replace(/\\div/g, "÷")
+        .replace(/\\pm/g, "±")
+        .replace(/\\infty/g, "∞")
+        .replace(/\\pi/g, "π")
+        .replace(/\\alpha/g, "α")
+        .replace(/\\beta/g, "β")
+        .replace(/\\gamma/g, "γ")
+        .replace(/\\delta/g, "δ")
+        .replace(/\\theta/g, "θ")
+        .replace(/\\lambda/g, "λ")
+        .replace(/\\mu/g, "μ")
+        .replace(/\\sigma/g, "σ");
+
+      return `<span class="math-expression bg-gray-100 px-1 py-0.5 rounded text-blue-900 font-mono text-sm">${mathHtml}</span>`;
+    });
+
+    // Convert asterisk bullet points to proper HTML lists
+    // But only if they're at the start of lines (bullet points)
+    if (formatted.match(/^\s*\*[^*]/m)) {
+      const lines = formatted.split("\n");
+      let inList = false;
+      let processedLines = [];
+
+      for (let line of lines) {
+        const trimmedLine = line.trim();
+
+        // Check if it's a bullet point (starts with * but not bold formatting)
+        if (trimmedLine.match(/^\*[^*]/)) {
+          if (!inList) {
+            processedLines.push(
+              '<ul class="list-disc list-inside mt-2 mb-2 space-y-1">'
+            );
+            inList = true;
+          }
+
+          // Extract the content after the asterisk
+          let content = trimmedLine.replace(/^\*\s*/, "").trim();
+          processedLines.push(`<li class="ml-2">${content}</li>`);
+        } else {
+          if (inList && trimmedLine === "") {
+            // Empty line in list, continue
+            continue;
+          } else if (inList) {
+            processedLines.push("</ul>");
+            inList = false;
+          }
+
+          if (trimmedLine !== "") {
+            processedLines.push(`<p class="mb-2">${trimmedLine}</p>`);
+          }
+        }
+      }
+
+      if (inList) {
+        processedLines.push("</ul>");
+      }
+
+      formatted = processedLines.join("\n");
+    } else {
+      // Add paragraph tags for better spacing
+      formatted = formatted.replace(/\n\s*\n/g, '</p><p class="mb-2">');
+      formatted = `<p class="mb-2">${formatted}</p>`;
+    }
+
+    // Clean up any double spaces and improve formatting
+    formatted = formatted.replace(/\s+/g, " ");
+    formatted = formatted.replace(/\s+([.,!?;:])/g, "$1");
+
+    return formatted;
+  };
+
+  // Helper function to check if explanation needs truncation
+  const needsTruncation = (explanation) => {
+    if (!explanation) return false;
+    // Remove HTML tags to get accurate character count
+    const textContent = explanation.replace(/<[^>]*>/g, "");
+    return textContent.length > EXPLANATION_CHAR_LIMIT;
+  };
+
+  // Helper function to truncate explanation text
+  const getTruncatedExplanation = (explanation) => {
+    if (!explanation) return "";
+
+    // First format the explanation
+    const formatted = formatExplanation(explanation);
+
+    // Then check if truncation is needed
+    const textContent = formatted.replace(/<[^>]*>/g, "");
+    if (textContent.length <= EXPLANATION_CHAR_LIMIT) return formatted;
+
+    // Find a good breaking point in the original text (before formatting)
+    const originalTextContent = explanation.replace(/<[^>]*>/g, "");
+    const truncated = originalTextContent.substring(0, EXPLANATION_CHAR_LIMIT);
+    const lastSentence = truncated.lastIndexOf(".");
+    const lastSpace = truncated.lastIndexOf(" ");
+
+    const breakPoint =
+      lastSentence > EXPLANATION_CHAR_LIMIT - 50 ? lastSentence + 1 : lastSpace;
+    const truncatedOriginal =
+      originalTextContent.substring(0, breakPoint) + "...";
+
+    // Format the truncated version
+    return formatExplanation(truncatedOriginal);
+  };
+
+  // Toggle explanation expansion
+  const toggleExplanationExpansion = (questionId) => {
+    setExpandedExplanations((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(questionId)) {
+        newSet.delete(questionId);
+      } else {
+        newSet.add(questionId);
+      }
+      return newSet;
+    });
+  };
 
   // Load questions from API
   useEffect(() => {
@@ -616,12 +765,41 @@ const PracticeSession = () => {
               className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-800"
             >
               <h4 className="font-bold mb-2 text-blue-900">Explanation:</h4>
-              <div
-                className="text-sm leading-relaxed prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(currentQuestion.explanation),
-                }}
-              />
+              <div className="text-sm leading-relaxed prose prose-sm max-w-none">
+                {needsTruncation(currentQuestion.explanation) ? (
+                  <>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(
+                          expandedExplanations.has(currentQuestion._id)
+                            ? formatExplanation(currentQuestion.explanation)
+                            : getTruncatedExplanation(
+                                currentQuestion.explanation
+                              )
+                        ),
+                      }}
+                    />
+                    <button
+                      onClick={() =>
+                        toggleExplanationExpansion(currentQuestion._id)
+                      }
+                      className="mt-2 text-blue-600 hover:text-blue-800 font-medium text-sm underline focus:outline-none transition-colors"
+                    >
+                      {expandedExplanations.has(currentQuestion._id)
+                        ? "Show less"
+                        : "Show more"}
+                    </button>
+                  </>
+                ) : (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(
+                        formatExplanation(currentQuestion.explanation)
+                      ),
+                    }}
+                  />
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -635,6 +813,8 @@ const PracticeSession = () => {
               setCurrentIndex((prevIndex) => prevIndex + 1);
               setSelectedAnswer(null);
               setShowFeedback(false);
+              // Reset explanation expansion for the new question
+              setExpandedExplanations(new Set());
             } else {
               setQuizCompleted(true);
               setTimerActive(false);
