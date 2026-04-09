@@ -106,3 +106,50 @@ export const useChangePassword = () => {
     },
   });
 };
+
+/**
+ * Hook for verifying phone number via OTP
+ */
+export const useVerifyPhone = () => {
+  return useMutation({
+    mutationFn: async ({ phoneNumber, otp }) => {
+      const response = await axiosInstance.post("/auth/verify-phone", {
+        phoneNumber,
+        otp,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      showToast.success("Phone number verified successfully!");
+    },
+    onError: (error) => {
+      console.error("Phone verification error:", error);
+      showToast.error(
+        error.response?.data?.message || "Failed to verify phone number"
+      );
+    },
+  });
+};
+
+/**
+ * Hook for resending OTP to phone number
+ */
+export const useResendOTP = () => {
+  return useMutation({
+    mutationFn: async ({ phoneNumber }) => {
+      const response = await axiosInstance.post("/auth/resend-otp", {
+        phoneNumber,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      showToast.success("OTP resent successfully!");
+    },
+    onError: (error) => {
+      console.error("Resend OTP error:", error);
+      showToast.error(
+        error.response?.data?.message || "Failed to resend OTP"
+      );
+    },
+  });
+};

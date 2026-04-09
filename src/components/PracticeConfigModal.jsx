@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectInterests } from "../redux/slices/profileSlice";
 import { motion, AnimatePresence } from "framer-motion";
+import ExamSubjectSelectionModal from "./ExamSubjectSelectionModal";
+import { showToast } from "../lib/toast";
 
 // Updated topics data with comprehensive list
 const TOPICS_BY_SUBJECT = {
@@ -158,6 +160,7 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
   const [examType, setExamType] = useState("UTME");
   const [questionCount, setQuestionCount] = useState(10);
   const [timeLimit, setTimeLimit] = useState(5);
+  const [showExamSubjectModal, setShowExamSubjectModal] = useState(false);
 
   // Modified to handle subject selection
   const handleSubjectToggle = (subjectId) => {
@@ -178,7 +181,7 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
       setMode("practice");
       // Ensure lowercase subject ID
       setSelectedSubjects(
-        userInterests.length > 0 ? [userInterests[0].toLowerCase()] : []
+        userInterests.length > 0 ? [userInterests[0].toLowerCase()] : [],
       );
       setTopic("random");
       setExamType("UTME");
@@ -240,9 +243,34 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
     // In a real app, you'd make an API call or set up Redux state
     // For now, we'll navigate with query params
     navigate(
-      `/practice/session?mode=${mode}&subject=${subject}&topic=${topic}&examType=${examType}&questionCount=${questionCount}&timeLimit=${timeLimit}`
+      `/practice/session?mode=${mode}&subject=${subject}&topic=${topic}&examType=${examType}&questionCount=${questionCount}&timeLimit=${timeLimit}`,
     );
     onClose();
+  };
+
+  const handleExamSimulation = () => {
+    // Check if user is on mobile
+    const isMobile = window.innerWidth < 1024; // lg breakpoint
+
+    if (isMobile) {
+      showToast.error(
+        "Exam Simulation is only available on desktop devices. Please use a larger screen.",
+      );
+      return;
+    }
+
+    setShowExamSubjectModal(true);
+  };
+
+  const handleExamSubjectsConfirm = (subjects) => {
+    setShowExamSubjectModal(false);
+    onClose();
+    // Navigate to exam confirmation with selected subjects
+    const subjectParams = subjects
+      .filter((s) => s !== "english")
+      .map((s, i) => `subject${i + 1}=${s}`)
+      .join("&");
+    navigate(`/jamb/exam/simulation/confirm?${subjectParams}`);
   };
 
   const availableTopics = TOPICS_BY_SUBJECT[selectedSubjects[0]] || [];
@@ -251,7 +279,7 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
   console.log("Selected subject:", selectedSubjects[0]);
   console.log(
     "Available topics:",
-    selectedSubjects[0] ? TOPICS_BY_SUBJECT[selectedSubjects[0]] : []
+    selectedSubjects[0] ? TOPICS_BY_SUBJECT[selectedSubjects[0]] : [],
   );
 
   if (!isOpen) return null;
@@ -418,12 +446,13 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
 
                     <button
                       type="button"
-                      disabled
-                      className="p-3 rounded-lg flex flex-col items-center justify-center border border-gray-200 text-gray-400 relative cursor-not-allowed"
+                      onClick={handleExamSimulation}
+                      className={`p-3 rounded-lg flex flex-col items-center justify-center border transition-all ${
+                        mode === "exam-simulation"
+                          ? "border-[#16956C] bg-[#E7F7F2] text-[#16956C]"
+                          : "border-gray-200 text-gray-700"
+                      }`}
                     >
-                      <div className="absolute -top-2 -right-2 bg-yellow-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                        Soon
-                      </div>
                       <svg
                         className="w-6 h-6 mb-1"
                         viewBox="0 0 24 24"
@@ -472,7 +501,7 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                               key={interestId}
                               className={`flex items-center p-2 cursor-pointer rounded-lg ${
                                 selectedSubjects.includes(
-                                  interestId.toLowerCase()
+                                  interestId.toLowerCase(),
                                 )
                                   ? "bg-[#E7F7F2]"
                                   : "hover:bg-gray-50"
@@ -482,7 +511,7 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                                 type="radio"
                                 name="subject"
                                 checked={selectedSubjects.includes(
-                                  interestId.toLowerCase()
+                                  interestId.toLowerCase(),
                                 )}
                                 onChange={() => handleSubjectToggle(interestId)}
                                 className="h-4 w-4 border-gray-300 text-[#16956C] focus:ring-[#16956C]"
@@ -527,7 +556,7 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                           >
                             {topicName}
                           </option>
-                        )
+                        ),
                       )
                     ) : (
                       <option value="random">
@@ -634,6 +663,13 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       )}
+
+      {/* Exam Subject Selection Modal */}
+      <ExamSubjectSelectionModal
+        isOpen={showExamSubjectModal}
+        onClose={() => setShowExamSubjectModal(false)}
+        onConfirm={handleExamSubjectsConfirm}
+      />
     </AnimatePresence>
   );
 };

@@ -29,7 +29,7 @@ export const useProfile = () => {
           gender: result.gender,
           dateOfBirth: result.dateOfBirth,
           levelOfStudy: result.levelOfStudy,
-        })
+        }),
       );
     },
     onError: (error) => {
@@ -121,7 +121,7 @@ export const useCompleteProfile = () => {
 
       const { data } = await axiosInstance.post(
         "/student/complete-profile",
-        profileData
+        profileData,
       );
       return data;
     },
@@ -155,7 +155,7 @@ export const useUpdateProfile = () => {
 
       const { data } = await axiosInstance.post(
         "/student/update-profile",
-        profileData
+        profileData,
       );
       return data;
     },
@@ -168,7 +168,7 @@ export const useUpdateProfile = () => {
     onError: (error) => {
       console.error("Profile update error:", error);
       showToast.error(
-        error.response?.data?.message || "Failed to update profile"
+        error.response?.data?.message || "Failed to update profile",
       );
     },
   });
@@ -200,7 +200,7 @@ export const useQuestions = () => {
       navigate("/dashboard");
       console.error("Questions fetch error:", error);
       throw new Error(
-        error.response?.data?.message || "Failed to load questions"
+        error.response?.data?.message || "Failed to load questions",
       );
     }
   };
@@ -225,7 +225,7 @@ export const useReportIssue = () => {
       if (data.success) {
         showToast.success(
           data.message ||
-            "Issue reported successfully! Thank you for helping us improve."
+            "Issue reported successfully! Thank you for helping us improve.",
         );
       } else {
         showToast.error(data.message || "Failed to submit report");
@@ -235,8 +235,42 @@ export const useReportIssue = () => {
       console.error("Report issue error:", error);
       showToast.error(
         error.response?.data?.message ||
-          "Failed to report issue. Please try again."
+          "Failed to report issue. Please try again.",
       );
     },
   });
+};
+
+/**
+ * Hook for fetching exam simulation questions
+ */
+export const useExamSimulation = () => {
+  const navigate = useNavigate();
+
+  const fetchExamQuestions = async (subjects) => {
+    try {
+      // Build query params from subjects array (excluding english which is default)
+      const otherSubjects = subjects.filter((s) => s !== "english");
+      const params = otherSubjects.reduce((acc, subject, index) => {
+        acc[`subject${index + 1}`] = subject;
+        return acc;
+      }, {});
+
+      const { data } = await axiosInstance.get("/exam/simulation", { params });
+
+      if (data.success) {
+        return data.data;
+      } else {
+        throw new Error(data.message || "Failed to fetch exam questions");
+      }
+    } catch (error) {
+      navigate("/dashboard");
+      console.error("Exam simulation fetch error:", error);
+      throw new Error(
+        error.response?.data?.message || "Failed to load exam questions",
+      );
+    }
+  };
+
+  return { fetchExamQuestions };
 };

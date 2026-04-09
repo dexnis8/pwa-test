@@ -77,8 +77,8 @@ export const SignUp = () => {
       const result = await signupMutation.mutateAsync(signupData);
       console.log("Mutation result:", result); // Debug log
 
-      // If successful, navigate to profile completion
-      navigate("/profile/complete");
+      // Navigate to phone verification step with the phone number
+      navigate("/auth/verify-phone", { state: { phoneNumber: data.phoneNumber } });
     } catch (error) {
       console.error("Signup form submission error:", error); // Debug log
       // Error handling is done in the mutation

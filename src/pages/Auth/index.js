@@ -4,3 +4,4 @@ export { SignIn } from "./SignIn";
 export { ForgotPassword } from "./ForgotPassword";
 export { ResetPassword } from "./ResetPassword";
 export { PasswordResetLayout } from "./PasswordResetLayout";
+export { VerifyPhone } from "./VerifyPhone";

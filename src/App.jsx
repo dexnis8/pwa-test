@@ -12,6 +12,7 @@ import {
   ForgotPassword,
   ResetPassword,
   PasswordResetLayout,
+  VerifyPhone,
 } from "./pages/Auth";
 import {
   CompleteProfile,
@@ -27,6 +28,9 @@ import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
 import PracticeSession from "./pages/PracticeSession";
 import PracticeResult from "./pages/PracticeResult";
+import ExamConfirmation from "./pages/ExamConfirmation";
+import ExamSimulation from "./pages/ExamSimulation";
+import ExamSimulationResult from "./pages/ExamSimulationResult";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage.jsx";
 
@@ -69,6 +73,7 @@ function App() {
           <Route path="/auth" element={<SignUp />} /> {/* Default auth route */}
           <Route path="/auth/signup" element={<SignUp />} />
           <Route path="/auth/signin" element={<SignIn />} />
+          <Route path="/auth/verify-phone" element={<VerifyPhone />} />
         </Route>
 
         {/* Password Recovery Routes wrapped in MobileLayout */}
@@ -163,6 +168,31 @@ function App() {
                 <ChangePassword />
               </ProtectedRoute>
             </MobileLayout>
+          }
+        />
+        {/* Exam Simulation Routes - Desktop Only (Full Width) */}
+        <Route
+          path="/jamb/exam/simulation/confirm"
+          element={
+            <ProtectedRoute>
+              <ExamConfirmation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jamb/exam/simulation"
+          element={
+            <ProtectedRoute>
+              <ExamSimulation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jamb/exam/simulation/result"
+          element={
+            <ProtectedRoute>
+              <ExamSimulationResult />
+            </ProtectedRoute>
           }
         />
       </Routes>
