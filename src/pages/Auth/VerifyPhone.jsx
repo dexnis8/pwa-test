@@ -13,8 +13,10 @@ export const VerifyPhone = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Phone number is passed via navigation state from SignUp
+  // Phone number is passed via navigation state from SignUp or SignIn
   const phoneNumber = location.state?.phoneNumber || "";
+  const from = location.state?.from || "signup"; // "signup" | "signin"
+  const backRoute = from === "signin" ? "/auth/signin" : "/auth/signup";
 
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(""));
   const [timeLeft, setTimeLeft] = useState(OTP_EXPIRY_SECONDS);
@@ -27,9 +29,9 @@ export const VerifyPhone = () => {
   // Redirect if no phone number in state
   useEffect(() => {
     if (!phoneNumber) {
-      navigate("/auth/signup");
+      navigate(backRoute);
     }
-  }, [phoneNumber, navigate]);
+  }, [phoneNumber, navigate, backRoute]);
 
   // Countdown timer
   useEffect(() => {
@@ -89,7 +91,10 @@ export const VerifyPhone = () => {
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, OTP_LENGTH);
     if (!pasted) return;
     const newOtp = Array(OTP_LENGTH).fill("");
     pasted.split("").forEach((char, i) => {
@@ -112,7 +117,9 @@ export const VerifyPhone = () => {
     }
     try {
       await verifyMutation.mutateAsync({ phoneNumber, otp: otpValue });
-      navigate("/profile/complete");
+      // After verifying from sign-in flow, send user to sign in to get tokens
+      // After verifying from sign-up flow, send user to sign in too
+      navigate("/auth/signin", { replace: true });
     } catch {
       // Error handled in mutation
     }
@@ -132,7 +139,10 @@ export const VerifyPhone = () => {
   };
 
   const maskedPhone = phoneNumber
-    ? phoneNumber.replace(/(\+?\d{3})(\d+)(\d{4})/, (_, a, b, c) => `${a}${"*".repeat(b.length)}${c}`)
+    ? phoneNumber.replace(
+        /(\+?\d{3})(\d+)(\d{4})/,
+        (_, a, b, c) => `${a}${"*".repeat(b.length)}${c}`,
+      )
     : "";
 
   return (
@@ -141,7 +151,7 @@ export const VerifyPhone = () => {
       <div className="flex items-center mb-8">
         <button
           type="button"
-          onClick={() => navigate("/auth/signup")}
+          onClick={() => navigate(backRoute)}
           className="bg-white/20 rounded-full p-2 mr-3 hover:bg-white/30 transition-colors"
         >
           <svg
@@ -235,11 +245,15 @@ export const VerifyPhone = () => {
         className="text-center mb-6"
       >
         {isExpired ? (
-          <p className="text-red-300 text-sm font-medium">OTP has expired. Please request a new one.</p>
+          <p className="text-red-300 text-sm font-medium">
+            OTP has expired. Please request a new one.
+          </p>
         ) : (
           <p className="text-white/70 text-sm">
             Code expires in{" "}
-            <span className={`font-semibold ${timeLeft <= 30 ? "text-red-300" : "text-white"}`}>
+            <span
+              className={`font-semibold ${timeLeft <= 30 ? "text-red-300" : "text-white"}`}
+            >
               {formatTime(timeLeft)}
             </span>
           </p>
@@ -256,7 +270,11 @@ export const VerifyPhone = () => {
         disabled={!isComplete || verifyMutation.isPending || isExpired}
         className="bg-white text-[#16956C] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mb-4 flex items-center justify-center"
       >
-        {verifyMutation.isPending ? <BeatLoader color="#16956C" size={8} /> : "Verify Phone Number"}
+        {verifyMutation.isPending ? (
+          <BeatLoader color="#16956C" size={8} />
+        ) : (
+          "Verify Phone Number"
+        )}
       </motion.button>
 
       {/* Resend OTP */}
@@ -266,11 +284,16 @@ export const VerifyPhone = () => {
         transition={{ delay: 0.4 }}
         className="text-center"
       >
-        <p className="text-white/70 text-sm mb-2">Didn&apos;t receive the code?</p>
+        <p className="text-white/70 text-sm mb-2">
+          Didn&apos;t receive the code?
+        </p>
         <button
           type="button"
           onClick={handleResend}
-          disabled={resendMutation.isPending || (!isExpired && timeLeft > OTP_EXPIRY_SECONDS - 30)}
+          disabled={
+            resendMutation.isPending ||
+            (!isExpired && timeLeft > OTP_EXPIRY_SECONDS - 30)
+          }
           className="text-white font-semibold underline underline-offset-2 hover:text-white/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm"
         >
           {resendMutation.isPending ? (

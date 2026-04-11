@@ -12,6 +12,15 @@ export const useLogin = () => {
       return data;
     },
     onSuccess: (data) => {
+      // If the response requires phone verification, skip token storage
+      // (no tokens are present in this response)
+      if (data?.data?.requiresPhoneVerification) {
+        showToast.success(
+          data.message || "An OTP has been sent to your phone number."
+        );
+        return;
+      }
+
       // Extract tokens and expiry from response
       const { token, refreshToken, expiresIn = 3600 } = data.data;
 
@@ -24,6 +33,7 @@ export const useLogin = () => {
 };
 
 export const useSignup = () => {
+  const dispatch = useDispatch();
   return useMutation({
     mutationFn: async (userData) => {
       console.log("Starting signup mutation with data:", userData); // Debug log
@@ -36,16 +46,9 @@ export const useSignup = () => {
         throw error;
       }
     },
-    onSuccess: (data) => {
-      console.log("Signup successful, storing token"); // Debug log
-
-      // Extract tokens and expiry from response
-      const { token, refreshToken, expiresIn = 3600 } = data;
-
-      // Store tokens using token manager
-      tokenManager.setTokens(token, refreshToken, expiresIn);
-
+    onSuccess: () => {
       showToast.success("Account created successfully!");
+      dispatch(resetProfile);
     },
     onError: (error) => {
       console.error("Signup error handler:", error); // Debug log
@@ -101,7 +104,7 @@ export const useChangePassword = () => {
     onError: (error) => {
       console.error("Password change error:", error);
       showToast.error(
-        error.response?.data?.message || "Failed to change password"
+        error.response?.data?.message || "Failed to change password",
       );
     },
   });
@@ -119,13 +122,18 @@ export const useVerifyPhone = () => {
       });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       showToast.success("Phone number verified successfully!");
+      // Extract tokens and expiry from response
+      const { token, refreshToken, expiresIn = 3600 } = data;
+
+      // Store tokens using token manager
+      tokenManager.setTokens(token, refreshToken, expiresIn);
     },
     onError: (error) => {
       console.error("Phone verification error:", error);
       showToast.error(
-        error.response?.data?.message || "Failed to verify phone number"
+        error.response?.data?.message || "Failed to verify phone number",
       );
     },
   });
@@ -147,9 +155,7 @@ export const useResendOTP = () => {
     },
     onError: (error) => {
       console.error("Resend OTP error:", error);
-      showToast.error(
-        error.response?.data?.message || "Failed to resend OTP"
-      );
+      showToast.error(error.response?.data?.message || "Failed to resend OTP");
     },
   });
 };

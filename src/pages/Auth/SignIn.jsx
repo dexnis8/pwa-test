@@ -74,6 +74,19 @@ export const SignIn = () => {
       const result = await loginMutation.mutateAsync(data);
       // Redirect to the attempted URL or dashboard
       console.log("LOGIN RESULT", result);
+
+      // Handle unverified phone number — backend sends OTP automatically
+      if (result?.data?.requiresPhoneVerification) {
+        navigate("/auth/verify-phone", {
+          replace: true,
+          state: {
+            phoneNumber: result.data.phoneNumber,
+            from: "signin",
+          },
+        });
+        return;
+      }
+
       if (result?.data.isProfileComplete) {
         const from = location.state?.from?.pathname || "/dashboard";
         navigate(from, { replace: true });
