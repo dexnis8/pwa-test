@@ -2,8 +2,10 @@ import axios from "axios";
 import { showToast } from "./toast.jsx";
 import tokenManager from "./tokenManager";
 
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
-// const baseURL = "http://localhost:5005/api/v1";
+const baseURL = (import.meta.env.ENV = "prod"
+  ? import.meta.env.VITE_API_URL
+  : import.meta.env.VITE_API_DEV_URL || "http://localhost:3000/api");
+
 
 console.log("API Base URL:", baseURL); // Debug log
 
@@ -82,7 +84,7 @@ axiosInstance.interceptors.response.use(
     //   tokenManager.clearTokens();
     //   window.location.href = "/auth/signin";
     // }
-    
+
     // Show error toast notification
     showToast.apiError(error);
 
