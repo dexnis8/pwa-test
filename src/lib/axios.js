@@ -1,12 +1,20 @@
-import axios from "axios";
+﻿import axios from "axios";
 import { showToast } from "./toast.jsx";
 import tokenManager from "./tokenManager";
 
-const baseURL = (import.meta.env.ENV = "prod"
-  ? import.meta.env.VITE_API_URL
-  : import.meta.env.VITE_API_DEV_URL || "http://localhost:3000/api");
+console.log(
+  "ENV VARIABLES",
+  import.meta.env.VITE_API_URL,
+  import.meta.env.VITE_API_DEV_URL,
+  import.meta.env.MODE,
+);
 
-
+// const baseURL =
+//   (import.meta.env.MODE === "production"
+//     ? import.meta.env.VITE_API_URL
+//     : import.meta.env.VITE_API_DEV_URL) ||
+//   "https://pace-app-backend-v1.onrender.com/api/v1";
+const baseURL = "https://pace-app-backend-v1.onrender.com/api/v1";
 console.log("API Base URL:", baseURL); // Debug log
 
 const axiosInstance = axios.create({
@@ -65,10 +73,18 @@ axiosInstance.interceptors.response.use(
         // Attempt to refresh the token
         const newToken = await tokenManager.refreshAccessToken();
 
-        // Update the authorization header with the new token
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        const access =
+          typeof newToken === "string"
+            ? newToken
+            : newToken && (newToken.accessToken || newToken.token);
+        if (access) {
+          originalRequest.headers.Authorization = `Bearer ${access}`;
+          try {
+            if (typeof tokenManager.setAccessToken === "function")
+              tokenManager.setAccessToken(access);
+          } catch (e) {}
+        }
 
-        // Retry the original request with the new token
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         // If refresh fails, redirect to login
