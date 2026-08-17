@@ -153,7 +153,7 @@ const ChooseInterests = () => {
               </svg>
             </button>
             <h1 className="text-[#16956C] text-2xl font-bold">
-              Choose <br /> your interest
+              Choose <br /> your subjects
             </h1>
           </div>
           <span className="text-gray-500 font-semibold">

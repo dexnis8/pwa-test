@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FaFacebookF } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSignup } from "../../hooks/api/useAuth";
 import { showToast } from "../../lib/toast.jsx";
 import BeatLoader from "react-spinners/BeatLoader";
@@ -33,7 +33,7 @@ const signUpSchema = z
         {
           message:
             "Please enter a valid Nigerian phone number (e.g., +2348012345678 or 08012345678)",
-        }
+        },
       ),
     password: z
       .string()
@@ -51,6 +51,9 @@ export const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const signupMutation = useSignup();
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get("ref");
+  console.log(refCode);
 
   const {
     register,
@@ -74,11 +77,16 @@ export const SignUp = () => {
       console.log("Sending signup data to API:", signupData); // Debug log
 
       // Call the mutation directly
-      const result = await signupMutation.mutateAsync(signupData);
+      const result = await signupMutation.mutateAsync({
+        ...signupData,
+        refCode,
+      });
       console.log("Mutation result:", result); // Debug log
 
       // Navigate to phone verification step with the phone number
-      navigate("/auth/verify-phone", { state: { phoneNumber: data.phoneNumber } });
+      navigate("/auth/verify-phone", {
+        state: { phoneNumber: data.phoneNumber },
+      });
     } catch (error) {
       console.error("Signup form submission error:", error); // Debug log
       // Error handling is done in the mutation

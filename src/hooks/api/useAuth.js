@@ -16,7 +16,7 @@ export const useLogin = () => {
       // (no tokens are present in this response)
       if (data?.data?.requiresPhoneVerification) {
         showToast.success(
-          data.message || "An OTP has been sent to your phone number."
+          data.message || "An OTP has been sent to your phone number.",
         );
         return;
       }

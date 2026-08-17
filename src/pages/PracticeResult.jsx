@@ -128,7 +128,7 @@ const PracticeResult = () => {
             [blob.type]: blob,
           }),
         ]);
-        alert("Image copied to clipboard");
+        // alert("Image copied to clipboard");
       }
     } catch (err) {
       console.error("Failed to copy image: ", err);

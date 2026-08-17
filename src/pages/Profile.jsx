@@ -299,7 +299,7 @@ const Profile = () => {
       {/* Interests Section */}
       <div className="px-6 mb-6">
         <div className="bg-white rounded-xl p-6 shadow-sm">
-          <h3 className="text-lg font-bold mb-4">Your Interests</h3>
+          <h3 className="text-lg font-bold mb-4">Your Subjects</h3>
           {isLoading ? (
             <div className="flex flex-wrap gap-2">
               {[1, 2, 3, 4].map((i) => (

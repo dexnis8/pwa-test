@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { selectPersonalInfo } from "../redux/slices/profileSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import DOMPurify from "dompurify";
+import axiosInstance from "../lib/axios";
 
 const subjectNames = {
   english: "English",
@@ -188,19 +189,9 @@ const ExamSimulation = () => {
   const submitExam = async () => {
     setIsSubmitting(true);
     try {
-      // Submit to API
-      const response = await fetch("/api/v1/exam/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ answers }),
-      });
-
-      const data = await response.json();
+      const { data } = await axiosInstance.post("/exam/submit", { answers });
 
       if (data.status === "success") {
-        // Navigate to results page with API response
         navigate("/jamb/exam/simulation/result", {
           state: {
             scores: data.data,
@@ -214,7 +205,6 @@ const ExamSimulation = () => {
       }
     } catch (error) {
       console.error("Exam submission error:", error);
-      alert("Failed to submit exam. Please try again.");
       setIsSubmitting(false);
     }
   };

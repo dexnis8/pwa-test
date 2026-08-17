@@ -3,6 +3,7 @@ import { showToast } from "./toast.jsx";
 import tokenManager from "./tokenManager";
 
 const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// const baseURL = "http://localhost:5005/api/v1";
 
 console.log("API Base URL:", baseURL); // Debug log
 
@@ -35,9 +36,8 @@ axiosInstance.interceptors.request.use(
     console.error("Request error:", error); // Debug log
     showToast.apiError(error);
     return Promise.reject(error);
-  }
+  },
 );
-
 
 // Response interceptor
 axiosInstance.interceptors.response.use(
@@ -78,16 +78,16 @@ axiosInstance.interceptors.response.use(
     }
 
     // If it's a 403 or token refresh failed, redirect to login
-    if (error.response?.status === 403) {
-      tokenManager.clearTokens();
-      window.location.href = "/auth/signin";
-    }
-
+    // if (error.response?.status === 403) {
+    //   tokenManager.clearTokens();
+    //   window.location.href = "/auth/signin";
+    // }
+    
     // Show error toast notification
     showToast.apiError(error);
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;
