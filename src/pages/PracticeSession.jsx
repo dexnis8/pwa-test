@@ -731,7 +731,7 @@ const PracticeSession = () => {
 
       {/* Reading passage - shown for comprehension-style question sets */}
       {currentQuestion.instruction && (
-        <p className="text-xs text-center my-2 text-amber-800 italic mb-2">
+        <p className="text-xs text-center my-2 mx-2 text-amber-800 italic mb-2">
           {currentQuestion.instruction}
         </p>
       )}
