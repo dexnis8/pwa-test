@@ -201,7 +201,7 @@ const LandingPage = () => {
   const toggleFAQ = (index) => {
     setOpenFAQ(openFAQ === index ? null : index);
   };
-  const appUrl = "https://pwa-test-vert-xi.vercel.app/auth/signin";
+  const appUrl = "https://app.paceapp.ng/auth/signin";
   const faqs = [
     {
       q: "Is Pace App free to use?",

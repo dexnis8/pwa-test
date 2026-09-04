@@ -1,11 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectPersonalInfo } from "../redux/slices/profileSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import DOMPurify from "dompurify";
 import axiosInstance from "../lib/axios";
+import {
+  EXAM_DURATION_SECONDS,
+  clearActiveExamAttempt,
+  getActiveExamAttempt,
+  getRemainingExamSeconds,
+  saveActiveExamAttempt,
+  saveExamResult,
+} from "../lib/examAttempt";
 
 const subjectNames = {
   english: "English",
@@ -29,26 +37,66 @@ const ExamSimulation = () => {
   const location = useLocation();
   const personalInfo = useSelector(selectPersonalInfo);
 
-  // Get exam data from navigation state
-  const { examData, subjects } = location.state || {};
+  const [attempt] = useState(() => {
+    const routeAttempt = location.state;
+    if (routeAttempt?.examData && routeAttempt?.subjects) return routeAttempt;
+    return getActiveExamAttempt();
+  });
+  const { examData, subjects, endsAt } = attempt || {};
 
   // State management
   const [currentSubject, setCurrentSubject] = useState(
-    subjects?.[0] || "english",
+    attempt?.currentSubject || subjects?.[0] || "english",
   );
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(
+    attempt?.currentQuestionIndex || 0,
+  );
   // Answer state format: { subject: [{ questionId, selectedOption }] }
   const [answers, setAnswers] = useState(() => {
-    const initialAnswers = {};
-    subjects?.forEach((subject) => {
-      initialAnswers[subject] = [];
-    });
-    return initialAnswers;
+    return Object.fromEntries(
+      (subjects || []).map((subject) => [
+        subject,
+        attempt?.answers?.[subject] || [],
+      ]),
+    );
   });
-  const [skipped, setSkipped] = useState({});
-  const [timeLeft, setTimeLeft] = useState(2 * 60 * 60); // 2 hours in seconds
+  const [skipped, setSkipped] = useState(attempt?.skipped || {});
+  const [timeLeft, setTimeLeft] = useState(() =>
+    endsAt ? getRemainingExamSeconds(endsAt) : EXAM_DURATION_SECONDS,
+  );
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const answersRef = useRef(answers);
+  const timeLeftRef = useRef(timeLeft);
+  const submissionStartedRef = useRef(false);
+
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
+
+  useEffect(() => {
+    if (!attempt || !examData || !subjects) return;
+
+    saveActiveExamAttempt({
+      ...attempt,
+      answers,
+      skipped,
+      currentSubject,
+      currentQuestionIndex,
+    });
+  }, [
+    attempt,
+    answers,
+    skipped,
+    currentSubject,
+    currentQuestionIndex,
+    examData,
+    subjects,
+  ]);
 
   // Redirect if no exam data
   useEffect(() => {
@@ -59,16 +107,21 @@ const ExamSimulation = () => {
 
   // Timer countdown
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleAutoSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    if (!endsAt) return undefined;
+
+    const tick = () => {
+      const remaining = getRemainingExamSeconds(endsAt);
+      timeLeftRef.current = remaining;
+      setTimeLeft(remaining);
+
+      if (remaining === 0) {
+        clearInterval(timer);
+        handleAutoSubmit();
+      }
+    };
+
+    const timer = setInterval(tick, 1000);
+    tick();
 
     return () => clearInterval(timer);
   }, []);
@@ -76,10 +129,14 @@ const ExamSimulation = () => {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e) => {
+      if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) return;
+
       if (e.key.toLowerCase() === "n") {
         handleNext();
       } else if (e.key.toLowerCase() === "p") {
         handlePrevious();
+      } else if (e.key.toLowerCase() === "s") {
+        handleSkip();
       }
     };
 
@@ -187,18 +244,46 @@ const ExamSimulation = () => {
   };
 
   const submitExam = async () => {
+    if (submissionStartedRef.current) return;
+
+    submissionStartedRef.current = true;
     setIsSubmitting(true);
     try {
-      const { data } = await axiosInstance.post("/exam/submit", { answers });
+      const submittedAnswers = answersRef.current;
+      const { data } = await axiosInstance.post("/exam/submit", {
+        answers: submittedAnswers,
+      });
 
-      if (data.status === "success") {
+      if (data.status === "success" || data.success === true) {
+        const payload = data.data || {};
+        const results = payload.results || payload.scores || payload;
+        const totalScore =
+          payload.totalScore ??
+          payload.score ??
+          subjects.reduce(
+            (total, subject) => total + (results?.[subject]?.score || 0),
+            0,
+          );
+        const totalQuestions =
+          payload.totalQuestions ??
+          subjects.reduce(
+            (total, subject) =>
+              total + (results?.[subject]?.total || examData[subject]?.length || 0),
+            0,
+          );
+        const resultState = {
+          results,
+          totalScore,
+          totalQuestions,
+          subjects,
+          timeSpent: EXAM_DURATION_SECONDS - timeLeftRef.current,
+          answers: submittedAnswers,
+        };
+
+        saveExamResult(resultState);
+        clearActiveExamAttempt();
         navigate("/jamb/exam/simulation/result", {
-          state: {
-            scores: data.data,
-            subjects,
-            timeSpent: 2 * 60 * 60 - timeLeft,
-            answers,
-          },
+          state: resultState,
         });
       } else {
         throw new Error(data.message || "Failed to submit exam");
@@ -206,6 +291,7 @@ const ExamSimulation = () => {
     } catch (error) {
       console.error("Exam submission error:", error);
       setIsSubmitting(false);
+      submissionStartedRef.current = false;
     }
   };
 
@@ -404,12 +490,12 @@ const ExamSimulation = () => {
                   Previous
                 </button>
 
-                {/* <button
+                <button
                   onClick={handleSkip}
                   className="px-6 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition-colors"
                 >
                   Skip
-                </button> */}
+                </button>
 
                 <button
                   onClick={handleNext}
@@ -467,10 +553,10 @@ const ExamSimulation = () => {
                   <div className="w-6 h-6 bg-gray-200 rounded"></div>
                   <span className="text-gray-700">Not Answered</span>
                 </div>
-                {/* <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
                   <div className="w-6 h-6 bg-red-500 rounded"></div>
                   <span className="text-gray-700">Skipped</span>
-                </div> */}
+                </div>
               </div>
 
               {/* Keyboard Shortcuts */}
@@ -489,6 +575,12 @@ const ExamSimulation = () => {
                     <span>Previous Question:</span>
                     <kbd className="px-2 py-1 bg-gray-100 rounded font-mono">
                       P
+                    </kbd>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Skip Question:</span>
+                    <kbd className="px-2 py-1 bg-gray-100 rounded font-mono">
+                      S
                     </kbd>
                   </div>
                 </div>

@@ -53,7 +53,6 @@ export const SignUp = () => {
   const signupMutation = useSignup();
   const [searchParams] = useSearchParams();
   const refCode = searchParams.get("ref");
-  console.log(refCode);
 
   const {
     register,
@@ -70,25 +69,21 @@ export const SignUp = () => {
   });
 
   const onSubmit = async (data) => {
-    console.log("Form submitted with data:", data); // Debug log
     try {
       // Remove confirmPassword before sending to API
       const { confirmPassword, ...signupData } = data;
-      console.log("Sending signup data to API:", signupData); // Debug log
 
       // Call the mutation directly
-      const result = await signupMutation.mutateAsync({
+      await signupMutation.mutateAsync({
         ...signupData,
         refCode,
       });
-      console.log("Mutation result:", result); // Debug log
 
       // Navigate to phone verification step with the phone number
       navigate("/auth/verify-phone", {
         state: { phoneNumber: data.phoneNumber },
       });
-    } catch (error) {
-      console.error("Signup form submission error:", error); // Debug log
+    } catch {
       // Error handling is done in the mutation
     }
   };

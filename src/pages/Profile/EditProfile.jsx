@@ -98,13 +98,10 @@ const EditProfile = () => {
 
   // Update useEffect for debugging
   useEffect(() => {
-    console.log("Personal Info from Redux:", personalInfo);
 
     if (personalInfo) {
-      console.log("Setting values from personalInfo");
       Object.keys(personalInfo).forEach((key) => {
         if (personalInfo[key] && key !== "avatarUrl") {
-          console.log(`Setting ${key}:`, personalInfo[key]);
           setValue(key, personalInfo[key]);
         }
       });
@@ -112,17 +109,14 @@ const EditProfile = () => {
 
     if (profileData?.data) {
       const apiData = profileData.data;
-      console.log("API Data received:", apiData);
 
       if (apiData.fullName) setValue("fullName", apiData.fullName);
       if (apiData.dateOfBirth) {
-        console.log("Setting DOB from API:", apiData.dateOfBirth);
         try {
           // Try to parse and format the date
           const date = new Date(apiData.dateOfBirth);
           if (!isNaN(date.getTime())) {
             const formattedDate = date.toISOString().split("T")[0];
-            console.log("Formatted DOB:", formattedDate);
             setValue("dateOfBirth", formattedDate);
           } else {
             console.error(
@@ -341,7 +335,6 @@ const EditProfile = () => {
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/images/default-avatar.png";
-                    console.log("Failed to load profile image");
                   }}
                 />
                 {isUploading && (

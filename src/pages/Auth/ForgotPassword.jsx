@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,7 +33,6 @@ export const ForgotPassword = () => {
     register,
     handleSubmit,
     formState: { errors },
-    getValues,
   } = useForm({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
@@ -42,9 +40,8 @@ export const ForgotPassword = () => {
     },
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = () => {
     // Handle password reset logic here
-    console.log("Requesting password reset for:", data.phoneNumber);
     setIsSubmitted(true);
 
     // For demo purposes, navigate to reset password page after successful submission

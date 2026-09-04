@@ -16,7 +16,7 @@ const buttonAnimation = {
 
 export const MotionButton = ({
   children,
-  animation = "pop",
+  animation: _animation = "pop",
   delay = 0,
   variant = "primary",
   size = "md",

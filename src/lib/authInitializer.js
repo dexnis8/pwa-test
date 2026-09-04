@@ -3,6 +3,8 @@ import tokenManager from "./tokenManager";
 // Time before expiration to trigger a refresh (in milliseconds)
 // 5 minutes before expiration
 const REFRESH_THRESHOLD = 5 * 60 * 1000;
+let refreshIntervalId = null;
+let initializationVersion = 0;
 
 /**
  * Initialize the authentication system
@@ -10,6 +12,9 @@ const REFRESH_THRESHOLD = 5 * 60 * 1000;
  * - Set up periodic token refresh
  */
 export const initializeAuth = async () => {
+  cleanupAuth();
+  const currentVersion = ++initializationVersion;
+
   try {
     // Check if we have tokens
     const accessToken = tokenManager.getAccessToken();
@@ -26,9 +31,14 @@ export const initializeAuth = async () => {
       await tokenManager.refreshAccessToken();
     }
 
+    // The component was unmounted while the refresh request was in flight.
+    if (currentVersion !== initializationVersion) return;
+
     // Set up periodic token check
     setupTokenRefreshInterval();
   } catch (error) {
+    if (currentVersion !== initializationVersion) return;
+
     console.error("Auth initialization failed:", error);
     // Clear tokens if initialization fails
     tokenManager.clearTokens();
@@ -53,8 +63,10 @@ const isTokenAboutToExpire = () => {
  * Set up an interval to check and refresh token if needed
  */
 const setupTokenRefreshInterval = () => {
+  cleanupAuth();
+
   // Check token every minute
-  const intervalId = setInterval(async () => {
+  refreshIntervalId = setInterval(async () => {
     try {
       // Only refresh if we have a refresh token and access token is about to expire
       if (tokenManager.getRefreshToken() && isTokenAboutToExpire()) {
@@ -63,21 +75,19 @@ const setupTokenRefreshInterval = () => {
     } catch (error) {
       console.error("Token refresh interval error:", error);
       // Stop checking if there's an error
-      clearInterval(intervalId);
+      cleanupAuth();
     }
   }, 60000); // Check every minute
-
-  // Store interval ID to clear it if needed
-  window.__tokenRefreshInterval = intervalId;
 };
 
 /**
  * Clean up token refresh interval
  */
 export const cleanupAuth = () => {
-  if (window.__tokenRefreshInterval) {
-    clearInterval(window.__tokenRefreshInterval);
-    window.__tokenRefreshInterval = null;
+  initializationVersion += 1;
+  if (refreshIntervalId) {
+    clearInterval(refreshIntervalId);
+    refreshIntervalId = null;
   }
 };
 

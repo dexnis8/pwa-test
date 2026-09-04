@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { getExamResult } from "../lib/examAttempt";
 
 const subjectNames = {
   english: "English",
@@ -22,15 +23,18 @@ const subjectNames = {
 const ExamSimulationResult = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const resultState = location.state?.results ? location.state : getExamResult();
   const { results, totalScore, totalQuestions, subjects, timeSpent } =
-    location.state || {};
+    resultState || {};
 
   if (!results) {
     navigate("/dashboard");
     return null;
   }
 
-  const percentage = Math.round((totalScore / totalQuestions) * 100);
+  const percentage = totalQuestions
+    ? Math.round((totalScore / totalQuestions) * 100)
+    : 0;
   const passed = percentage >= 50;
 
   const formatTime = (seconds) => {
@@ -150,4 +154,3 @@ const ExamSimulationResult = () => {
 };
 
 export default ExamSimulationResult;
-

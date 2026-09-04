@@ -5,6 +5,11 @@ import { selectPersonalInfo } from "../redux/slices/profileSlice";
 import { useExamSimulation } from "../hooks/api/useFeatures";
 import { BeatLoader } from "react-spinners";
 import { motion } from "framer-motion";
+import {
+  clearExamResult,
+  createExamAttempt,
+  saveActiveExamAttempt,
+} from "../lib/examAttempt";
 
 const subjectNames = {
   english: "English",
@@ -50,12 +55,14 @@ const ExamConfirmation = () => {
     setLoading(true);
     try {
       const examData = await fetchExamQuestions(selectedSubjects);
+      const attempt = createExamAttempt({ examData, subjects: selectedSubjects });
+
+      clearExamResult();
+      saveActiveExamAttempt(attempt);
+
       // Navigate to exam page with data
       navigate("/jamb/exam/simulation", {
-        state: {
-          examData,
-          subjects: selectedSubjects,
-        },
+        state: attempt,
       });
     } catch (error) {
       console.error("Failed to load exam:", error);
@@ -148,4 +155,3 @@ const ExamConfirmation = () => {
 };
 
 export default ExamConfirmation;
-

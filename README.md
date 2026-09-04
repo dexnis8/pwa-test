@@ -1,12 +1,47 @@
-# React + Vite
+# Pace App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Pace App is a React PWA for JAMB/UTME preparation. Learners can create targeted practice sessions, complete their profile, view a leaderboard, and take a four-subject JAMB exam simulation.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 19, Vite 6, Tailwind CSS 4, and Framer Motion
+- Redux Toolkit with Redux Persist for lightweight profile state
+- TanStack Query for API caching and Axios for authenticated requests
+- Vite PWA for installable/offline-friendly delivery
 
-## Expanding the ESLint configuration
+## Local development
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Copy `.env.example` to `.env` and set the API URLs.
+2. Install dependencies with `npm install`.
+3. Run `npm run dev`.
+
+Useful checks:
+
+- `npm run lint`
+- `npm run build`
+- `npm run preview`
+
+## Application flows
+
+- Auth: sign up, phone verification, sign in, reset password, and change password.
+- Profile: complete personal details, choose a department and subjects, edit the profile.
+- Practice: dashboard setup modal → `/practice/session` → `/practice/result`.
+- Exam simulation: choose four subjects → confirmation → `/jamb/exam/simulation` → results.
+
+The current exam attempt is stored in `sessionStorage`, so page refreshes retain the questions, answers, skipped questions, current position, and deadline during the active browser session.
+
+## Project layout
+
+- `src/pages`: route-level screens and flows.
+- `src/components`: shared layouts, modals, navigation, and UI primitives.
+- `src/hooks/api`: React Query data-access hooks.
+- `src/lib`: Axios/auth utilities, feedback helpers, query client, and exam-attempt persistence.
+- `src/redux`: persisted profile/auth client state.
+
+## Configuration and security
+
+Only values prefixed with `VITE_` are readable by frontend code, so they must never contain secrets. `.env` is intentionally ignored; use `.env.example` as the committed template. Authentication is currently token-based and relies on backend support for any migration to HTTP-only cookie sessions.
+
+## Quality status
+
+The project currently has lint and production-build scripts but no automated test suite. Add component tests for the auth, practice, and exam flows before making substantial UI or API-contract changes.

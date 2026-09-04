@@ -21,6 +21,7 @@ const PracticeResult = () => {
   const [shareCardVisible, setShareCardVisible] = React.useState(false);
   const [shareableImage, setShareableImage] = React.useState(null);
   const [showShareOptions, setShowShareOptions] = React.useState(false);
+  const [imageGenerationError, setImageGenerationError] = React.useState(null);
 
   // Calculate percentage score and feedback
   const percentage = Math.round((score / totalQuestions) * 100);
@@ -44,76 +45,45 @@ const PracticeResult = () => {
 
   // Handler for the share button click
   const handleShareClick = () => {
-    setShareableImage(null); // Reset the image first
+    setShareableImage(null);
+    setImageGenerationError(null);
     setShareCardVisible(true);
-
-    // Show share options with or without image after a short delay
-    setTimeout(() => {
-      setShowShareOptions(true);
-
-      // Set a timeout to create a fallback image if generation takes too long
-      const fallbackTimer = setTimeout(() => {
-        if (!shareableImage) {
-          console.log("Image generation taking too long, creating fallback");
-
-          // Create simple fallback canvas
-          const canvas = document.createElement("canvas");
-          canvas.width = 600;
-          canvas.height = 380;
-          const ctx = canvas.getContext("2d");
-
-          // Draw green background
-          ctx.fillStyle = "#16956C";
-          ctx.fillRect(0, 0, 600, 380);
-
-          // Draw text
-          ctx.fillStyle = "white";
-          ctx.font = "bold 28px Arial";
-          ctx.textAlign = "center";
-          ctx.fillText(`${subject.toUpperCase()} Practice Result`, 300, 100);
-
-          ctx.font = "bold 64px Arial";
-          ctx.fillText(`${score}/${totalQuestions}`, 300, 200);
-
-          ctx.font = "20px Arial";
-          ctx.fillText("https://pwa-test-vert-xi.vercel.app/", 300, 300);
-
-          // Set the fallback image
-          handleImageGenerated(canvas.toDataURL("image/png"));
-        }
-      }, 5000); // 5 second timeout for fallback
-
-      return () => clearTimeout(fallbackTimer);
-    }, 200);
+    setShowShareOptions(true);
   };
 
   // Handler for when the shareable image is generated
-  const handleImageGenerated = (imageUrl) => {
-    console.log("Image generated successfully");
+  const handleImageGenerated = React.useCallback((imageUrl) => {
     setShareableImage(imageUrl);
     setShareCardVisible(false);
-  };
+  }, []);
+
+  const handleImageGenerationError = React.useCallback((error) => {
+    setImageGenerationError(
+      error?.message || "We couldn't generate your result card. Please try again.",
+    );
+    setShareCardVisible(false);
+  }, []);
 
   // Sharing functions
   const shareToWhatsApp = () => {
-    const message = `Just completed a ${subject} practice on Pace App with a score of ${score}/${totalQuestions}! Join me and improve your exam prep: https://pwa-test-vert-xi.vercel.app/`;
+    const message = `Just completed a ${subject} practice on Pace App with a score of ${score}/${totalQuestions}! Join me and improve your exam prep: https://app.paceapp.ng/`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   const shareToTwitter = () => {
-    const message = `I scored ${score}/${totalQuestions} in ${subject} practice on Pace App! Join my journey to exam success: https://pwa-test-vert-xi.vercel.app/`;
+    const message = `I scored ${score}/${totalQuestions} in ${subject} practice on Pace App! Join my journey to exam success: https://app.paceapp.ng/`;
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`,
-      "_blank"
+      "_blank",
     );
   };
 
   const shareToFacebook = () => {
     window.open(
       `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        "https://pwa-test-vert-xi.vercel.app/"
+        "https://app.paceapp.ng/",
       )}`,
-      "_blank"
+      "_blank",
     );
   };
 
@@ -337,7 +307,7 @@ const PracticeResult = () => {
                 </button>
               </div>
 
-              {!shareableImage && (
+              {!shareableImage && !imageGenerationError && (
                 <div className="mb-6 py-8 flex flex-col items-center justify-center bg-gray-50 rounded-lg">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#16956C] mb-2"></div>
                   <p className="text-gray-500 text-sm mb-1">
@@ -346,6 +316,20 @@ const PracticeResult = () => {
                   <p className="text-gray-400 text-xs">
                     This may take a few seconds
                   </p>
+                </div>
+              )}
+
+              {imageGenerationError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-center">
+                  <p className="text-red-700 text-sm mb-3">
+                    {imageGenerationError}
+                  </p>
+                  <button
+                    onClick={handleShareClick}
+                    className="px-4 py-2 bg-[#16956C] text-white text-sm font-medium rounded-lg hover:bg-[#138055]"
+                  >
+                    Try again
+                  </button>
                 </div>
               )}
 
@@ -486,6 +470,7 @@ const PracticeResult = () => {
         examType={examType}
         mode={mode}
         onImageGenerated={handleImageGenerated}
+        onImageGenerationError={handleImageGenerationError}
         isVisible={shareCardVisible}
       />
     </div>

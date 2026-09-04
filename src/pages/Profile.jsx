@@ -32,7 +32,6 @@ const Profile = () => {
   };
 
   const profileData = data?.data || {};
-  console.log(profileData);
 
   // Create skeleton loaders for different components
   const Skeleton = ({ className, ...props }) => (

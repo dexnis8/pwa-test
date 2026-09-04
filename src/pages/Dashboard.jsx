@@ -7,7 +7,6 @@ const Dashboard = () => {
   const personalInfo = useSelector(selectPersonalInfo);
   const name = personalInfo.fullName?.split(" ")[0] || "User";
   const [isPracticeModalOpen, setIsPracticeModalOpen] = useState(false);
-  console.log(personalInfo);
   return (
     <div className="p-6">
       <h1 className="text-[#16956C] text-2xl font-bold mb-1">Hi, {name}</h1>

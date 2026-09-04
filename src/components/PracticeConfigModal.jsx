@@ -131,7 +131,7 @@ const TOPICS_BY_SUBJECT = {
     "Homeostasis - Endocrine System, Plant Hormones",
     "The Nervous System",
     "The Cell and its Environment",
-    "Classification VII: Vertebrates - Birds, Mammals",
+    "Classification VII: Vertebrates II - Birds, Mammals",
     "Supporting Tissues - Musculoskeletal System",
     "Digestive System - Digestive Enzymes, Dentition, Movement",
     "Transport - Circulatory System",
@@ -167,7 +167,6 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
 
   // Modified to handle subject selection
   const handleSubjectToggle = (subjectId) => {
-    console.log("Toggling subject:", subjectId);
     // Don't allow deselecting the currently selected subject
     if (selectedSubjects.includes(subjectId) && selectedSubjects.length === 1) {
       return;
@@ -278,12 +277,6 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
 
   const availableTopics = TOPICS_BY_SUBJECT[selectedSubjects[0]] || [];
 
-  // Add this console log to debug
-  console.log("Selected subject:", selectedSubjects[0]);
-  console.log(
-    "Available topics:",
-    selectedSubjects[0] ? TOPICS_BY_SUBJECT[selectedSubjects[0]] : [],
-  );
 
   if (!isOpen) return null;
 

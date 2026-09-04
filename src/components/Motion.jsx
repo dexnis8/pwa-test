@@ -1,9 +1,8 @@
-/* eslint-disable no-unused-vars */
 import React from "react";
 import { motion } from "framer-motion";
 
 // Animation presets for reuse across the app
-export const animations = {
+const animations = {
   fadeIn: {
     initial: { opacity: 0 },
     animate: { opacity: 1 },

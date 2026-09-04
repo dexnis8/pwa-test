@@ -63,14 +63,12 @@ export const ResetPassword = () => {
 
   const onSubmitOtp = (data) => {
     // Verify OTP with backend
-    console.log("Verifying OTP:", data.otp);
     // For demo purposes, just set the OTP as verified
     setOtpVerified(true);
   };
 
   const onSubmit = (data) => {
     // Handle password reset logic here
-    console.log("Setting new password:", data.password);
     setIsSubmitted(true);
 
     // Redirect to sign in after a delay

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import axiosInstance from "../../lib/axios";
 import { showToast } from "../../lib/toast.jsx";
 import { useDispatch } from "react-redux";
@@ -10,7 +11,7 @@ import { useNavigate } from "react-router-dom";
  */
 export const useProfile = () => {
   const dispatch = useDispatch();
-  return useQuery({
+  const profileQuery = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
       const { data } = await axiosInstance.get("/student/get-profile");
@@ -18,32 +19,38 @@ export const useProfile = () => {
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      const result = data.data;
-      console.log("Profile result", result);
-      dispatch(
-        updatePersonalInfo({
-          fullName: result.fullName,
-          email: result.email,
-          avatarUrl: result.image,
-          gender: result.gender,
-          dateOfBirth: result.dateOfBirth,
-          levelOfStudy: result.levelOfStudy,
-        }),
-      );
-    },
-    onError: (error) => {
-      console.error("Profile fetch error:", error);
-      showToast.error("Failed to load profile. Please try again.");
-    },
   });
+
+  useEffect(() => {
+    const result = profileQuery.data?.data;
+    if (!result) return;
+
+    dispatch(
+      updatePersonalInfo({
+        fullName: result.fullName,
+        email: result.email,
+        avatarUrl: result.image,
+        gender: result.gender,
+        dateOfBirth: result.dateOfBirth,
+        levelOfStudy: result.levelOfStudy,
+      }),
+    );
+  }, [dispatch, profileQuery.data]);
+
+  useEffect(() => {
+    if (profileQuery.isError) {
+      showToast.error("Failed to load profile. Please try again.");
+    }
+  }, [profileQuery.isError]);
+
+  return profileQuery;
 };
 
 /**
  * Hook for fetching leaderboard data
  */
 export const useLeaderboard = () => {
-  return useQuery({
+  const leaderboardQuery = useQuery({
     queryKey: ["leaderboard"],
     queryFn: async () => {
       const { data } = await axiosInstance.get("/leaderboard");
@@ -51,11 +58,15 @@ export const useLeaderboard = () => {
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     refetchOnWindowFocus: false,
-    onError: (error) => {
-      console.error("Leaderboard fetch error:", error);
-      showToast.error("Failed to load leaderboard. Please try again.");
-    },
   });
+
+  useEffect(() => {
+    if (leaderboardQuery.isError) {
+      showToast.error("Failed to load leaderboard. Please try again.");
+    }
+  }, [leaderboardQuery.isError]);
+
+  return leaderboardQuery;
 };
 
 /**

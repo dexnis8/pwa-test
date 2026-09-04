@@ -2,20 +2,15 @@
 import { showToast } from "./toast.jsx";
 import tokenManager from "./tokenManager";
 
-console.log(
-  "ENV VARIABLES",
-  import.meta.env.VITE_API_URL,
-  import.meta.env.VITE_API_DEV_URL,
-  import.meta.env.MODE,
-);
+const baseURL = import.meta.env.VITE_PROD
+  ? import.meta.env.VITE_API_URL
+  : import.meta.env.VITE_API_DEV_URL || import.meta.env.VITE_API_URL;
 
-// const baseURL =
-//   (import.meta.env.MODE === "production"
-//     ? import.meta.env.VITE_API_URL
-//     : import.meta.env.VITE_API_DEV_URL) ||
-//   "https://pace-app-backend-v1.onrender.com/api/v1";
-const baseURL = "https://pace-app-backend-v1.onrender.com/api/v1";
-console.log("API Base URL:", baseURL); // Debug log
+if (!baseURL) {
+  throw new Error("A VITE_API_URL or VITE_API_DEV_URL value is required.");
+}
+
+let refreshPromise = null;
 
 const axiosInstance = axios.create({
   baseURL,
@@ -27,14 +22,10 @@ const axiosInstance = axios.create({
 // Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    console.log("Making API request to:", config.url); // Debug log
-
     // Skip token check if explicitly marked to skip auth refresh
     if (config.skipAuthRefresh) {
       return config;
     }
-
-    console.log("Request data:", config.data); // Debug log
 
     const token = tokenManager.getAccessToken();
     if (token) {
@@ -43,7 +34,6 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error("Request error:", error); // Debug log
     showToast.apiError(error);
     return Promise.reject(error);
   },
@@ -52,12 +42,9 @@ axiosInstance.interceptors.request.use(
 // Response interceptor
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log("API Response:", response.data); // Debug log
     return response;
   },
   async (error) => {
-    console.error("API Error:", error.response || error); // Debug log
-
     // Get the original request config
     const originalRequest = error.config;
 
@@ -70,25 +57,23 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Attempt to refresh the token
-        const newToken = await tokenManager.refreshAccessToken();
+        // Share a single refresh request across concurrent 401 responses.
+        if (!refreshPromise) {
+          refreshPromise = tokenManager
+            .refreshAccessToken()
+            .finally(() => {
+              refreshPromise = null;
+            });
+        }
 
-        const access =
-          typeof newToken === "string"
-            ? newToken
-            : newToken && (newToken.accessToken || newToken.token);
+        const access = await refreshPromise;
         if (access) {
           originalRequest.headers.Authorization = `Bearer ${access}`;
-          try {
-            if (typeof tokenManager.setAccessToken === "function")
-              tokenManager.setAccessToken(access);
-          } catch (e) {}
         }
 
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, redirect to login
-        console.error("Token refresh failed:", refreshError);
+        // If refresh fails, redirect to login.
         tokenManager.clearTokens();
         window.location.href = "/auth/signin";
         return Promise.reject(refreshError);

@@ -73,7 +73,6 @@ export const SignIn = () => {
     try {
       const result = await loginMutation.mutateAsync(data);
       // Redirect to the attempted URL or dashboard
-      console.log("LOGIN RESULT", result);
 
       // Handle unverified phone number — backend sends OTP automatically
       if (result?.data?.requiresPhoneVerification) {

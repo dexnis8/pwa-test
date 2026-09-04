@@ -32,7 +32,6 @@ import ExamConfirmation from "./pages/ExamConfirmation";
 import ExamSimulation from "./pages/ExamSimulation";
 import ExamSimulationResult from "./pages/ExamSimulationResult";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import LandingPage from "./pages/LandingPage.jsx";
 
 function App() {
   const location = useLocation();
@@ -41,9 +40,6 @@ function App() {
     <AnimatePresence mode="wait">
       {/* Use location and key on Routes for AnimatePresence */}
       <Routes location={location} key={location.pathname}>
-        {/* Landing Page Route (Full Width) */}
-        {/* <Route path="/" element={<LandingPage />} /> */}
-
         {/* App Routes (Constrained by MobileLayout) */}
         <Route
           path="/"

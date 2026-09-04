@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -54,6 +53,7 @@ const ReportIssueModal = ({
     { value: "", label: "Select issue type" },
     { value: "incorrect answer", label: "Incorrect Answer" },
     { value: "wrong question", label: "Wrong Question" },
+    { value: "wrong explanation", label: "Wrong Explanation" },
     { value: "typo error", label: "Typo/Grammar Error" },
     { value: "unclear question", label: "Unclear Question" },
     { value: "missing image", label: "Missing/Broken Image" },

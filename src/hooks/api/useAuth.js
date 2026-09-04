@@ -36,23 +36,12 @@ export const useSignup = () => {
   const dispatch = useDispatch();
   return useMutation({
     mutationFn: async (userData) => {
-      console.log("Starting signup mutation with data:", userData); // Debug log
-      try {
-        const response = await axiosInstance.post("/auth/sign-up", userData);
-        console.log("Signup response:", response.data); // Debug log
-        return response.data;
-      } catch (error) {
-        console.error("Signup mutation error:", error); // Debug log
-        throw error;
-      }
+      const response = await axiosInstance.post("/auth/sign-up", userData);
+      return response.data;
     },
     onSuccess: () => {
       showToast.success("Account created successfully!");
       dispatch(resetProfile);
-    },
-    onError: (error) => {
-      console.error("Signup error handler:", error); // Debug log
-      // showToast.apiError(error);
     },
   });
 };
