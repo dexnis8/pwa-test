@@ -288,14 +288,14 @@ export const SignUp = () => {
         </button>
 
         {/* OR Divider */}
-        <div className="flex items-center my-6">
+        {/* <div className="flex items-center my-6">
           <div className="flex-1 border-t border-white/30"></div>
           <span className="mx-4 text-white">or</span>
           <div className="flex-1 border-t border-white/30"></div>
-        </div>
+        </div> */}
 
         {/* Social Sign Up Buttons */}
-        <div className="flex gap-4">
+        {/* <div className="flex gap-4">
           <button
             type="button"
             disabled={true}
@@ -317,7 +317,7 @@ export const SignUp = () => {
               <FaFacebookF className="w-4 h-4" />
             </div>
           </button>
-        </div>
+        </div> */}
       </form>
     </div>
   );

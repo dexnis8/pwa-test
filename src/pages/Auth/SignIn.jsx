@@ -42,7 +42,7 @@ const signInSchema = z.object({
           }
           return "Username must be at least 3 characters";
         },
-      }
+      },
     ),
   password: z
     .string()
@@ -205,14 +205,14 @@ export const SignIn = () => {
         </button>
 
         {/* OR Divider */}
-        <div className="flex items-center my-6">
+        {/* <div className="flex items-center my-6">
           <div className="flex-1 border-t border-white/30"></div>
           <span className="mx-4 text-white">or</span>
           <div className="flex-1 border-t border-white/30"></div>
-        </div>
+        </div> */}
 
         {/* Social Sign In Buttons */}
-        <div className="flex gap-4">
+        {/* <div className="flex gap-4">
           <button
             type="button"
             className="flex-1 gap-2 bg-white text-[#16956C] py-2 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer flex items-center justify-center"
@@ -232,7 +232,7 @@ export const SignIn = () => {
               <FaFacebookF className="w-4 h-4" />
             </div>
           </button>
-        </div>
+        </div> */}
       </form>
     </div>
   );
