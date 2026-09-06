@@ -111,7 +111,7 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
     const isMobile = window.innerWidth < 1024; // lg breakpoint
 
     if (isMobile) {
-      showToast.error(
+      showToast.info(
         "Exam Simulation is only available on desktop devices. Please use a larger screen.",
       );
       return;

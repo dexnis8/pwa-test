@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import axiosInstance from "../../lib/axios";
 import { showToast } from "../../lib/toast.jsx";
+import { errorMessage } from "../../lib/apiError.js";
 import { useDispatch } from "react-redux";
 import { updatePersonalInfo } from "../../redux/slices/profileSlice.js";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +20,7 @@ export const useProfile = () => {
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     refetchOnWindowFocus: false,
+    meta: { errorMessage: "Couldn't load your profile. Pull to refresh." },
   });
 
   useEffect(() => {
@@ -37,12 +39,6 @@ export const useProfile = () => {
     );
   }, [dispatch, profileQuery.data]);
 
-  useEffect(() => {
-    if (profileQuery.isError) {
-      showToast.error("Failed to load profile. Please try again.");
-    }
-  }, [profileQuery.isError]);
-
   return profileQuery;
 };
 
@@ -58,13 +54,10 @@ export const useLeaderboard = () => {
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     refetchOnWindowFocus: false,
+    // The Leaderboard screen renders its own error state with a Retry button,
+    // so a toast would only repeat what is already on the page.
+    meta: { silentError: true },
   });
-
-  useEffect(() => {
-    if (leaderboardQuery.isError) {
-      showToast.error("Failed to load leaderboard. Please try again.");
-    }
-  }, [leaderboardQuery.isError]);
 
   return leaderboardQuery;
 };
@@ -103,14 +96,7 @@ export const useImageUpload = () => {
         queryClient.invalidateQueries({ queryKey: ["profile"] });
       }
     },
-    onError: (error) => {
-      // Custom error handling
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to upload image";
-      showToast.error(errorMessage);
-    },
+    meta: { errorMessage: "Couldn't upload that image." },
   });
 };
 
@@ -140,10 +126,7 @@ export const useCompleteProfile = () => {
       showToast.success("Profile completed successfully!");
       return data;
     },
-    onError: (error) => {
-      console.error("Profile completion error:", error);
-      // Error handling is done in axios interceptor
-    },
+    meta: { errorMessage: "Couldn't save your profile. Please try again." },
   });
 };
 
@@ -176,12 +159,7 @@ export const useUpdateProfile = () => {
       showToast.success("Profile updated successfully!");
       return data;
     },
-    onError: (error) => {
-      console.error("Profile update error:", error);
-      showToast.error(
-        error.response?.data?.message || "Failed to update profile",
-      );
-    },
+    meta: { errorMessage: "Couldn't update your profile." },
   });
 };
 
@@ -208,11 +186,13 @@ export const useQuestions = () => {
         throw new Error(data.message || "Failed to fetch questions");
       }
     } catch (error) {
-      navigate("/dashboard");
-      console.error("Questions fetch error:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to load questions",
+      const message = errorMessage(
+        error,
+        "Couldn't load those questions. Please try again.",
       );
+      showToast.apiError(error, message);
+      navigate("/dashboard");
+      throw new Error(message);
     }
   };
 
@@ -242,13 +222,7 @@ export const useReportIssue = () => {
         showToast.error(data.message || "Failed to submit report");
       }
     },
-    onError: (error) => {
-      console.error("Report issue error:", error);
-      showToast.error(
-        error.response?.data?.message ||
-          "Failed to report issue. Please try again.",
-      );
-    },
+    meta: { errorMessage: "Couldn't send that report. Please try again." },
   });
 };
 
@@ -275,11 +249,13 @@ export const useExamSimulation = () => {
         throw new Error(data.message || "Failed to fetch exam questions");
       }
     } catch (error) {
-      navigate("/dashboard");
-      console.error("Exam simulation fetch error:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to load exam questions",
+      const message = errorMessage(
+        error,
+        "Couldn't load the exam questions. Please try again.",
       );
+      showToast.apiError(error, message);
+      navigate("/dashboard");
+      throw new Error(message);
     }
   };
 

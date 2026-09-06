@@ -29,6 +29,7 @@ export const useLogin = () => {
 
       showToast.success("Successfully logged in!");
     },
+    meta: { errorMessage: "Couldn't sign you in. Check your details." },
   });
 };
 
@@ -45,6 +46,7 @@ export const useSignup = () => {
       // function, not an action, so the profile was never actually cleared.
       dispatch(resetProfile());
     },
+    meta: { errorMessage: "Couldn't create your account." },
   });
 };
 
@@ -77,6 +79,7 @@ export const useLogout = () => {
 
       window.location.href = "/auth/signin";
     },
+    meta: { silentError: true },
   });
 };
 
@@ -97,12 +100,7 @@ export const useChangePassword = () => {
     onSuccess: () => {
       showToast.success("Password changed successfully!");
     },
-    onError: (error) => {
-      console.error("Password change error:", error);
-      showToast.error(
-        error.response?.data?.message || "Failed to change password",
-      );
-    },
+    meta: { errorMessage: "Couldn't change your password." },
   });
 };
 
@@ -130,12 +128,7 @@ export const useVerifyPhone = () => {
         tokenManager.setTokens(token, refreshToken, expiresIn);
       }
     },
-    onError: (error) => {
-      console.error("Phone verification error:", error);
-      showToast.error(
-        error.response?.data?.message || "Failed to verify phone number",
-      );
-    },
+    meta: { errorMessage: "Couldn't verify that code." },
   });
 };
 
@@ -153,9 +146,6 @@ export const useResendOTP = () => {
     onSuccess: () => {
       showToast.success("OTP resent successfully!");
     },
-    onError: (error) => {
-      console.error("Resend OTP error:", error);
-      showToast.error(error.response?.data?.message || "Failed to resend OTP");
-    },
+    meta: { errorMessage: "Couldn't resend the code. Try again shortly." },
   });
 };

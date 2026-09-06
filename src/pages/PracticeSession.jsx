@@ -377,9 +377,12 @@ const PracticeSession = () => {
         }
       }
     } catch (error) {
-      // The axios interceptor has already surfaced this. Let the learner carry
-      // on rather than trapping them on a question we could not mark.
+      // Let the learner carry on rather than trapping them on a question we
+      // could not mark — but say so, or the missing feedback looks like a bug.
+      // Their answer is already recorded against the session server-side, so
+      // the final score will still be right.
       console.error("Failed to grade answer:", error);
+      showToast.info("Couldn't mark that one right now — your answer is saved.");
     } finally {
       setIsGrading(false);
       setShowFeedback(true);
@@ -413,8 +416,13 @@ const PracticeSession = () => {
         }
       } catch (error) {
         // Keep the learner moving; their answers are already recorded against
-        // the session and the submit can be retried by support if needed.
+        // the session and the submit can be retried by support if needed. This
+        // one is worth flagging: the score on the next screen is the local
+        // tally, not the server's confirmed one.
         console.error("Failed to submit practice session:", error);
+        showToast.warning(
+          "We couldn't confirm your score with the server. Your answers are saved.",
+        );
       }
     }
 

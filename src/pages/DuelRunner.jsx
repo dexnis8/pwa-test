@@ -6,11 +6,13 @@ import { SERVER_EVENTS, CLIENT_EVENTS } from "../lib/socketEvents";
 import { duelApi, useDuelOptions } from "../hooks/api/useDuel";
 import { questionHtml, explanationHtml } from "../lib/questionText";
 import { showToast } from "../lib/toast";
+import { normalizeError } from "../lib/apiError";
 import QuitConfirmationModal from "../components/QuitConfirmationModal";
 import {
   Avatar,
   CountdownRing,
   Spinner,
+  ErrorState,
   formatDuration,
   useCountdown,
   titleCase,
@@ -46,6 +48,7 @@ const DuelRunner = () => {
   const [showQuit, setShowQuit] = useState(false);
   const [emotes, setEmotes] = useState([]);
   const [countdown, setCountdown] = useState(null);
+  const [loadError, setLoadError] = useState(null);
 
   const answeredRoundRef = useRef(0);
 
@@ -54,6 +57,7 @@ const DuelRunner = () => {
   // ── Loading and resume ─────────────────────────────────────────────────────
   const load = useCallback(async () => {
     try {
+      setLoadError(null);
       const next = await duelApi.start(challengeId);
 
       if (next?.phase === "completed") {
@@ -66,10 +70,29 @@ const DuelRunner = () => {
       setFeedback(null);
       setOpponentAnswered(false);
     } catch (error) {
-      showToast.error(
-        error.response?.data?.message || "Could not open that duel.",
+      // A duel that genuinely is not ours or no longer exists is settled — go
+      // back to the Arena. Anything else (a dropped connection, a server
+      // hiccup) is very likely temporary, and throwing the learner out of a
+      // match they are mid-way through would lose them the match. Show the
+      // failure in place with a Retry instead.
+      const { status, message, kind } = normalizeError(
+        error,
+        "Could not open that duel.",
       );
-      navigate("/challenges", { replace: true });
+
+      if (status === 403 || status === 404) {
+        showToast.error(message);
+        navigate("/challenges", { replace: true });
+        return;
+      }
+
+      setLoadError({
+        message,
+        body:
+          kind === "network"
+            ? "Your connection dropped. Your place in the duel is held on the server — reconnect and pick up where you left off."
+            : "Your progress is saved on the server. Try again in a moment.",
+      });
     } finally {
       setLoading(false);
     }
@@ -130,7 +153,7 @@ const DuelRunner = () => {
         if (payload.challengeId !== challengeId) return;
         setOpponentState(payload.state);
         if (payload.state === "reconnecting") {
-          showToast.error("Your opponent dropped — waiting for them to come back.");
+          showToast.info("Your opponent dropped — waiting for them to come back.");
         }
       }),
 
@@ -194,6 +217,73 @@ const DuelRunner = () => {
 
   // ── Answering ──────────────────────────────────────────────────────────────
 
+  /**
+   * Submits one answer, surviving a transient failure.
+   *
+   * The server's submit is idempotent — it keys off (participant, round) and
+   * replays the original mark rather than scoring twice — which is what makes
+   * a blind retry safe here. Without one, a single dropped packet or a moment
+   * of write contention on the challenge document showed the learner a red
+   * popup mid-duel for something that would have worked on the next attempt.
+   */
+  const submitWithRetry = useCallback(async (round, optionId, attempts = 2) => {
+    let lastError = null;
+
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+      try {
+        return await duelApi.answer(challengeId, {
+          round,
+          selectedOptionId: optionId,
+        });
+      } catch (error) {
+        lastError = error;
+        // A 4xx is a settled answer from the server: retrying cannot change
+        // it. Only a timeout, a dropped connection or a 5xx is worth a second
+        // attempt.
+        if (!normalizeError(error).isRetryable) break;
+        if (attempt < attempts - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        }
+      }
+    }
+
+    throw lastError;
+  }, [challengeId]);
+
+  /**
+   * The server and this screen disagree about which round we are on — the
+   * usual cause is the round closing on the server's clock while an answer was
+   * in flight. That is ordinary duel timing, not an error, so it resyncs
+   * quietly rather than telling the learner something went wrong.
+   */
+  const resyncFromServer = useCallback(async () => {
+    try {
+      const next = await duelApi.state(challengeId);
+
+      if (next?.phase === "completed") {
+        navigate(`/duel/${challengeId}/result`, { replace: true });
+        return;
+      }
+
+      // `/state` reports the round but only carries a question when one is
+      // open and unanswered. In an async run the next round has to be opened
+      // before there is anything to render, and `/start` is the idempotent
+      // call that does it — so fall through to the loader rather than putting
+      // the learner in front of an empty question card.
+      if (next?.phase === "playing" && !next?.question) {
+        await load();
+        return;
+      }
+
+      setState(next);
+      setSelected(null);
+      setFeedback(null);
+      setOpponentAnswered(false);
+    } catch {
+      // The socket or the poll will bring us back into line.
+    }
+  }, [challengeId, load, navigate]);
+
   const handleAnswer = async (optionId) => {
     if (selected != null || submitting || feedback) return;
     if (!state?.round) return;
@@ -203,10 +293,7 @@ const DuelRunner = () => {
     answeredRoundRef.current = state.round;
 
     try {
-      const result = await duelApi.answer(challengeId, {
-        round: state.round,
-        selectedOptionId: optionId,
-      });
+      const result = await submitWithRetry(state.round, optionId);
 
       if (isLive) {
         // In a live duel the reveal waits for the round to close, so all we
@@ -241,10 +328,20 @@ const DuelRunner = () => {
         }, 2600);
       }
     } catch (error) {
-      showToast.error(
-        error.response?.data?.message || "That answer didn't register.",
-      );
+      if (normalizeError(error).status === 409) {
+        // "That round has already moved on" / "You have already finished your
+        // run": the server is ahead of us. Catch up silently — this is duel
+        // timing, not a failure, and it is the case that used to greet the
+        // learner with a red popup.
+        await resyncFromServer();
+        return;
+      }
+
+      // Let the learner tap the same option again. Re-submitting is safe: the
+      // server replays an answer it already has rather than scoring it twice.
       setSelected(null);
+      answeredRoundRef.current = 0;
+      showToast.apiError(error, "That answer didn't register — tap it again.");
     } finally {
       setSubmitting(false);
     }
@@ -264,10 +361,7 @@ const DuelRunner = () => {
     if (isLive) return; // the server closes live rounds on its own clock
 
     try {
-      const result = await duelApi.answer(challengeId, {
-        round: state.round,
-        selectedOptionId: null,
-      });
+      const result = await submitWithRetry(state.round, null);
 
       setFeedback({
         correctOptionId: result.answer.correctOptionId,
@@ -294,10 +388,23 @@ const DuelRunner = () => {
           setFeedback(null);
         }, 2600);
       }
-    } catch {
-      // Nothing useful to show; the sweeper resolves a stuck duel.
+    } catch (error) {
+      // A missed question is not something to interrupt anyone about: the
+      // server records the miss on its own clock and the sweeper resolves a
+      // stuck duel. Only resync if we have fallen behind.
+      if (normalizeError(error).status === 409) await resyncFromServer();
     }
-  }, [challengeId, feedback, isLive, navigate, selected, state?.round, submitting]);
+  }, [
+    challengeId,
+    feedback,
+    isLive,
+    navigate,
+    resyncFromServer,
+    selected,
+    state?.round,
+    submitWithRetry,
+    submitting,
+  ]);
 
   const sendEmote = (emoteId) => {
     emit(CLIENT_EVENTS.DUEL_EMOTE, { challengeId, emoteId });
@@ -315,7 +422,30 @@ const DuelRunner = () => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   if (loading) return <Spinner label="Setting up your duel…" />;
-  if (!state) return null;
+
+  if (loadError) {
+    return (
+      <ErrorState
+        title={loadError.message}
+        body={loadError.body}
+        onRetry={() => {
+          setLoading(true);
+          load();
+        }}
+        secondary={{ label: "Back to the Arena", onClick: () => navigate("/challenges") }}
+      />
+    );
+  }
+
+  if (!state) {
+    return (
+      <ErrorState
+        title="This duel isn't available"
+        body="It may have finished or been cancelled."
+        secondary={{ label: "Back to the Arena", onClick: () => navigate("/challenges") }}
+      />
+    );
+  }
 
   if (state.phase === "waiting_for_opponent") {
     return <WaitingScreen state={state} challengeId={challengeId} />;

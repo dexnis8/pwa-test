@@ -1,5 +1,5 @@
 ﻿import axios from "axios";
-import { showToast } from "./toast.jsx";
+import { normalizeError } from "./apiError";
 import tokenManager from "./tokenManager";
 
 // Vite sets PROD for `vite build` and DEV for `vite dev`, so the API target
@@ -33,6 +33,23 @@ if (
 
 let refreshPromise = null;
 
+/**
+ * Attaches the normalized form to the error and hands it back.
+ *
+ * The interceptor deliberately does **not** toast. It used to, and that single
+ * line was the reason one failed action could paint three or four red popups:
+ * the interceptor fired once per attempt (React Query retries), then the
+ * mutation's own `onError` fired again with its own wording. Presentation now
+ * happens in exactly one place — the React Query cache handlers in
+ * `lib/react-query.js` — and every layer below this one just reports facts.
+ */
+const decorate = (error) => {
+  if (error && typeof error === "object") {
+    error.normalized = normalizeError(error);
+  }
+  return error;
+};
+
 const axiosInstance = axios.create({
   baseURL,
   headers: {
@@ -54,10 +71,7 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    showToast.apiError(error);
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(decorate(error)),
 );
 
 // Response interceptor
@@ -69,10 +83,19 @@ axiosInstance.interceptors.response.use(
     // Get the original request config
     const originalRequest = error.config;
 
-    // Check if error is due to token expiration (401 Unauthorized)
+    // Check if error is due to token expiration (401 Unauthorized).
+    //
+    // `skipAuthRefresh` has to be honoured here and not only on the way out.
+    // The refresh call itself carries the flag, and when a refresh token has
+    // genuinely expired that call comes back 401 — without this check it fell
+    // into the branch below, found `refreshPromise` already set, and awaited
+    // the very promise it was itself blocking. The result was not an error
+    // message: it was a request that never settled, so the learner sat on a
+    // spinner instead of being sent to sign in.
     if (
       error.response?.status === 401 &&
-      !originalRequest._retry &&
+      !originalRequest?.skipAuthRefresh &&
+      !originalRequest?._retry &&
       tokenManager.getRefreshToken()
     ) {
       originalRequest._retry = true;
@@ -94,23 +117,20 @@ axiosInstance.interceptors.response.use(
 
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, redirect to login.
+        // If refresh fails, redirect to login. The redirect is the message —
+        // a toast that unmounts a frame later would only flash, so mark both
+        // this error and the original request's as handled here.
         tokenManager.clearTokens();
         window.location.href = "/auth/signin";
-        return Promise.reject(refreshError);
+        if (refreshError && typeof refreshError === "object") {
+          refreshError.handledByAuthFlow = true;
+        }
+        error.handledByAuthFlow = true;
+        return Promise.reject(decorate(refreshError));
       }
     }
 
-    // If it's a 403 or token refresh failed, redirect to login
-    // if (error.response?.status === 403) {
-    //   tokenManager.clearTokens();
-    //   window.location.href = "/auth/signin";
-    // }
-
-    // Show error toast notification
-    showToast.apiError(error);
-
-    return Promise.reject(error);
+    return Promise.reject(decorate(error));
   },
 );
 

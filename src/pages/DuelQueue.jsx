@@ -46,7 +46,7 @@ const DuelQueue = () => {
         setStatus(payload);
         if (payload?.inQueue === false && payload?.error) {
           setSearching(false);
-          showToast.error(payload.error);
+          showToast.warning(payload.error);
         }
       }),
       subscribe(SERVER_EVENTS.QUEUE_ASYNC_OFFER, () => setAsyncOffer(true)),
@@ -109,14 +109,12 @@ const DuelQueue = () => {
       setSearching(true);
 
       if (result?.distributed === false) {
-        showToast.error(
+        showToast.info(
           "Matchmaking is running in limited mode right now — you may be offered a solo run.",
         );
       }
     } catch (error) {
-      showToast.error(
-        error.response?.data?.message || "Could not join the queue.",
-      );
+      showToast.apiError(error, "Could not join the queue.");
     }
   };
 

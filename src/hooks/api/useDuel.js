@@ -27,6 +27,7 @@ export const useLobby = (filters = {}) =>
     },
     staleTime: 15 * 1000,
     refetchInterval: 30 * 1000,
+    meta: { background: true },
   });
 
 export const useMyChallenges = () =>
@@ -38,6 +39,7 @@ export const useMyChallenges = () =>
     },
     staleTime: 10 * 1000,
     refetchInterval: 30 * 1000,
+    meta: { background: true },
   });
 
 /**
@@ -54,6 +56,7 @@ export const useActiveChallenges = () =>
     },
     staleTime: 10 * 1000,
     refetchOnWindowFocus: true,
+    meta: { background: true },
   });
 
 export const useInvites = () =>
@@ -110,11 +113,7 @@ export const useCreateChallenge = () => {
       return unwrap(data);
     },
     onSuccess: () => invalidateChallenges(queryClient),
-    onError: (error) => {
-      showToast.error(
-        error.response?.data?.message || "Could not create that challenge.",
-      );
-    },
+    meta: { errorMessage: "Could not create that challenge." },
   });
 };
 
@@ -128,8 +127,9 @@ export const useAcceptChallenge = () => {
     },
     onSuccess: () => invalidateChallenges(queryClient),
     // Errors here are meaningful to the learner — "that challenge was just
-    // taken" is information, not a failure — so the axios interceptor's toast
-    // is left to speak.
+    // taken" is information, not a failure — so the 4xx message is shown as
+    // the server wrote it, by the mutation cache.
+    meta: { errorMessage: "Could not join that challenge." },
   });
 };
 
@@ -139,6 +139,7 @@ export const useDeclineChallenge = () => {
     mutationFn: (challengeId) =>
       axiosInstance.post(`/challenges/${challengeId}/decline`),
     onSuccess: () => invalidateChallenges(queryClient),
+    meta: { errorMessage: "Could not decline that challenge." },
   });
 };
 
@@ -151,6 +152,7 @@ export const useCancelChallenge = () => {
       invalidateChallenges(queryClient);
       showToast.success("Challenge cancelled.");
     },
+    meta: { errorMessage: "Could not cancel that challenge." },
   });
 };
 
@@ -162,6 +164,7 @@ export const useRematch = () => {
       return unwrap(data);
     },
     onSuccess: () => invalidateChallenges(queryClient),
+    meta: { errorMessage: "Could not send that rematch." },
   });
 };
 
@@ -202,6 +205,7 @@ export const useDuelResult = (challengeId) =>
     },
     enabled: Boolean(challengeId),
     retry: 2,
+    meta: { silentError: true },
   });
 
 export const useDuelReview = (challengeId) =>
@@ -212,6 +216,7 @@ export const useDuelReview = (challengeId) =>
       return unwrap(data);
     },
     enabled: Boolean(challengeId),
+    meta: { silentError: true },
   });
 
 // ── Profile, ladder, opponents ───────────────────────────────────────────────
@@ -279,6 +284,7 @@ export const useUpdateDuelPrivacy = () => {
       queryClient.invalidateQueries({ queryKey: ["duel", "profile"] });
       showToast.success("Challenge settings updated.");
     },
+    meta: { errorMessage: "Could not save those settings." },
   });
 };
 

@@ -240,6 +240,51 @@ export const Spinner = ({ label }) => (
   </div>
 );
 
+/**
+ * What a screen shows when its data would not load.
+ *
+ * The alternative most of these screens used was `return null` — a white page
+ * with no explanation and no way forward. A failure the learner can act on
+ * ("Try again") is worth more than a toast that vanishes in four seconds and
+ * leaves the same blank screen behind it.
+ */
+export const ErrorState = ({
+  icon = "😕",
+  title = "That didn't load",
+  body,
+  onRetry,
+  retryLabel = "Try again",
+  secondary,
+}) => (
+  <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 py-12 text-center">
+    <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-2xl">
+      {icon}
+    </div>
+    <p className="mb-1 font-semibold text-gray-800">{title}</p>
+    {body && <p className="mb-5 max-w-xs text-sm text-gray-500">{body}</p>}
+    <div className="flex flex-col items-center gap-2">
+      {onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-full bg-[#16956C] px-6 py-2.5 text-sm font-bold text-white"
+        >
+          {retryLabel}
+        </button>
+      )}
+      {secondary && (
+        <button
+          type="button"
+          onClick={secondary.onClick}
+          className="px-4 py-2 text-sm font-semibold text-gray-500"
+        >
+          {secondary.label}
+        </button>
+      )}
+    </div>
+  </div>
+);
+
 export const SUBJECT_ICONS = {
   english: "📝",
   mathematics: "🔢",

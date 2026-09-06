@@ -158,14 +158,12 @@ const EditProfile = () => {
       // Validate file type (images only)
       if (!file.type.startsWith("image/")) {
         setUploadError("Only image files are allowed");
-        showToast.error("Only image files are allowed");
         return;
       }
 
       // Validate file size (max 3MB)
       if (file.size > 3 * 1024 * 1024) {
         setUploadError("Image size must be less than 3MB");
-        showToast.error("Image size must be less than 3MB");
         return;
       }
 
@@ -234,8 +232,8 @@ const EditProfile = () => {
       // Navigate back to profile
       navigate("/profile");
     } catch (error) {
+      // useUpdateProfile / useImageUpload report the reason themselves.
       console.error("Error updating profile:", error);
-      showToast.error("Failed to update profile. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

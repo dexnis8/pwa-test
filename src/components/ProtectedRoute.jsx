@@ -8,7 +8,7 @@ export const ProtectedRoute = ({ children }) => {
 
   if (!token) {
     // Store the attempted URL for redirect after login
-    showToast.error("Please sign in to access this page");
+    showToast.info("Please sign in to access this page");
     return <Navigate to="/auth/signin" state={{ from: location }} replace />;
   }
 

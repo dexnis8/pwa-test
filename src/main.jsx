@@ -10,6 +10,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/react-query";
 import { Toaster } from "react-hot-toast";
 import { AuthInitializer } from "./components/AuthInitializer";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { SocketProvider } from "./context/SocketProvider";
 
 createRoot(document.getElementById("root")).render(
@@ -22,8 +23,19 @@ createRoot(document.getElementById("root")).render(
               {/* Inside the router and the query client: the socket patches
                   the React Query cache and its listeners navigate. */}
               <SocketProvider>
-                <App />
-                <Toaster />
+                {/* Inside the providers, so the fallback can still route and
+                    read the cache; outside App, so any screen's throw is
+                    caught rather than blanking the page. */}
+                <ErrorBoundary>
+                  <App />
+                </ErrorBoundary>
+                <Toaster
+                  /* One notice at a time. react-hot-toast keeps the rest
+                     queued rather than painting a column of them. */
+                  gutter={8}
+                  containerStyle={{ top: 12 }}
+                  toastOptions={{ duration: 4000 }}
+                />
               </SocketProvider>
             </AuthInitializer>
           </BrowserRouter>

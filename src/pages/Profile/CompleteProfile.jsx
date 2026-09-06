@@ -123,8 +123,9 @@ const CompleteProfile = () => {
       // Navigate to the next step
       navigate("/profile/complete/step2");
     } catch (error) {
+      // useCompleteProfile reports the reason; re-toasting here was the second
+      // of the two popups this screen used to show for one failure.
       console.error("Error saving profile data:", error);
-      showToast.error("Failed to save profile data. Please try again.");
     }
   };
 
@@ -140,14 +141,12 @@ const CompleteProfile = () => {
       // Validate file type (images only)
       if (!file.type.startsWith("image/")) {
         setUploadError("Only image files are allowed");
-        showToast.error("Only image files are allowed");
         return;
       }
 
       // Validate file size (max 3MB)
       if (file.size > 3 * 1024 * 1024) {
         setUploadError("Image size must be less than 3MB");
-        showToast.error("Image size must be less than 3MB");
         return;
       }
 
