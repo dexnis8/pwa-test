@@ -31,6 +31,13 @@ import PracticeResult from "./pages/PracticeResult";
 import ExamConfirmation from "./pages/ExamConfirmation";
 import ExamSimulation from "./pages/ExamSimulation";
 import ExamSimulationResult from "./pages/ExamSimulationResult";
+import Arena from "./pages/Arena";
+import CreateChallenge from "./pages/CreateChallenge";
+import ChallengeDetail from "./pages/ChallengeDetail";
+import DuelRunner from "./pages/DuelRunner";
+import DuelResult from "./pages/DuelResult";
+import DuelReview from "./pages/DuelReview";
+import DuelQueue from "./pages/DuelQueue";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
@@ -131,6 +138,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/practice" element={<Practice />} />
+          <Route path="/challenges" element={<Arena />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
@@ -152,6 +160,68 @@ function App() {
             <MobileLayout>
               <ProtectedRoute>
                 <PracticeResult />
+              </ProtectedRoute>
+            </MobileLayout>
+          }
+        />
+        {/* 1v1 duel mode. Deliberately outside DashboardLayout — a bottom nav
+            during a timed round is an invitation to tap away and lose it. */}
+        <Route
+          path="/challenges/create"
+          element={
+            <MobileLayout>
+              <ProtectedRoute>
+                <CreateChallenge />
+              </ProtectedRoute>
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/challenges/:id"
+          element={
+            <MobileLayout>
+              <ProtectedRoute>
+                <ChallengeDetail />
+              </ProtectedRoute>
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/duel/queue"
+          element={
+            <MobileLayout>
+              <ProtectedRoute>
+                <DuelQueue />
+              </ProtectedRoute>
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/duel/:id"
+          element={
+            <MobileLayout>
+              <ProtectedRoute>
+                <DuelRunner />
+              </ProtectedRoute>
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/duel/:id/result"
+          element={
+            <MobileLayout>
+              <ProtectedRoute>
+                <DuelResult />
+              </ProtectedRoute>
+            </MobileLayout>
+          }
+        />
+        <Route
+          path="/duel/:id/review"
+          element={
+            <MobileLayout>
+              <ProtectedRoute>
+                <DuelReview />
               </ProtectedRoute>
             </MobileLayout>
           }

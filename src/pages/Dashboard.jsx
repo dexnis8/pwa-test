@@ -1,12 +1,20 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { selectPersonalInfo } from "../redux/slices/profileSlice";
 import PracticeConfigModal from "../components/PracticeConfigModal";
+import { useDuelProfile, useActiveChallenges } from "../hooks/api/useDuel";
 
 const Dashboard = () => {
   const personalInfo = useSelector(selectPersonalInfo);
   const name = personalInfo.fullName?.split(" ")[0] || "User";
   const [isPracticeModalOpen, setIsPracticeModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { data: duelProfile } = useDuelProfile();
+  const { data: active } = useActiveChallenges();
+
+  const resumable = active?.live?.[0];
+  const pendingInvites = active?.invites?.length || 0;
   return (
     <div className="p-6">
       <h1 className="text-[#16956C] text-2xl font-bold mb-1">Hi, {name}</h1>
@@ -79,7 +87,7 @@ const Dashboard = () => {
                 strokeLinejoin="round"
               />
             </svg>
-            <span>23rd November 2021</span>
+            <span>23rd November 2026</span>
           </div>
         </div>
 
@@ -257,6 +265,50 @@ const Dashboard = () => {
             />
           </svg>
           <span className="uppercase text-lg">PRACTICE NOW</span>
+        </div>
+      </button>
+
+      {/* 1v1 duel entry point. Sits with the practice button because they are
+          the two ways to answer questions — burying one in a modal hides it. */}
+      <button
+        onClick={() => navigate("/challenges")}
+        className="relative mb-6 block w-full overflow-hidden rounded-lg bg-gradient-to-r from-[#16956C] to-[#1B7A93] px-6 py-4 text-left font-bold text-white transition-opacity hover:opacity-95"
+      >
+        {(resumable || pendingInvites > 0) && (
+          <span className="absolute right-3 top-3 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold">
+            {resumable ? "Duel in progress" : `${pendingInvites} invite${pendingInvites === 1 ? "" : "s"}`}
+          </span>
+        )}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <svg
+              className="mr-2 h-6 w-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M14.5 17.5L20 22M17.5 14.5L20.5 5.5L18.5 3.5L9.5 6.5M17.5 14.5L9.5 6.5M9.5 6.5L6.5 9.5M6.5 9.5L3.5 6.5L5.5 4.5M4 20L9.5 14.5"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <div>
+              <span className="block text-lg uppercase leading-tight">1V1 Arena</span>
+              <span className="block text-xs font-normal opacity-85">
+                {duelProfile?.matchesPlayed
+                  ? `${duelProfile.wins}W · ${duelProfile.losses}L this season`
+                  : "Challenge anyone, against the clock"}
+              </span>
+            </div>
+          </div>
+          {duelProfile?.tier && (
+            <div className="shrink-0 rounded-full bg-white/20 px-2 py-1 text-[10px] font-bold">
+              {duelProfile.tier.label} · {duelProfile.rating}
+            </div>
+          )}
         </div>
       </button>
 

@@ -10,6 +10,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/react-query";
 import { Toaster } from "react-hot-toast";
 import { AuthInitializer } from "./components/AuthInitializer";
+import { SocketProvider } from "./context/SocketProvider";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -18,8 +19,12 @@ createRoot(document.getElementById("root")).render(
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <AuthInitializer>
-              <App />
-              <Toaster />
+              {/* Inside the router and the query client: the socket patches
+                  the React Query cache and its listeners navigate. */}
+              <SocketProvider>
+                <App />
+                <Toaster />
+              </SocketProvider>
             </AuthInitializer>
           </BrowserRouter>
         </QueryClientProvider>

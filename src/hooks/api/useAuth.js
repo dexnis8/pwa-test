@@ -41,7 +41,9 @@ export const useSignup = () => {
     },
     onSuccess: () => {
       showToast.success("Account created successfully!");
-      dispatch(resetProfile);
+      // resetProfile is an action creator — dispatching it uncalled sent a
+      // function, not an action, so the profile was never actually cleared.
+      dispatch(resetProfile());
     },
   });
 };
@@ -65,13 +67,13 @@ export const useLogout = () => {
       // Clear all tokens
       tokenManager.clearTokens();
       window.location.href = "/auth/signin";
-      dispatch(resetProfile);
+      dispatch(resetProfile());
     },
     onError: (error) => {
       console.error("Logout error:", error);
       // Even if the API call fails, clear tokens locally
       tokenManager.clearTokens();
-      dispatch(resetProfile);
+      dispatch(resetProfile());
 
       window.location.href = "/auth/signin";
     },
@@ -83,8 +85,13 @@ export const useLogout = () => {
  */
 export const useChangePassword = () => {
   return useMutation({
-    mutationFn: async (data) => {
-      const response = await axiosInstance.post("/auth/change-password", data);
+    mutationFn: async ({ currentPassword, newPassword }) => {
+      // The endpoint lives under /student, not /auth, and the API names the
+      // first field oldPassword. Both were wrong, so this never worked.
+      const response = await axiosInstance.post("/student/change-password", {
+        oldPassword: currentPassword,
+        newPassword,
+      });
       return response.data;
     },
     onSuccess: () => {
@@ -113,11 +120,15 @@ export const useVerifyPhone = () => {
     },
     onSuccess: (data) => {
       showToast.success("Phone number verified successfully!");
-      // Extract tokens and expiry from response
-      const { token, refreshToken, expiresIn = 3600 } = data;
 
-      // Store tokens using token manager
-      tokenManager.setTokens(token, refreshToken, expiresIn);
+      // Tokens sit under the response envelope's `data` key, as they do for
+      // sign-in. Reading them off the envelope itself stored undefined, so a
+      // freshly verified user was left without a session.
+      const { token, refreshToken, expiresIn = 3600 } = data?.data ?? {};
+
+      if (token && refreshToken) {
+        tokenManager.setTokens(token, refreshToken, expiresIn);
+      }
     },
     onError: (error) => {
       console.error("Phone verification error:", error);

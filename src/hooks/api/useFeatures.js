@@ -285,3 +285,33 @@ export const useExamSimulation = () => {
 
   return { fetchExamQuestions };
 };
+
+/**
+ * Server-side practice grading.
+ *
+ * The practice payload no longer carries `isCorrect` or explanations, so the
+ * answer key never reaches the browser. `gradeAnswer` asks the server to mark a
+ * single answer (immediate feedback), and `submitSession` finalises the session,
+ * which is what actually credits the learner's score.
+ */
+export const usePracticeGrading = () => {
+  const gradeAnswer = async ({ sessionId, questionId, selectedOptionId }) => {
+    const { data } = await axiosInstance.post("/questions/practice/answer", {
+      sessionId,
+      questionId,
+      selectedOptionId,
+    });
+    return data?.data ?? null;
+  };
+
+  const submitSession = async ({ sessionId, answers, durationSeconds }) => {
+    const { data } = await axiosInstance.post("/questions/practice/submit", {
+      sessionId,
+      answers,
+      durationSeconds,
+    });
+    return data?.data ?? null;
+  };
+
+  return { gradeAnswer, submitSession };
+};

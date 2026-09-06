@@ -2,12 +2,33 @@
 import { showToast } from "./toast.jsx";
 import tokenManager from "./tokenManager";
 
-const baseURL = import.meta.env.VITE_PROD
+// Vite sets PROD for `vite build` and DEV for `vite dev`, so the API target
+// follows the build mode automatically: running locally talks to the local
+// backend, a production build talks to the deployed one. There is deliberately
+// no env flag to override this - a stale flag is what previously shipped a
+// localhost URL to production.
+const baseURL = import.meta.env.PROD
   ? import.meta.env.VITE_API_URL
-  : import.meta.env.VITE_API_DEV_URL || import.meta.env.VITE_API_URL;
+  : import.meta.env.VITE_API_DEV_URL;
 
 if (!baseURL) {
-  throw new Error("A VITE_API_URL or VITE_API_DEV_URL value is required.");
+  throw new Error(
+    import.meta.env.PROD
+      ? "VITE_API_URL must be set for a production build."
+      : "VITE_API_DEV_URL must be set for local development.",
+  );
+}
+
+// Last line of defence: a deployed bundle can never reach a local API.
+const LOCAL_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
+if (
+  import.meta.env.PROD &&
+  LOCAL_HOSTS.some((host) => baseURL.includes("//" + host))
+) {
+  console.error(
+    `[api] Production build is pointing at a local API (${baseURL}). ` +
+      "Check VITE_API_URL in the deploy environment.",
+  );
 }
 
 let refreshPromise = null;

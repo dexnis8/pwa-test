@@ -6,152 +6,9 @@ import { selectInterests } from "../redux/slices/profileSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import ExamSubjectSelectionModal from "./ExamSubjectSelectionModal";
 import { showToast } from "../lib/toast";
+import { TOPICS_BY_SUBJECT, subjects } from "../constants/topics";
 
 // Updated topics data with comprehensive list
-const TOPICS_BY_SUBJECT = {
-  english: [
-    "Random (All Topics)",
-    "Comprehension",
-    "Cloze Test, Language Register",
-    "Lexis I: Synonyms",
-    "Lexis II: Antonyms",
-    "Interpretation of Words and Expressions",
-    "Idioms, Sayings",
-    "Phrasal Verbs",
-    "Nouns, Pronouns",
-    "Verbs, Tenses",
-    "Prepositions",
-    "Adjectives, Articles, Determiners",
-    "Adverbs, Conjunctions, Punctuation",
-    "Rules of Concord, Collocation",
-    "Question Tags, Interrogatives, Direct and Reported Speech",
-    "Spelling Mistakes",
-    "Common Mistakes in English, Fixed Expressions",
-    "Test of Oral Forms",
-  ],
-  chemistry: [
-    "Random (All Topics)",
-    "Nature of Matter, Separation of Mixtures",
-    "Particulate Nature of Matter, Chemical Formula and Equations, Laws of Chemical Reaction",
-    "The Atomic Structure, Electronic Configuration, Periodicity of Elements",
-    "Chemical Bonding, Shapes of Molecules",
-    "The Kinetic Theory of Matter, Gas Laws",
-    "Air, Composition of Air, Environmental Pollution",
-    "Water, Solutions, Solubility",
-    "Acids, Bases, Salts: Hydrolysis of Salts",
-    "Stoichiometry, Quantitative and Qualitative Analysis",
-    "Types of Reaction, Oxidation and Reduction",
-    "Electrolytes, Electrolysis, Electrochemical Cells",
-    "Energy Changes in Chemical and Physical Changes, Entropy, Spontaneity of Reaction",
-    "Rate of Chemical Reactions",
-    "Chemical Equilibrium, Equilibrium Constant",
-    "Nuclear Chemistry, Radioactivity, Nuclear Reactions",
-    "Non-Metals I: Hydrogen, Oxygen, Carbon, Phosphorus",
-    "Non-Metals II: Chlorine, Nitrogen, Sulfur, Silicon",
-    "Metals and Their Compounds",
-    "Organic Chemistry",
-  ],
-  physics: [
-    "Random (All Topics)",
-    "Measurement, Dimensions, Scalar and Vector Quantities",
-    "Linear Motion, Projectiles",
-    "Newton's Laws of Motion and Law of Conservation of Momentum",
-    "Circular Motion and Simple Harmonic Motion",
-    "Gravitational Field, Mass and Weight",
-    "Vectors, Equilibrium of Forces",
-    "Work, Energy and Power",
-    "Friction, Viscosity, Surface Tension",
-    "Simple Machines",
-    "Elasticity, Hooke's Law, Young's Modulus",
-    "Density and Upthrust, Archimedes' Principle, Floatation",
-    "Pressure, Pascal's Principle",
-    "Temperature and Heat, Thermal Expansion",
-    "Structure of Matter, Kinetic Theory, Gas Laws",
-    "Quantity of Heat, Heat Capacity and Latent Heat",
-    "Change of State, Vapours",
-    "Heat Transfer",
-    "Waves: Types, Production, Propagation, Properties",
-    "Sound Waves: Propagation and Characteristics",
-    "Light Energy, Reflection from Plane Surfaces",
-    "Reflection of Light from Spherical Surfaces",
-    "Refraction of Light from Plane and Spherical Surfaces",
-    "Optical Instruments, Vision",
-    "Dispersion of Light, Electromagnetic Spectrum",
-    "Electrostatics, Electric Field, Capacitors",
-    "Current Electricity",
-    "Electrical Energy and Power",
-    "Magnetic Field and Electromagnetic Induction",
-    "Conduction of Electricity through Liquids and Gases",
-    "Atomic Physics and Radioactivity",
-    "Introductory Electronics",
-    "Simple A.C. Circuits",
-  ],
-  mathematics: [
-    "Random (All Topics)",
-    "Number Bases",
-    "Fractions, Decimals, Percentages, Approximation, Errors",
-    "Indices, Standard Form",
-    "Logarithms",
-    "Surds",
-    "Sets",
-    "Polynomial I: Factorization. Factor and Remainder Theorems. Functions",
-    "Polynomial II: Algebraic Equations and Expressions Word Problems",
-    "Variation, Change of Subject of the Formula",
-    "Matrices",
-    "Geometry I: Lines, Angles, Triangles",
-    "Geometry II: Polygons",
-    "Binary Operation",
-    "Progression: Arithmetic and Geometric",
-    "Geometry III: Circle Construction",
-    "Geometry IV: Coordinate Geometry, Loci and Construction",
-    "Mensuration I: Plane Figures",
-    "Mensuration II: Solid Figures",
-    "Trigonometry: Special Angles, Solving Triangles, Pythagoras Theorem",
-    "Calculus I: Differentiation",
-    "Calculus II: Integration",
-    "Statistics I: Data Presentation, Measures of Location, Cumulative Frequency",
-    "Statistics II: Measures of Dispersion",
-    "Permutations and Combinations",
-    "Probability",
-    "Inequalities",
-  ],
-  biology: [
-    "Random (All Topics)",
-    "The Cell - Organization of Life",
-    "Classification I: Viruses, Monera, Protista, Fungi",
-    "Classification II: Plantae, Thallophyta, Bryophyta, Pteridophyta",
-    "Classification III: Higher Plants - Spermatophyta",
-    "Classification IV: Lower Invertebrates",
-    "Classification V: Higher Invertebrates",
-    "Classification VI: Vertebrates I - Pisces, Amphibians, Reptiles",
-    "Nutrition - Food Substances",
-    "Excretion - Excretory Products",
-    "Reproduction in Flowering Plants - Germination, Fruits and Seed Dispersal",
-    "Homeostasis - Endocrine System, Plant Hormones",
-    "The Nervous System",
-    "The Cell and its Environment",
-    "Classification VII: Vertebrates II - Birds, Mammals",
-    "Supporting Tissues - Musculoskeletal System",
-    "Digestive System - Digestive Enzymes, Dentition, Movement",
-    "Transport - Circulatory System",
-    "Respiration",
-    "Reproduction in Animals - Growth and Development",
-    "Agriculture - Soil Science",
-    "Common Diseases - Insect Vectors",
-    "Ecology I: Basic Concept, Ecological Management",
-    "Ecology II: Ecological Succession, Adaptation, Feeding Relationship",
-    "Heredity, Variation, Evolution",
-  ],
-};
-
-const subjects = {
-  english: { name: "English", icon: "📝" },
-  mathematics: { name: "Mathematics", icon: "🔢" },
-  physics: { name: "Physics", icon: "🔭" },
-  biology: { name: "Biology", icon: "🧬" },
-  chemistry: { name: "Chemistry", icon: "🧪" },
-};
-
 const PracticeConfigModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const userInterests = useSelector(selectInterests);
@@ -409,13 +266,18 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
                       <span className="text-sm font-medium">Time-based</span>
                     </button>
 
+                    {/* 1v1 is live now. This button was the "Soon" placeholder
+                        and stays the discovery path learners already know. */}
                     <button
                       type="button"
-                      disabled
-                      className="p-3 rounded-lg flex flex-col items-center justify-center border border-gray-200 text-gray-400 relative cursor-not-allowed"
+                      onClick={() => {
+                        onClose();
+                        navigate("/challenges");
+                      }}
+                      className="p-3 rounded-lg flex flex-col items-center justify-center border border-gray-200 text-gray-700 relative transition-all hover:border-[#16956C] hover:bg-[#E7F7F2] hover:text-[#16956C]"
                     >
-                      <div className="absolute -top-2 -right-2 bg-yellow-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                        Soon
+                      <div className="absolute -top-2 -right-2 bg-[#16956C] text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                        New
                       </div>
                       <svg
                         className="w-6 h-6 mb-1"

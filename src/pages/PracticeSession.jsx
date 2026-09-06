@@ -1,12 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import ShareableResultCard from "../components/ShareableResultCard";
 import QuitConfirmationModal from "../components/QuitConfirmationModal";
 import ReportIssueModal from "../components/ReportIssueModal";
-import { useQuestions, useReportIssue } from "../hooks/api/useFeatures";
+import {
+  useQuestions,
+  useReportIssue,
+  usePracticeGrading,
+} from "../hooks/api/useFeatures";
 import { BeatLoader } from "react-spinners";
 import { showToast } from "../lib/toast";
 import DOMPurify from "dompurify";
@@ -123,7 +127,18 @@ const PracticeSession = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [expandedExplanations, setExpandedExplanations] = useState(new Set());
 
+  // Server-side grading state. `answerFeedback` holds the marked result for the
+  // question on screen — the correct option and its explanation now arrive from
+  // the server instead of being shipped with the question.
+  const [sessionId, setSessionId] = useState(null);
+  const [answerFeedback, setAnswerFeedback] = useState(null);
+  const [isGrading, setIsGrading] = useState(false);
+  const [answerLog, setAnswerLog] = useState([]);
+  const startedAtRef = useRef(Date.now());
+  const submittedRef = useRef(false);
+
   const { fetchQuestions, isLoading, error } = useQuestions();
+  const { gradeAnswer, submitSession } = usePracticeGrading();
   const reportIssueMutation = useReportIssue();
 
   // Character limit for explanations
@@ -284,6 +299,10 @@ const PracticeSession = () => {
 
       if (data) {
         setQuestions(data.questions);
+        // Identifies this session to the grading endpoints. Without it the
+        // server has no way to know which questions we were issued.
+        setSessionId(data.sessionId);
+        startedAtRef.current = Date.now();
       } else {
         navigate("/dashboard");
       }
@@ -322,18 +341,48 @@ const PracticeSession = () => {
     return () => clearInterval(interval);
   }, [timerActive, timeLeft]);
 
-  const handleAnswerSelect = (option) => {
-    if (showFeedback) return;
-
-    setSelectedAnswer(option);
-    setShowFeedback(true);
+  const handleAnswerSelect = async (option) => {
+    if (showFeedback || isGrading) return;
 
     const currentQuestion = questions[currentIndex];
-    const correct = option.isCorrect;
-    setIsCorrect(correct);
+    if (!currentQuestion) return;
 
-    if (correct) {
-      setScore((prevScore) => prevScore + 1);
+    // Show the selection straight away; the mark comes back from the server.
+    setSelectedAnswer(option);
+    setIsGrading(true);
+
+    // Record the answer regardless of how grading goes, so the final submit is
+    // still complete even if one feedback call failed.
+    setAnswerLog((prev) => {
+      const next = prev.filter((a) => a.questionId !== currentQuestion._id);
+      next.push({
+        questionId: currentQuestion._id,
+        selectedOptionId: option.id,
+      });
+      return next;
+    });
+
+    try {
+      const result = await gradeAnswer({
+        sessionId,
+        questionId: currentQuestion._id,
+        selectedOptionId: option.id,
+      });
+
+      if (result) {
+        setAnswerFeedback(result);
+        setIsCorrect(result.isCorrect);
+        if (result.isCorrect) {
+          setScore((prevScore) => prevScore + 1);
+        }
+      }
+    } catch (error) {
+      // The axios interceptor has already surfaced this. Let the learner carry
+      // on rather than trapping them on a question we could not mark.
+      console.error("Failed to grade answer:", error);
+    } finally {
+      setIsGrading(false);
+      setShowFeedback(true);
     }
   };
 
@@ -345,11 +394,33 @@ const PracticeSession = () => {
       .padStart(2, "0")}`;
   };
 
-  const navigateToResult = () => {
-    // call the API for updating user's point here
+  const navigateToResult = async () => {
+    // Finalise the session on the server. This is what credits the learner's
+    // score — the server re-grades every answer, so the number it returns is
+    // authoritative and we show that rather than our local tally.
+    let finalScore = score;
+
+    if (sessionId && !submittedRef.current) {
+      submittedRef.current = true;
+      try {
+        const summary = await submitSession({
+          sessionId,
+          answers: answerLog,
+          durationSeconds: Math.round((Date.now() - startedAtRef.current) / 1000),
+        });
+        if (summary && typeof summary.correctCount === "number") {
+          finalScore = summary.correctCount;
+        }
+      } catch (error) {
+        // Keep the learner moving; their answers are already recorded against
+        // the session and the submit can be retried by support if needed.
+        console.error("Failed to submit practice session:", error);
+      }
+    }
+
     navigate("/practice/result", {
       state: {
-        score,
+        score: finalScore,
         totalQuestions: questions.length,
         subject,
         examType,
@@ -778,7 +849,7 @@ const PracticeSession = () => {
               className={`w-full text-left p-4 rounded-lg border-2 flex items-center transition-colors ${
                 selectedAnswer?.id === option.id
                   ? showFeedback
-                    ? option.isCorrect
+                    ? answerFeedback?.correctOptionId === option.id
                       ? "bg-green-100 border-green-500 text-green-800"
                       : "bg-red-100 border-red-500 text-red-800"
                     : "bg-[#E7F7F2] border-[#16956C] text-[#16956C]"
@@ -800,7 +871,7 @@ const PracticeSession = () => {
               />
               {showFeedback && selectedAnswer?.id === option.id && (
                 <span className="ml-auto">
-                  {option.isCorrect ? (
+                  {answerFeedback?.correctOptionId === option.id ? (
                     <svg
                       className="w-5 h-5 text-green-600"
                       fill="none"
@@ -833,7 +904,7 @@ const PracticeSession = () => {
               )}
               {showFeedback &&
                 selectedAnswer?.id !== option.id &&
-                option.isCorrect && (
+                answerFeedback?.correctOptionId === option.id && (
                   <span className="ml-auto">
                     <svg
                       className="w-5 h-5 text-green-600"
@@ -856,7 +927,7 @@ const PracticeSession = () => {
 
         {/* Explanation Section - Appears after feedback */}
         <AnimatePresence>
-          {showFeedback && currentQuestion.explanation && (
+          {showFeedback && answerFeedback?.explanation && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -866,15 +937,15 @@ const PracticeSession = () => {
             >
               <h4 className="font-bold mb-2 text-blue-900">Explanation:</h4>
               <div className="text-sm leading-relaxed prose prose-sm max-w-none katex-content">
-                {needsTruncation(currentQuestion.explanation) ? (
+                {needsTruncation(answerFeedback?.explanation) ? (
                   <>
                     <div
                       dangerouslySetInnerHTML={{
                         __html: DOMPurify.sanitize(
                           expandedExplanations.has(currentQuestion._id)
-                            ? formatExplanation(currentQuestion.explanation)
+                            ? formatExplanation(answerFeedback?.explanation)
                             : getTruncatedExplanation(
-                                currentQuestion.explanation,
+                                answerFeedback?.explanation,
                               ),
                           KATEX_SANITIZE_CONFIG,
                         ),
@@ -895,7 +966,7 @@ const PracticeSession = () => {
                   <div
                     dangerouslySetInnerHTML={{
                       __html: DOMPurify.sanitize(
-                        formatExplanation(currentQuestion.explanation),
+                        formatExplanation(answerFeedback?.explanation),
                         KATEX_SANITIZE_CONFIG,
                       ),
                     }}
@@ -915,6 +986,8 @@ const PracticeSession = () => {
               setCurrentIndex((prevIndex) => prevIndex + 1);
               setSelectedAnswer(null);
               setShowFeedback(false);
+              // Clear the previous question's mark so nothing carries over.
+              setAnswerFeedback(null);
               // Reset explanation expansion for the new question
               setExpandedExplanations(new Set());
             } else {
