@@ -124,9 +124,9 @@ export const SignIn = () => {
               {errors.username.message}
             </p>
           )}
-          <p className="text-white/50 text-xs mt-1">
+          {/* <p className="text-white/50 text-xs mt-1">
             For phone numbers: Use format +2348XXXXXXXXX or 08XXXXXXXXX
-          </p>
+          </p> */}
         </div>
 
         {/* Password Input */}

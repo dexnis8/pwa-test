@@ -155,7 +155,9 @@ const PracticeConfigModal = ({ isOpen, onClose }) => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white rounded-2xl w-full max-w-[360px] relative z-10 shadow-xl mx-auto"
+              // max-w-md matches ExamSubjectSelectionModal, which opens from
+              // this one — at 360px the two sizes visibly jumped on the way in.
+              className="bg-white rounded-2xl w-full max-w-md relative z-10 shadow-xl mx-auto"
             >
               {/* Modal Header */}
               <div className="flex items-center justify-between p-5 border-b">

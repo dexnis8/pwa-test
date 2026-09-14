@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { Motion } from "../../components/Motion";
+// import { Brand } from "../../components/Brand";
 
 export const AuthLayout = () => {
   const location = useLocation();
@@ -9,6 +10,7 @@ export const AuthLayout = () => {
     <div className="h-full w-full flex flex-col bg-gray-50">
       {/* Header with tabs */}
       <div className="p-6 pb-4">
+        {/* <Brand /> */}
         <Motion animation="fadeIn" delay={0.1}>
           <h1 className="text-[#4B4D52] font-bold mb-5 text-lg font-coolvetica">
             Welcome to The Pace App

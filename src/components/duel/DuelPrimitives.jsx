@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { subjects as SUBJECT_CATALOG } from "../../constants/topics";
 
 /**
  * The small shared pieces of duel UI: rank badges, avatars, countdowns.
@@ -285,14 +286,31 @@ export const ErrorState = ({
   </div>
 );
 
+/**
+ * Subject icons, taken from the shared subject catalog so the duel screens
+ * show exactly what PracticeConfigModal shows. They were briefly swapped for
+ * monochrome line art, which lost the colour that lets a learner pick a
+ * subject out of a row before reading the label.
+ *
+ * `mixed` is duel-only — it has no entry in the catalog, which covers the five
+ * subjects a learner can practise.
+ */
 export const SUBJECT_ICONS = {
-  english: "📝",
-  mathematics: "🔢",
-  physics: "🔭",
-  biology: "🧬",
-  chemistry: "🧪",
+  ...Object.fromEntries(
+    Object.entries(SUBJECT_CATALOG).map(([key, value]) => [key, value.icon]),
+  ),
   mixed: "🎲",
 };
+
+/**
+ * The same icons as an element, for the screens that lay them out beside text.
+ * Size it with a font-size class — these are glyphs, so `h-*`/`w-*` do nothing.
+ */
+export const SubjectIcon = ({ subject, className = "text-sm" }) => (
+  <span className={`inline-block leading-none ${className}`} aria-hidden="true">
+    {SUBJECT_ICONS[subject] || "📚"}
+  </span>
+);
 
 export const titleCase = (value = "") =>
   String(value).charAt(0).toUpperCase() + String(value).slice(1);

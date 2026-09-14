@@ -1,11 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { LuFlame } from "react-icons/lu";
 import {
   Avatar,
   RankBadge,
   ExpiryPill,
-  SUBJECT_ICONS,
+  SubjectIcon,
   titleCase,
 } from "./DuelPrimitives";
 
@@ -20,8 +21,6 @@ const ChallengeCard = ({ challenge, onAccept, onCancel, mine = false, busy }) =>
   const navigate = useNavigate();
   const awaitingMyRun = mine && challenge.awaitingMyRun;
   const { terms, creator, creatorTier, scoreToBeat } = challenge;
-
-  const icon = SUBJECT_ICONS[terms?.subject] || "📚";
 
   return (
     <motion.div
@@ -39,8 +38,12 @@ const ChallengeCard = ({ challenge, onAccept, onCancel, mine = false, busy }) =>
               {mine ? "Your challenge" : creator?.username || "A learner"}
             </p>
             {challenge.creatorWinStreak >= 3 && (
-              <span className="shrink-0 text-[10px]" title="On a win streak">
-                🔥{challenge.creatorWinStreak}
+              <span
+                className="flex shrink-0 items-center gap-0.5 text-[10px] font-bold text-orange-500"
+                title="On a win streak"
+              >
+                <LuFlame className="h-3 w-3" aria-hidden="true" />
+                {challenge.creatorWinStreak}
               </span>
             )}
           </div>
@@ -52,7 +55,8 @@ const ChallengeCard = ({ challenge, onAccept, onCancel, mine = false, busy }) =>
       <div className="px-4 py-3">
         <div className="mb-3 flex flex-wrap gap-1.5">
           <Tag>
-            {icon} {titleCase(terms?.subject)}
+            <SubjectIcon subject={terms?.subject} className="text-[11px]" />
+            {titleCase(terms?.subject)}
           </Tag>
           {terms?.topic && terms.topic.toLowerCase() !== "random" && (
             <Tag>{terms.topic}</Tag>
@@ -129,7 +133,7 @@ const ChallengeCard = ({ challenge, onAccept, onCancel, mine = false, busy }) =>
 
 const Tag = ({ children, accent }) => (
   <span
-    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
       accent ? "bg-[#1B7A93] text-white" : "bg-gray-100 text-gray-700"
     }`}
   >
