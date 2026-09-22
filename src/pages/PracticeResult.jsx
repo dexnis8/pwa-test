@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import ShareableResultCard from "../components/ShareableResultCard";
+import { shareResultToWhatsApp } from "../lib/shareResult";
 
 const PracticeResult = () => {
   const navigate = useNavigate();
@@ -65,10 +66,12 @@ const PracticeResult = () => {
   }, []);
 
   // Sharing functions
-  const shareToWhatsApp = () => {
-    const message = `Just completed a ${subject} practice on Pace App with a score of ${score}/${totalQuestions}! Join me and improve your exam prep: https://app.paceapp.ng/`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
-  };
+  const shareToWhatsApp = () =>
+    shareResultToWhatsApp({
+      imageDataUrl: shareableImage,
+      message: `Just completed a ${subject} practice on Pace App with a score of ${score}/${totalQuestions}! Join me and improve your exam prep: https://app.paceapp.ng/`,
+      filename: `paceapp-result-${subject}-${score}-of-${totalQuestions}.png`,
+    });
 
   const shareToTwitter = () => {
     const message = `I scored ${score}/${totalQuestions} in ${subject} practice on Pace App! Join my journey to exam success: https://app.paceapp.ng/`;
@@ -352,7 +355,9 @@ const PracticeResult = () => {
                 <div className="grid grid-cols-3 gap-3">
                   <button
                     onClick={shareToWhatsApp}
-                    className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-gray-100"
+                    // Wait for the card: tapping early would send the text alone.
+                    disabled={!shareableImage && !imageGenerationError}
+                    className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center mb-2">
                       <svg className="w-6 h-6" viewBox="0 0 24 24" fill="white">

@@ -13,6 +13,7 @@ import {
 } from "../hooks/api/useFeatures";
 import { BeatLoader } from "react-spinners";
 import { showToast } from "../lib/toast";
+import { shareResultToWhatsApp } from "../lib/shareResult";
 import {
   HEARTBEAT_MS,
   abandonBreadcrumb,
@@ -522,13 +523,12 @@ const PracticeSession = () => {
   }, []);
 
   // Sharing functions
-  const shareToWhatsApp = () => {
-    // WhatsApp can only share text links, not direct images
-    const message = `Just completed a ${subject} practice on Pace App with a score of ${score}/${questions.length}! Join me and improve your exam prep: https://app.paceapp.ng/`;
-
-    // Open WhatsApp with the message
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
-  };
+  const shareToWhatsApp = () =>
+    shareResultToWhatsApp({
+      imageDataUrl: shareableImage,
+      message: `Just completed a ${subject} practice on Pace App with a score of ${score}/${questions.length}! Join me and improve your exam prep: https://app.paceapp.ng/`,
+      filename: `paceapp-result-${subject}-${score}-of-${questions.length}.png`,
+    });
 
   const shareToTwitter = () => {
     // Twitter/X can only share text and links, not direct images
@@ -1147,7 +1147,9 @@ const PracticeSession = () => {
                 <div className="grid grid-cols-3 gap-3">
                   <button
                     onClick={shareToWhatsApp}
-                    className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-gray-100"
+                    // Wait for the card: tapping early would send the text alone.
+                    disabled={!shareableImage && !imageGenerationError}
+                    className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center mb-2">
                       <svg className="w-6 h-6" viewBox="0 0 24 24" fill="white">
