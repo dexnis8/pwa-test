@@ -11,6 +11,38 @@ import {
 import { SERVER_EVENTS } from "../lib/socketEvents";
 import tokenManager from "../lib/tokenManager";
 import { showToast } from "../lib/toast";
+import { track } from "../lib/analytics";
+
+// Duels already reported by this page, so a repeated event cannot count twice.
+const reportedDuels = new Set();
+
+/**
+ * The client's funnel marker for a finished duel. The authoritative record is
+ * the server's own duel_completed, fired from resolveDuel; challengeId pairs
+ * the two.
+ *
+ * The server sends DUEL_COMPLETED twice when a match ends: once to each
+ * player's own room carrying their `result`, and once to the duel's room with
+ * only the id, for anyone watching the match screen. A learner on that screen
+ * is in both rooms and receives both — so only the copy carrying a `result`
+ * counts, which is also the only one that knows how it went.
+ */
+const trackDuelCompleted = (payload) => {
+  const result = payload?.result;
+  if (!result?.challengeId || reportedDuels.has(result.challengeId)) return;
+  reportedDuels.add(result.challengeId);
+
+  track("duel_completed", {
+    challengeId: result.challengeId,
+    mode: result.terms?.format, // live | async
+    ranked: result.terms?.ranked,
+    outcome: result.isDraw ? "draw" : result.won ? "win" : "loss",
+    resultReason: result.resultReason,
+    ratingDelta: result.you?.ratingDelta,
+    correctCount: result.you?.correctCount,
+    totalQuestions: result.totalQuestions,
+  });
+};
 
 const SocketContext = createContext({
   connected: false,
@@ -93,10 +125,11 @@ export const SocketProvider = ({ children }) => {
         queryClient.invalidateQueries({ queryKey: ["challenges"] });
       }),
 
-      onSocket(SERVER_EVENTS.DUEL_COMPLETED, () => {
+      onSocket(SERVER_EVENTS.DUEL_COMPLETED, (payload) => {
         queryClient.invalidateQueries({ queryKey: ["challenges"] });
         queryClient.invalidateQueries({ queryKey: ["duel", "profile"] });
         queryClient.invalidateQueries({ queryKey: ["duel", "leaderboard"] });
+        trackDuelCompleted(payload);
       }),
 
       onSocket(SERVER_EVENTS.LOBBY_UPDATED, () => {

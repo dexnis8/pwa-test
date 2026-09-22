@@ -1,6 +1,7 @@
 ﻿import axios from "axios";
 import { normalizeError } from "./apiError";
 import tokenManager from "./tokenManager";
+import { resetAnalytics } from "./analytics";
 
 // Vite sets PROD for `vite build` and DEV for `vite dev`, so the API target
 // follows the build mode automatically: running locally talks to the local
@@ -121,6 +122,9 @@ axiosInstance.interceptors.response.use(
         // a toast that unmounts a frame later would only flash, so mark both
         // this error and the original request's as handled here.
         tokenManager.clearTokens();
+        // This is a sign-out too, just not one anybody pressed. Before the
+        // redirect, which reloads the page and would cut it off.
+        resetAnalytics();
         window.location.href = "/auth/signin";
         if (refreshError && typeof refreshError === "object") {
           refreshError.handledByAuthFlow = true;

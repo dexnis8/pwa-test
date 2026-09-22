@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import { trackPageview } from "./lib/analytics";
 import "./App.css";
 import { SplashScreen } from "./pages/SplashScreen";
 import { OnBoarding } from "./pages/OnBoarding";
@@ -42,6 +44,14 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
   const location = useLocation();
+
+  // Pageviews are fired by hand — PostHog's auto-capture is off because it
+  // would record the raw URL, and every duel and challenge id would become a
+  // page of its own. trackPageview normalises the path first. In development
+  // StrictMode runs this twice per route; that is expected, not a bug.
+  useEffect(() => {
+    trackPageview(location.pathname);
+  }, [location.pathname]);
 
   return (
     <AnimatePresence mode="wait">

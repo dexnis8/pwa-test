@@ -14,6 +14,11 @@ import {
   saveActiveExamAttempt,
   saveExamResult,
 } from "../lib/examAttempt";
+import {
+  HEARTBEAT_MS,
+  clearBreadcrumb,
+  touchBreadcrumb,
+} from "../lib/analyticsBreadcrumb";
 
 const subjectNames = {
   english: "English",
@@ -104,6 +109,18 @@ const ExamSimulation = () => {
       navigate("/dashboard");
     }
   }, [examData, subjects, navigate]);
+
+  // Keeps the abandonment marker fresh while the exam is open. Runs on a
+  // resumed attempt too; an attempt started before analytics existed has no
+  // marker, and touching never creates one.
+  useEffect(() => {
+    if (!attempt?.startedAt) return undefined;
+    const interval = setInterval(
+      () => touchBreadcrumb("exam", attempt.startedAt),
+      HEARTBEAT_MS,
+    );
+    return () => clearInterval(interval);
+  }, [attempt?.startedAt]);
 
   // Timer countdown
   useEffect(() => {
@@ -282,6 +299,7 @@ const ExamSimulation = () => {
 
         saveExamResult(resultState);
         clearActiveExamAttempt();
+        clearBreadcrumb("exam", attempt?.startedAt);
         navigate("/jamb/exam/simulation/result", {
           state: resultState,
         });

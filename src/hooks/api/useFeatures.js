@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import axiosInstance from "../../lib/axios";
 import { showToast } from "../../lib/toast.jsx";
 import { errorMessage } from "../../lib/apiError.js";
+import { identify, track } from "../../lib/analytics";
 import { useDispatch } from "react-redux";
 import { updatePersonalInfo } from "../../redux/slices/profileSlice.js";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +27,12 @@ export const useProfile = () => {
   useEffect(() => {
     const result = profileQuery.data?.data;
     if (!result) return;
+
+    // A safety net for learners whose session predates analytics — they never
+    // pass through sign-in again, so this is where they get identified. A no-op
+    // once they are. Only the id goes over: everything else in this payload
+    // (name, date of birth, phone) is exactly what must not.
+    identify(result._id);
 
     dispatch(
       updatePersonalInfo({
@@ -122,7 +129,14 @@ export const useCompleteProfile = () => {
       );
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: (data, profileData) => {
+      // Picked field by field, never spread: this payload also carries the
+      // learner's full name, email, gender and date of birth.
+      track("onboarding_completed", {
+        department: profileData?.department,
+        levelOfStudy: profileData?.levelOfStudy,
+        subjectsOfInterest: profileData?.subjectsOfInterest,
+      });
       showToast.success("Profile completed successfully!");
       return data;
     },
@@ -212,8 +226,15 @@ export const useReportIssue = () => {
       const { data } = await axiosInstance.post("/reports", reportData);
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: (data, reportData) => {
       if (data.success) {
+        // questionId joins back to the question's subject and topic in the
+        // data, so they need not be sent. The free-text message is never sent —
+        // it is whatever the learner typed.
+        track("report_issue_submitted", {
+          questionId: reportData?.questionId,
+          issueType: reportData?.issueType,
+        });
         showToast.success(
           data.message ||
             "Issue reported successfully! Thank you for helping us improve.",
@@ -244,6 +265,9 @@ export const useExamSimulation = () => {
       const { data } = await axiosInstance.get("/exam/simulation", { params });
 
       if (data.success) {
+        // Called from the confirmation screen's start button, so a successful
+        // fetch is the exam actually beginning, not a preview.
+        track("exam_started", { subjects });
         return data.data;
       } else {
         throw new Error(data.message || "Failed to fetch exam questions");
@@ -286,7 +310,22 @@ export const usePracticeGrading = () => {
       answers,
       durationSeconds,
     });
-    return data?.data ?? null;
+    const summary = data?.data ?? null;
+
+    // The funnel marker. The authoritative count is the server's
+    // practice_session_submitted; sessionId is the key that pairs the two.
+    track("practice_completed", {
+      sessionId,
+      mode: summary?.mode,
+      subject: summary?.subject,
+      topic: summary?.topic,
+      examType: summary?.examType,
+      totalQuestions: summary?.totalQuestions,
+      correctCount: summary?.correctCount,
+      durationSeconds,
+    });
+
+    return summary;
   };
 
   return { gradeAnswer, submitSession };

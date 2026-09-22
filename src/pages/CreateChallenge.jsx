@@ -9,6 +9,7 @@ import {
   useOpponents,
 } from "../hooks/api/useDuel";
 import { showToast } from "../lib/toast";
+import { track } from "../lib/analytics";
 import {
   Avatar,
   RankBadge,
@@ -80,6 +81,26 @@ const CreateChallenge = () => {
         perQuestionSeconds: effectiveSeconds,
         format: mode === "direct" ? format : "async",
       });
+
+      // The two start types carry different rating exposure — an open challenge
+      // is half-weighted, a direct one is a friendly and moves nobody's rating —
+      // so they are separate events rather than one with a flag. The opponent is
+      // deliberately not recorded: that is another learner, and nothing here
+      // needs to know who.
+      track(
+        mode === "open" ? "duel_open_challenge_created" : "duel_direct_challenge_sent",
+        {
+          challengeId: result.challengeId,
+          mode: mode === "direct" ? format : "async", // live | async
+          origin: "create_screen",
+          subject,
+          topic,
+          examType,
+          preset,
+          questionCount: effectiveCount,
+          ...(mode === "direct" ? { inviteeOnline: Boolean(result.inviteeOnline) } : {}),
+        },
+      );
 
       if (mode === "open") {
         showToast.success("Challenge created — play your run now.");

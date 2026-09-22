@@ -19,6 +19,7 @@
     "framer-motion": "^12.6.2",
     "html2canvas": "^1.4.1",
     "katex": "^0.18.1",
+    "posthog-js": "^1.434.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.55.0",

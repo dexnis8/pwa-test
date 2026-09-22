@@ -1,6 +1,7 @@
 import { QueryClient, QueryCache, MutationCache } from "@tanstack/react-query";
 import { showToast } from "./toast.jsx";
 import { normalizeError, shouldRetry } from "./apiError";
+import { captureApiError } from "./analytics";
 
 /**
  * The app's one error-reporting point.
@@ -20,10 +21,18 @@ import { normalizeError, shouldRetry } from "./apiError";
  *
  * A mutation is the opposite case: someone pressed a button and is waiting, so
  * it reports by default and opts out explicitly.
+ *
+ * Analytics is recorded **first, above every guard.** Whether a learner should
+ * see a toast and whether the API is healthy are separate questions: the
+ * background polls and the duel's HTTP backstop are exactly the failures the
+ * guards below silence, and exactly the ones that say the API is struggling.
+ * captureApiError does its own filtering (5xx, network, timeouts only).
  */
 
 const reportQueryError = (error, query) => {
   const { meta } = query;
+  captureApiError(error, { source: "query", background: Boolean(meta?.background) });
+
   if (meta?.silentError || meta?.background) return;
 
   const { isSilent, message } = normalizeError(error, meta?.errorMessage);
@@ -38,6 +47,8 @@ const reportQueryError = (error, query) => {
 
 const reportMutationError = (error, _vars, _ctx, mutation) => {
   const { meta } = mutation.options;
+  captureApiError(error, { source: "mutation" });
+
   if (meta?.silentError) return;
   showToast.apiError(error, meta?.errorMessage);
 };

@@ -20,6 +20,8 @@ Useful checks:
 - `npm run lint`
 - `npm run build`
 - `npm run preview`
+- `Remove-Item -Recurse -Force .git/objects/06` when you get the git commit error use this to removed the locked staled file
+
 
 The app needs the API running to do anything beyond the splash and auth screens. Point `VITE_API_DEV_URL` at the backend's `PORT` (5005 by default) and leave `VITE_PROD` empty for local work — `src/lib/axios.js` prefers the dev URL unless `VITE_PROD` is truthy.
 

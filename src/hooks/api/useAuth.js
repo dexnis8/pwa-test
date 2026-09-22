@@ -4,6 +4,18 @@ import { showToast } from "../../lib/toast.jsx";
 import tokenManager from "../../lib/tokenManager";
 import { useDispatch } from "react-redux";
 import { resetProfile } from "../../redux/slices/profileSlice.js";
+import { identify, resetAnalytics, track } from "../../lib/analytics";
+import { normalizeError } from "../../lib/apiError";
+
+/**
+ * Resends during the verification currently in progress. Every resend is a
+ * paid SMS through Termii, so this is the cost signal on phone_verified.
+ *
+ * Module-level rather than a ref because two hooks read it — the resend button
+ * and the verify form are separate mutations on the same screen. It restarts
+ * whenever a fresh code goes out from sign-up or sign-in, and on success.
+ */
+let otpResendCount = 0;
 
 export const useLogin = () => {
   return useMutation({
@@ -15,6 +27,8 @@ export const useLogin = () => {
       // If the response requires phone verification, skip token storage
       // (no tokens are present in this response)
       if (data?.data?.requiresPhoneVerification) {
+        // A new code just went out, so the resend count starts again.
+        otpResendCount = 0;
         showToast.success(
           data.message || "An OTP has been sent to your phone number.",
         );
@@ -26,6 +40,12 @@ export const useLogin = () => {
 
       // Store tokens using token manager
       tokenManager.setTokens(token, refreshToken, expiresIn);
+
+      identify(data.data._id, {
+        isProfileComplete: data.data.isProfileComplete,
+        role: data.data.role,
+      });
+      track("signed_in");
 
       showToast.success("Successfully logged in!");
     },
@@ -40,7 +60,14 @@ export const useSignup = () => {
       const response = await axiosInstance.post("/auth/sign-up", userData);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Identified here, before the phone is verified and before there is a
+      // session: this is the moment the anonymous visitor from the landing page
+      // becomes a known learner, and every step after it should hang off them.
+      identify(data?.data?._id, { isProfileComplete: false });
+      track("signup_completed");
+      otpResendCount = 0;
+
       showToast.success("Account created successfully!");
       // resetProfile is an action creator — dispatching it uncalled sent a
       // function, not an action, so the profile was never actually cleared.
@@ -68,6 +95,8 @@ export const useLogout = () => {
     onSuccess: () => {
       // Clear all tokens
       tokenManager.clearTokens();
+      // Before the redirect — it reloads the page, and nothing after it runs.
+      resetAnalytics();
       window.location.href = "/auth/signin";
       dispatch(resetProfile());
     },
@@ -76,6 +105,7 @@ export const useLogout = () => {
       // Even if the API call fails, clear tokens locally
       tokenManager.clearTokens();
       dispatch(resetProfile());
+      resetAnalytics();
 
       window.location.href = "/auth/signin";
     },
@@ -127,6 +157,23 @@ export const useVerifyPhone = () => {
       if (token && refreshToken) {
         tokenManager.setTokens(token, refreshToken, expiresIn);
       }
+
+      identify(data?.data?._id, {
+        isProfileComplete: data?.data?.isProfileComplete,
+      });
+      track("phone_verified", { resend_count: otpResendCount });
+      otpResendCount = 0;
+    },
+    // Analytics only. It must never toast: the MutationCache handler already
+    // reports this failure to the learner, and a second onError that toasts is
+    // exactly how one failure used to become three popups.
+    onError: (error) => {
+      const { kind, status } = normalizeError(error);
+      track("phone_verification_failed", {
+        resend_count: otpResendCount,
+        kind,
+        status,
+      });
     },
     meta: { errorMessage: "Couldn't verify that code." },
   });
@@ -144,6 +191,8 @@ export const useResendOTP = () => {
       return response.data;
     },
     onSuccess: () => {
+      otpResendCount += 1;
+      track("otp_resent", { resend_count: otpResendCount });
       showToast.success("OTP resent successfully!");
     },
     meta: { errorMessage: "Couldn't resend the code. Try again shortly." },

@@ -1,3 +1,7 @@
+// First, before anything that can navigate: initialising analytics reads the
+// landing page's UTM parameters, and the splash screen redirects them away.
+import "./lib/analytics";
+import { reportStaleBreadcrumbs } from "./lib/analyticsBreadcrumb";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
@@ -12,6 +16,10 @@ import { Toaster } from "react-hot-toast";
 import { AuthInitializer } from "./components/AuthInitializer";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { SocketProvider } from "./context/SocketProvider";
+
+// A practice session or exam left unfinished last time is reported now, once,
+// before this visit can start a new one over the top of it.
+reportStaleBreadcrumbs();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

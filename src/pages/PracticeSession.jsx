@@ -13,6 +13,13 @@ import {
 } from "../hooks/api/useFeatures";
 import { BeatLoader } from "react-spinners";
 import { showToast } from "../lib/toast";
+import {
+  HEARTBEAT_MS,
+  abandonBreadcrumb,
+  clearBreadcrumb,
+  startBreadcrumb,
+  touchBreadcrumb,
+} from "../lib/analyticsBreadcrumb";
 import DOMPurify from "dompurify";
 import katex from "katex";
 import "katex/dist/katex.min.css";
@@ -303,6 +310,13 @@ const PracticeSession = () => {
         // server has no way to know which questions we were issued.
         setSessionId(data.sessionId);
         startedAtRef.current = Date.now();
+        startBreadcrumb("practice", data.sessionId, {
+          mode,
+          subject,
+          topic,
+          examType,
+          totalQuestions: data.questions?.length,
+        });
       } else {
         navigate("/dashboard");
       }
@@ -325,6 +339,17 @@ const PracticeSession = () => {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [quizCompleted]);
+
+  // Keeps the abandonment marker fresh while this session is open, so another
+  // tab opening the app does not mistake a live session for an abandoned one.
+  useEffect(() => {
+    if (!sessionId || quizCompleted) return undefined;
+    const interval = setInterval(
+      () => touchBreadcrumb("practice", sessionId),
+      HEARTBEAT_MS,
+    );
+    return () => clearInterval(interval);
+  }, [sessionId, quizCompleted]);
 
   // Timer countdown
   useEffect(() => {
@@ -426,6 +451,11 @@ const PracticeSession = () => {
       }
     }
 
+    // The learner finished, whether or not the submit reached the server — a
+    // failed submit is an API problem, not an abandonment, and api_error or the
+    // server's own sweeper is where that shows up.
+    clearBreadcrumb("practice", sessionId);
+
     navigate("/practice/result", {
       state: {
         score: finalScore,
@@ -457,6 +487,8 @@ const PracticeSession = () => {
 
   const handleQuitConfirm = () => {
     setShowQuitModal(false);
+    // The one abandonment we see as it happens rather than infer later.
+    abandonBreadcrumb("practice", sessionId);
     navigate("/dashboard");
   };
 

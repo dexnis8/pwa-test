@@ -7,6 +7,7 @@ import { useSocket } from "../context/SocketProvider";
 import { SERVER_EVENTS } from "../lib/socketEvents";
 import { queueApi, useCreateChallenge } from "../hooks/api/useDuel";
 import { showToast } from "../lib/toast";
+import { track } from "../lib/analytics";
 import { SUBJECT_ICONS, titleCase } from "../components/duel/DuelPrimitives";
 
 const SUBJECTS = ["english", "mathematics", "physics", "biology", "chemistry"];
@@ -101,6 +102,17 @@ const DuelQueue = () => {
       setAsyncOffer(false);
       const result = await queueApi.join({ subject, examType, preset });
 
+      // Quick Match is always live — the matchmaker only ever pairs two online
+      // players into a `format: "live"` match. `instantMatch` separates a learner
+      // paired on arrival from one who has to wait for the queue.
+      track("duel_quickmatch_started", {
+        mode: "live",
+        subject,
+        examType,
+        preset,
+        instantMatch: Boolean(result?.match?.[2]),
+      });
+
       if (result?.match?.[2]) {
         navigate(`/duel/${result.match[2]}`);
         return;
@@ -133,6 +145,18 @@ const DuelQueue = () => {
         examType,
         preset,
         format: "async",
+      });
+      // The fallback that keeps the queue from dead-ending with a small user
+      // base. It is an open challenge, but one nobody chose to create — worth
+      // telling apart, because how often it happens is how thin the queue is.
+      track("duel_open_challenge_created", {
+        challengeId: result.challengeId,
+        mode: "async",
+        origin: "queue_fallback",
+        subject,
+        examType,
+        preset,
+        waitedSeconds: elapsed,
       });
       navigate(`/duel/${result.challengeId}`);
     } catch {

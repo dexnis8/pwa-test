@@ -10,6 +10,7 @@ import {
   createExamAttempt,
   saveActiveExamAttempt,
 } from "../lib/examAttempt";
+import { startBreadcrumb } from "../lib/analyticsBreadcrumb";
 
 const subjectNames = {
   english: "English",
@@ -59,6 +60,9 @@ const ExamConfirmation = () => {
 
       clearExamResult();
       saveActiveExamAttempt(attempt);
+      // Keyed by the attempt's start time — an exam has no server session id,
+      // since nothing is written server-side until it is submitted.
+      startBreadcrumb("exam", attempt.startedAt, { subjects: selectedSubjects });
 
       // Navigate to exam page with data
       navigate("/jamb/exam/simulation", {
