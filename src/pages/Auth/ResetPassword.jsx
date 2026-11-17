@@ -1,23 +1,19 @@
-/* eslint-disable no-unused-vars */
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useResetPassword } from "../../hooks/api/useAuth";
 
-// Define validation schema for OTP
-const otpSchema = z.object({
-  otp: z
-    .string()
-    .min(1, "OTP is required")
-    .length(4, "OTP must be exactly 4 digits")
-    .regex(/^\d{4}$/, "OTP must contain only numbers"),
-});
-
-// Define validation schema for password reset
 const resetPasswordSchema = z
   .object({
+    otp: z
+      .string()
+      .min(1, "OTP is required")
+      .length(4, "OTP must be exactly 4 digits")
+      .regex(/^\d{4}$/, "OTP must contain only numbers"),
+    username: z.string().trim().optional(),
     password: z
       .string()
       .min(1, "Password is required")
@@ -31,44 +27,37 @@ const resetPasswordSchema = z
 
 export const ResetPassword = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // OTP form
-  const {
-    register: registerOtp,
-    handleSubmit: handleSubmitOtp,
-    formState: { errors: otpErrors },
-  } = useForm({
-    resolver: zodResolver(otpSchema),
-    defaultValues: {
-      otp: "",
-    },
-  });
+  const resetPassword = useResetPassword();
+  const username = location.state?.username ?? "";
 
   // Password reset form
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
+      otp: "",
       password: "",
       confirmPassword: "",
     },
   });
+  const formUsername = watch("username");
+  const resetUsername = username || formUsername?.trim() || "";
 
-  const onSubmitOtp = (data) => {
-    // Verify OTP with backend
-    // For demo purposes, just set the OTP as verified
-    setOtpVerified(true);
-  };
-
-  const onSubmit = (data) => {
-    // Handle password reset logic here
+  const onSubmit = async (data) => {
+    if (!resetUsername) return;
+    await resetPassword.mutateAsync({
+      username: resetUsername,
+      newPassword: data.password,
+      otp: data.otp,
+    });
     setIsSubmitted(true);
 
     // Redirect to sign in after a delay
@@ -116,56 +105,43 @@ export const ResetPassword = () => {
       </div>
 
       {!isSubmitted ? (
-        !otpVerified ? (
-          // OTP Verification Form
-          <>
+        <>
+            {!username ? (
+              <div className="mb-6">
+                <p className="text-white/80 mb-4">Enter the username or phone number you used to request the reset code.</p>
+                <label htmlFor="username" className="block mb-2 text-white">Username or phone number</label>
+                <input
+                  type="text"
+                  id="username"
+                  autoComplete="username"
+                  {...register("username")}
+                  placeholder="Username or phone number"
+                  className="w-full bg-transparent border-b border-white/50 focus:border-white py-2 text-white placeholder-white/50 outline-none"
+                />
+                {errors.username && <p className="text-red-200 text-sm mt-1">{errors.username.message}</p>}
+              </div>
+            ) : (
+              <p className="text-white/80 mb-4">Resetting password for <strong>{username}</strong>.</p>
+            )}
             <p className="text-white/80 mb-8">
-              Enter the 4-digit code sent to your phone number to verify your
-              identity.
+              Enter the 4-digit code sent to you and choose a new password.
             </p>
 
-            <form
-              onSubmit={handleSubmitOtp(onSubmitOtp)}
-              className="flex flex-col"
-            >
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
               <div className="mb-6">
-                <label htmlFor="otp" className="block mb-2 text-white">
-                  Verification Code
-                </label>
+                <label htmlFor="otp" className="block mb-2 text-white">Verification Code</label>
                 <input
                   type="text"
                   id="otp"
-                  {...registerOtp("otp")}
+                  {...register("otp")}
                   onInput={formatOtpInput}
                   placeholder="Enter 4-digit code"
                   className="w-full bg-transparent border-b border-white/50 focus:border-white py-2 text-white placeholder-white/50 outline-none text-center text-2xl tracking-widest"
                   inputMode="numeric"
                   autoComplete="one-time-code"
                 />
-                {otpErrors.otp && (
-                  <p className="text-red-200 text-sm mt-1">
-                    {otpErrors.otp.message}
-                  </p>
-                )}
+                {errors.otp && <p className="text-red-200 text-sm mt-1">{errors.otp.message}</p>}
               </div>
-
-              <button
-                type="submit"
-                className="bg-white text-[#16956C] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer mt-6"
-              >
-                Verify Code
-              </button>
-            </form>
-          </>
-        ) : (
-          // Password Reset Form (only shown after OTP is verified)
-          <>
-            <p className="text-white/80 mb-8">
-              Create a new password for your account. Make sure it's strong and
-              you'll remember it.
-            </p>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
               <div className="mb-6">
                 <label htmlFor="password" className="block mb-2 text-white">
                   New Password
@@ -281,13 +257,13 @@ export const ResetPassword = () => {
 
               <button
                 type="submit"
+                disabled={resetPassword.isPending || !resetUsername}
                 className="bg-white text-[#16956C] py-3 px-4 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer mt-6"
               >
-                Reset Password
+                {resetPassword.isPending ? "Resetting..." : "Reset Password"}
               </button>
             </form>
-          </>
-        )
+        </>
       ) : (
         // Success Message (after password reset)
         <motion.div

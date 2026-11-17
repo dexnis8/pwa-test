@@ -134,6 +134,40 @@ export const useChangePassword = () => {
   });
 };
 
+/** Sends a password reset code to a username or phone number. */
+export const useForgotPassword = () => {
+  return useMutation({
+    mutationFn: async ({ username }) => {
+      const { data } = await axiosInstance.post("/auth/forget-password", {
+        username,
+      });
+      return data;
+    },
+    meta: {
+      errorMessage:
+        "Couldn't send a password reset code. Check your details and try again.",
+    },
+  });
+};
+
+/** Resets a password using the code sent by the forgot-password request. */
+export const useResetPassword = () => {
+  return useMutation({
+    mutationFn: async ({ username, newPassword, otp }) => {
+      const { data } = await axiosInstance.post("/auth/reset-password", {
+        username,
+        newPassword,
+        otp,
+      });
+      return data;
+    },
+    meta: {
+      errorMessage:
+        "Couldn't reset your password. Check the code and try again.",
+    },
+  });
+};
+
 /**
  * Hook for verifying phone number via OTP
  */
